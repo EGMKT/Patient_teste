@@ -1,20 +1,30 @@
 import React from 'react';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
+import Login from './pages/Login';
 import DoctorSelection from './pages/DoctorSelection';
 import ConsultationSetup from './pages/ConsultationSetup';
 import AudioRecording from './pages/AudioRecording';
 import SuccessPage from './pages/SuccessPage';
 
+const PrivateRoute: React.FC<{ element: React.ReactElement }> = ({ element }) => {
+  const { isAuthenticated } = useAuth();
+  return isAuthenticated ? element : <Navigate to="/login" />;
+};
+
 const App: React.FC = () => {
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<DoctorSelection />} />
-        <Route path="/setup" element={<ConsultationSetup />} />
-        <Route path="/record" element={<AudioRecording />} />
-        <Route path="/success" element={<SuccessPage />} />
-      </Routes>
-    </Router>
+    <AuthProvider>
+      <Router>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="/" element={<PrivateRoute element={<DoctorSelection />} />} />
+          <Route path="/setup" element={<PrivateRoute element={<ConsultationSetup />} />} />
+          <Route path="/record" element={<PrivateRoute element={<AudioRecording />} />} />
+          <Route path="/success" element={<PrivateRoute element={<SuccessPage />} />} />
+        </Routes>
+      </Router>
+    </AuthProvider>
   );
 };
 

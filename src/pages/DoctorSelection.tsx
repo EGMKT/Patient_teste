@@ -2,9 +2,9 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const mockDoctors = [
-  { id: 1, name: 'Dr. Smith' },
-  { id: 2, name: 'Dr. Johnson' },
-  { id: 3, name: 'Dr. Williams' },
+  { id: 1, name: 'Dr. Smith', specialty: 'Cardiologist' },
+  { id: 2, name: 'Dr. Johnson', specialty: 'Neurologist' },
+  { id: 3, name: 'Dr. Williams', specialty: 'Pediatrician' },
 ];
 
 const DoctorSelection: React.FC = () => {
@@ -12,7 +12,7 @@ const DoctorSelection: React.FC = () => {
   const navigate = useNavigate();
 
   const handleDoctorSelect = (doctorId: number) => {
-    setSelectedDoctor(doctorId); // Corrigido
+    setSelectedDoctor(doctorId);
   };
 
   const handleNext = () => {
@@ -24,21 +24,30 @@ const DoctorSelection: React.FC = () => {
   };
 
   return (
-    <div>
-      <h1>Select a Doctor</h1>
-      <ul>
+    <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-4">
+      <h1 className="text-3xl font-bold mb-8 text-center">Select a Doctor</h1>
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 w-full max-w-4xl">
         {mockDoctors.map((doctor) => (
-          <li key={doctor.id}>
-            <button
-              onClick={() => handleDoctorSelect(doctor.id)}
-              style={{ fontWeight: selectedDoctor === doctor.id ? 'bold' : 'normal' }}
-            >
-              {doctor.name}
-            </button>
-          </li>
+          <button
+            key={doctor.id}
+            onClick={() => handleDoctorSelect(doctor.id)}
+            className={`p-4 rounded-lg shadow-md transition-all ${
+              selectedDoctor === doctor.id
+                ? 'bg-blue-500 text-white'
+                : 'bg-white hover:bg-blue-100'
+            }`}
+          >
+            <h2 className="text-xl font-semibold">{doctor.name}</h2>
+            <p className="text-sm">{doctor.specialty}</p>
+          </button>
         ))}
-      </ul>
-      <button onClick={handleNext}>Next</button>
+      </div>
+      <button
+        onClick={handleNext}
+        className="mt-8 px-6 py-2 bg-green-500 text-white rounded-full hover:bg-green-600 transition-colors"
+      >
+        Next
+      </button>
     </div>
   );
 };

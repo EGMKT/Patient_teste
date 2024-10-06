@@ -5,7 +5,7 @@ import axios from 'axios';
 const AudioRecording: React.FC = () => {
   const [isRecording, setIsRecording] = useState(false);
   const [duration, setDuration] = useState(0);
-  const [amplitude, setAmplitude] = useState(0);
+  const [amplitudes, setAmplitudes] = useState<number[]>([]);
   const navigate = useNavigate();
   const location = useLocation();
   const { doctorId, patient, service, participants } = location.state as {
@@ -28,9 +28,9 @@ const AudioRecording: React.FC = () => {
           const dataArray = new Uint8Array(analyser.current.frequencyBinCount);
           analyser.current.getByteFrequencyData(dataArray);
           const average = dataArray.reduce((a, b) => a + b) / dataArray.length;
-          setAmplitude(average / 255);
+          setAmplitudes((prev) => [...prev.slice(-29), average / 255]);
         }
-      }, 1000);
+      }, 100);
     }
     return () => clearInterval(interval);
   }, [isRecording]);
@@ -93,22 +93,34 @@ const AudioRecording: React.FC = () => {
   };
 
   return (
-    <div>
-      <h1>Audio Recording</h1>
-      <p>Duration: {duration} seconds</p>
-      <div style={{ width: '100%', height: '20px', backgroundColor: '#ddd' }}>
-        <div
-          style={{
-            width: `${amplitude * 100}%`,
-            height: '100%',
-            backgroundColor: 'blue',
-          }}
-        />
+    <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-4">
+      <h1 className="text-3xl font-bold mb-8 text-center">Audio Recording</h1>
+      <p className="text-xl mb-4">Duration: {duration} seconds</p>
+      <div className="w-full max-w-md h-20 bg-white rounded-lg shadow-md overflow-hidden mb-8">
+        <div className="h-full flex items-end">
+          {amplitudes.map((amp, index) => (
+            <div
+              key={index}
+              className="w-1 bg-blue-500 mx-px transition-all duration-100"
+              style={{ height: `${amp * 100}%` }}
+            />
+          ))}
+        </div>
       </div>
       {!isRecording ? (
-        <button onClick={startRecording}>Start Recording</button>
+        <button
+          onClick={startRecording}
+          className="px-6 py-2 bg-green-500 text-white rounded-full hover:bg-green-600 transition-colors"
+        >
+          Start Recording
+        </button>
       ) : (
-        <button onClick={stopRecording}>Stop Recording</button>
+        <button
+          onClick={stopRecording}
+          className="px-6 py-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
+        >
+          Stop Recording
+        </button>
       )}
     </div>
   );
