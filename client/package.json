@@ -14,7 +14,7 @@
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-scripts": "5.0.1",
-    "ajv": "^7.2.4"
+    "ajv": "^8.17.1"
   },
   "scripts": {
     "outros-scripts": "echo 'placeholder para outros scripts'",
