@@ -53,7 +53,7 @@ patient-funnel/
 │ │ │ ├── SettingsButton.tsx
 │ │ │ ├── PageTransition.tsx
 │ │ │ ├── Notification.tsx
-│ │ │ ├── Tooltip.tsx
+│ │ │ └── Tooltip.tsx
 │ │ ├── contexts
 │ │ │ └── AuthContext.tsx
 │ │ ├── hooks
@@ -63,14 +63,16 @@ patient-funnel/
 │ │ │ ├── DoctorSelection.tsx
 │ │ │ ├── ConsultationSetup.tsx
 │ │ │ ├── AudioRecording.tsx
-│ │ │ └── SucessPage.tsx
+│ │ │ ├── ErrorPage.tsx
+│ │ │ └── SuccessPage.tsx
 │ │ ├── App.tsx
 │ │ ├── index.css
-│ │ ├── index.tsx
-│ │ └── waveform-playlist.d.ts
+│ │ └── index.tsx
 │ ├── .gitignore
+│ ├── .npmrc
 │ ├── package-lock.json
 │ ├── package.json
+│ ├── Procfile
 │ ├── tsconfig.json
 │ └── tailwind.config.js
 └── README.md
