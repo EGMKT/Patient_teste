@@ -1,4 +1,9 @@
 {
+  "name": "patientfunnel",
+  "version": "1.0.0",
+  "engines": {
+    "node": "18.x"
+  },
   "dependencies": {
     "@emotion/react": "^11.13.3",
     "@emotion/styled": "^11.13.0",

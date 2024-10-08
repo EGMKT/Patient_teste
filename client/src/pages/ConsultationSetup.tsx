@@ -1,65 +1,73 @@
 import React, { useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 const ConsultationSetup: React.FC = () => {
   const [patient, setPatient] = useState('');
   const [service, setService] = useState('');
-  const [participants, setParticipants] = useState<number>(1);
+  const [participants, setParticipants] = useState(2);
   const navigate = useNavigate();
-  const location = useLocation();
-  const doctorId = (location.state as { doctorId: number })?.doctorId;
 
-  const handleStartRecording = () => {
-    if (patient && service) {
-      navigate('/record', {
-        state: {
-          doctorId,
-          patient,
-          service,
-          participants,
-        }
-      });
-    } else {
-      alert('Please fill in all fields');
-    }
+  // Lista de serviços fictícios
+  const services = [
+    'Consulta Geral',
+    'Exame de Rotina',
+    'Acompanhamento',
+    'Avaliação Especializada',
+    'Procedimento Menor'
+  ];
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    navigate('/record', { state: { patient, service, participants } });
   };
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-4">
-      <h1 className="text-3xl font-bold mb-8 text-center">Consultation Setup</h1>
-      <div className="w-full max-w-md space-y-4">
+      <h1 className="text-3xl font-bold mb-8 text-center">Configuração da Consulta</h1>
+      <form onSubmit={handleSubmit} className="w-full max-w-md space-y-4">
         <input
           type="text"
-          placeholder="Patient Name"
+          placeholder="Nome do Paciente"
           value={patient}
           onChange={(e) => setPatient(e.target.value)}
           className="w-full p-2 border border-gray-300 rounded-md"
+          required
         />
-        <input
-          type="text"
-          placeholder="Service"
+        <select
           value={service}
           onChange={(e) => setService(e.target.value)}
           className="w-full p-2 border border-gray-300 rounded-md"
-        />
-        <div className="flex items-center">
-          <label htmlFor="participants" className="mr-2">Participants:</label>
-          <input
-            id="participants"
-            type="number"
-            value={participants}
-            onChange={(e) => setParticipants(parseInt(e.target.value))}
-            min={1}
-            className="w-20 p-2 border border-gray-300 rounded-md"
-          />
+          required
+        >
+          <option value="">Selecione o Serviço</option>
+          {services.map((s, index) => (
+            <option key={index} value={s}>{s}</option>
+          ))}
+        </select>
+        <div>
+          <p className="mb-2">Número de Participantes:</p>
+          <div className="flex justify-between">
+            {[2, 3, 4, 5].map((num) => (
+              <button
+                key={num}
+                type="button"
+                onClick={() => setParticipants(num)}
+                className={`px-4 py-2 rounded-full ${
+                  participants === num ? 'bg-blue-500 text-white' : 'bg-gray-200'
+                }`}
+              >
+                {num}
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
-      <button
-        onClick={handleStartRecording}
-        className="mt-8 px-6 py-2 bg-green-500 text-white rounded-full hover:bg-green-600 transition-colors"
-      >
-        Start Recording
-      </button>
+        <button
+          type="submit"
+          className="w-full px-6 py-2 bg-green-500 text-white rounded-full hover:bg-green-600 transition-colors"
+        >
+          Iniciar Gravação
+        </button>
+      </form>
     </div>
   );
 };

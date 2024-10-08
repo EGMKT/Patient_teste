@@ -6,18 +6,20 @@ const AudioRecording: React.FC = () => {
   const [isRecording, setIsRecording] = useState(false);
   const [duration, setDuration] = useState(0);
   const [amplitudes, setAmplitudes] = useState<number[]>([]);
+  const [isProcessing, setIsProcessing] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-  const { doctorId, patient, service, participants } = location.state as {
-    doctorId: number;
+  const { patient, service, participants } = location.state as {
     patient: string;
     service: string;
     participants: number;
-  };
+  } || {}; // Adicione um fallback para evitar erros se state for undefined
+
   const mediaRecorder = useRef<MediaRecorder | null>(null);
   const audioChunks = useRef<Blob[]>([]);
   const audioContext = useRef<AudioContext | null>(null);
   const analyser = useRef<AnalyserNode | null>(null);
+  const mediaStream = useRef<MediaStream | null>(null);
 
   useEffect(() => {
     let interval: ReturnType<typeof setInterval>;
@@ -30,7 +32,7 @@ const AudioRecording: React.FC = () => {
           const average = dataArray.reduce((a, b) => a + b) / dataArray.length;
           setAmplitudes((prev) => [...prev.slice(-29), average / 255]);
         }
-      }, 100);
+      }, 1000);
     }
     return () => clearInterval(interval);
   }, [isRecording]);
@@ -38,6 +40,7 @@ const AudioRecording: React.FC = () => {
   const startRecording = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      mediaStream.current = stream;
       audioContext.current = new AudioContext();
       analyser.current = audioContext.current.createAnalyser();
       const source = audioContext.current.createMediaStreamSource(stream);
@@ -55,16 +58,16 @@ const AudioRecording: React.FC = () => {
   };
 
   const stopRecording = () => {
-    if (mediaRecorder.current) {
+    if (mediaRecorder.current && mediaStream.current) {
       mediaRecorder.current.stop();
       mediaRecorder.current.onstop = async () => {
+        setIsProcessing(true);
         const audioBlob = new Blob(audioChunks.current, { type: 'audio/wav' });
         const reader = new FileReader();
         reader.readAsDataURL(audioBlob);
         reader.onloadend = async () => {
           const base64Audio = reader.result as string;
           const metadata = {
-            doctorId,
             patient,
             service,
             participants,
@@ -76,11 +79,19 @@ const AudioRecording: React.FC = () => {
             navigate('/success');
           } catch (error) {
             console.error('Error sending audio to webhook:', error);
-            alert('Failed to send audio. Please try again.');
+            navigate('/error', { state: { errorMessage: 'Failed to send audio' } });
+          } finally {
+            setIsProcessing(false);
           }
         };
       };
       setIsRecording(false);
+      
+      // Desativar o microfone
+      mediaStream.current.getTracks().forEach(track => track.stop());
+      if (audioContext.current) {
+        audioContext.current.close();
+      }
     }
   };
 
@@ -92,10 +103,15 @@ const AudioRecording: React.FC = () => {
     });
   };
 
+  // Adicione uma verificação para garantir que os dados necessários estão presentes
+  if (!patient || !service || !participants) {
+    return <div>Erro: Dados da consulta não encontrados. Por favor, volte e configure a consulta novamente.</div>;
+  }
+
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-4">
-      <h1 className="text-3xl font-bold mb-8 text-center">Audio Recording</h1>
-      <p className="text-xl mb-4">Duration: {duration} seconds</p>
+      <h1 className="text-3xl font-bold mb-8 text-center">Gravação de Áudio</h1>
+      <p className="text-xl mb-4">Duração: {duration} segundos</p>
       <div className="w-full max-w-md h-20 bg-white rounded-lg shadow-md overflow-hidden mb-8">
         <div className="h-full flex items-end">
           {amplitudes.map((amp, index) => (
@@ -107,20 +123,24 @@ const AudioRecording: React.FC = () => {
           ))}
         </div>
       </div>
-      {!isRecording ? (
+      {!isRecording && !isProcessing && (
         <button
           onClick={startRecording}
           className="px-6 py-2 bg-green-500 text-white rounded-full hover:bg-green-600 transition-colors"
         >
-          Start Recording
+          Iniciar Gravação
         </button>
-      ) : (
+      )}
+      {isRecording && (
         <button
           onClick={stopRecording}
           className="px-6 py-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
         >
-          Stop Recording
+          Parar Gravação
         </button>
+      )}
+      {isProcessing && (
+        <p className="text-lg font-semibold text-blue-500">Processando e enviando áudio...</p>
       )}
     </div>
   );

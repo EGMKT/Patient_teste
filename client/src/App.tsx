@@ -6,6 +6,7 @@ import DoctorSelection from './pages/DoctorSelection';
 import ConsultationSetup from './pages/ConsultationSetup';
 import AudioRecording from './pages/AudioRecording';
 import SuccessPage from './pages/SuccessPage';
+import ErrorPage from './pages/ErrorPage';
 
 const PrivateRoute: React.FC<{ element: React.ReactElement }> = ({ element }) => {
   const { isAuthenticated } = useAuth();
@@ -22,6 +23,7 @@ const App: React.FC = () => {
           <Route path="/setup" element={<PrivateRoute element={<ConsultationSetup />} />} />
           <Route path="/record" element={<PrivateRoute element={<AudioRecording />} />} />
           <Route path="/success" element={<PrivateRoute element={<SuccessPage />} />} />
+          <Route path="/error" element={<ErrorPage />} />
         </Routes>
       </Router>
     </AuthProvider>

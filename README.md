@@ -25,11 +25,11 @@ Patient Funnel é uma aplicação web desenvolvida para gerenciamento eficiente 
 ## Instalação e Execução
 1. Clone o repositório:
    ```bash
-   git clone https://github.com/seu-usuario/patient-funnel.git
+   git clone https://github.com/EGMKT/PatientFunnel.git
    ```
 2. Navegue até o diretório do projeto:
    ```bash
-   cd patient-funnel
+   cd patientfunnel/client
    ```
 3. Instale as dependências:
    ```bash
