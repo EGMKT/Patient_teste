@@ -49,16 +49,15 @@ patient-funnel/
 │ ├── public/
 │ │ └── index.html
 │ ├── src/
-│ │ ├── components
-│ │ │ ├── SettingsButton.tsx
-│ │ │ ├── PageTransition.tsx
-│ │ │ ├── Notification.tsx
-│ │ │ └── Tooltip.tsx
-│ │ ├── contexts
+│ │ ├── components/
+│ │ │ └── Header.tsx
+│ │ ├── contexts/
 │ │ │ └── AuthContext.tsx
-│ │ ├── hooks
-│ │ │ └── useKeyboardShortcuts.ts
-│ │ ├── pages
+│ │ ├── hooks/
+│ │ ├── locales/
+│ │ │ ├── en.json
+│ │ │ └── pt.json
+│ │ ├── pages/
 │ │ │ ├── Login.tsx
 │ │ │ ├── DoctorSelection.tsx
 │ │ │ ├── ConsultationSetup.tsx
@@ -75,6 +74,9 @@ patient-funnel/
 │ ├── Procfile
 │ ├── tsconfig.json
 │ └── tailwind.config.js
+│ server/
+│ ├── node_modules/
+│ │ └── (...)
 └── README.md
 
 ## Contribuição
