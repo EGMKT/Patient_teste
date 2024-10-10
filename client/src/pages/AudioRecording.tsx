@@ -1,8 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 
 const AudioRecording: React.FC = () => {
+  const { t } = useTranslation();
   const [isRecording, setIsRecording] = useState(false);
   const [duration, setDuration] = useState(0);
   const [amplitudes, setAmplitudes] = useState<number[]>([]);
@@ -110,8 +112,8 @@ const AudioRecording: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-4">
-      <h1 className="text-3xl font-bold mb-8 text-center">Gravação de Áudio</h1>
-      <p className="text-xl mb-4">Duração: {duration} segundos</p>
+      <h1 className="text-3xl font-bold mb-8 text-center">{t('audioRecording')}</h1>
+      <p className="text-xl mb-4">{t('duration')}: {duration} {t('seconds')}</p>
       <div className="w-full max-w-md h-20 bg-white rounded-lg shadow-md overflow-hidden mb-8">
         <div className="h-full flex items-end">
           {amplitudes.map((amp, index) => (
@@ -128,7 +130,7 @@ const AudioRecording: React.FC = () => {
           onClick={startRecording}
           className="px-6 py-2 bg-green-500 text-white rounded-full hover:bg-green-600 transition-colors"
         >
-          Iniciar Gravação
+          {t('startRecording')}
         </button>
       )}
       {isRecording && (
@@ -136,11 +138,11 @@ const AudioRecording: React.FC = () => {
           onClick={stopRecording}
           className="px-6 py-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
         >
-          Parar Gravação
+          {t('stopRecording')}
         </button>
       )}
       {isProcessing && (
-        <p className="text-lg font-semibold text-blue-500">Processando e enviando áudio...</p>
+        <p className="text-lg font-semibold text-blue-500">{t('processingAudio')}</p>
       )}
     </div>
   );

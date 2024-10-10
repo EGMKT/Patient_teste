@@ -13,7 +13,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const login = async (username: string, password: string) => {
     // Simulated login - replace with actual API call
-    if (username === 'demo' && password === 'password') {
+    if (username === 'demo' && password === 'password1') {
       setIsAuthenticated(true);
       return true;
     }

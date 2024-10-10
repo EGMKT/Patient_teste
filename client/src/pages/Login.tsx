@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
 
 const Login: React.FC = () => {
@@ -8,25 +9,26 @@ const Login: React.FC = () => {
   const [error, setError] = useState('');
   const navigate = useNavigate();
   const { login } = useAuth();
+  const { t } = useTranslation();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     const success = await login(username, password);
     if (success) {
-      navigate('/');
+      navigate('/doctor-selection');
     } else {
-      setError('Invalid username or password');
+      setError(t('loginError'));
     }
   };
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-4">
-      <h1 className="text-3xl font-bold mb-8 text-center">Login</h1>
+      <h1 className="text-3xl font-bold mb-8 text-center">{t('login')}</h1>
       <form onSubmit={handleSubmit} className="w-full max-w-md space-y-4">
         <input
           type="text"
-          placeholder="Username"
+          placeholder={t('username')}
           value={username}
           onChange={(e) => setUsername(e.target.value)}
           className="w-full p-2 border border-gray-300 rounded-md"
@@ -34,7 +36,7 @@ const Login: React.FC = () => {
         />
         <input
           type="password"
-          placeholder="Password"
+          placeholder={t('password')}
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           className="w-full p-2 border border-gray-300 rounded-md"
@@ -45,7 +47,7 @@ const Login: React.FC = () => {
           type="submit"
           className="w-full px-6 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition-colors"
         >
-          Login
+          {t('loginButton')}
         </button>
       </form>
     </div>

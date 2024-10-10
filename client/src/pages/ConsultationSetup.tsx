@@ -1,33 +1,34 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 const ConsultationSetup: React.FC = () => {
+  const { t } = useTranslation();
   const [patient, setPatient] = useState('');
   const [service, setService] = useState('');
   const [participants, setParticipants] = useState(2);
   const navigate = useNavigate();
 
-  // Lista de serviços fictícios
   const services = [
-    'Consulta Geral',
-    'Exame de Rotina',
-    'Acompanhamento',
-    'Avaliação Especializada',
-    'Procedimento Menor'
+    t('generalConsultation'),
+    t('routineExam'),
+    t('followUp'),
+    t('specializedEvaluation'),
+    t('minorProcedure')
   ];
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    navigate('/record', { state: { patient, service, participants } });
+    navigate('/audio-recording', { state: { patient, service, participants } });
   };
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-4">
-      <h1 className="text-3xl font-bold mb-8 text-center">Configuração da Consulta</h1>
+      <h1 className="text-3xl font-bold mb-8 text-center">{t('consultationSetup')}</h1>
       <form onSubmit={handleSubmit} className="w-full max-w-md space-y-4">
         <input
           type="text"
-          placeholder="Nome do Paciente"
+          placeholder={t('patientName')}
           value={patient}
           onChange={(e) => setPatient(e.target.value)}
           className="w-full p-2 border border-gray-300 rounded-md"
@@ -39,13 +40,13 @@ const ConsultationSetup: React.FC = () => {
           className="w-full p-2 border border-gray-300 rounded-md"
           required
         >
-          <option value="">Selecione o Serviço</option>
+          <option value="">{t('selectService')}</option>
           {services.map((s, index) => (
             <option key={index} value={s}>{s}</option>
           ))}
         </select>
         <div>
-          <p className="mb-2">Número de Participantes:</p>
+          <p className="mb-2">{t('participants')}:</p>
           <div className="flex justify-between">
             {[2, 3, 4, 5].map((num) => (
               <button
@@ -65,7 +66,7 @@ const ConsultationSetup: React.FC = () => {
           type="submit"
           className="w-full px-6 py-2 bg-green-500 text-white rounded-full hover:bg-green-600 transition-colors"
         >
-          Iniciar Gravação
+          {t('startRecording')}
         </button>
       </form>
     </div>
