@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from .models import Clinica, Usuario, Medico, Paciente, Servico, Consulta
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 class ClinicaSerializer(serializers.ModelSerializer):
     class Meta:
@@ -43,3 +44,12 @@ class ConsultaSerializer(serializers.ModelSerializer):
         return value
 
 # Adicione serializers similares para Servico
+
+class ServicoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Servico
+        fields = '__all__'
+
+class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
+    # Personalize conforme necessário
+    pass

@@ -10,6 +10,23 @@ class Usuario(AbstractUser):
     clinica = models.ForeignKey(Clinica, on_delete=models.CASCADE, null=True)
     is_admin = models.BooleanField(default=False)
     pin = models.CharField(max_length=6, blank=True)
+    
+    groups = models.ManyToManyField(
+        'auth.Group',
+        verbose_name='groups',
+        blank=True,
+        help_text='The groups this user belongs to.',
+        related_name='usuario_set',
+        related_query_name='usuario'
+    )
+    user_permissions = models.ManyToManyField(
+        'auth.Permission',
+        verbose_name='user permissions',
+        blank=True,
+        help_text='Specific permissions for this user.',
+        related_name='usuario_set',
+        related_query_name='usuario'
+    )
 
 class Medico(models.Model):
     usuario = models.OneToOneField(Usuario, on_delete=models.CASCADE)

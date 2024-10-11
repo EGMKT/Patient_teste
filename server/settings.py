@@ -6,7 +6,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = 'Lhd8spY0u5Mh0KmTJcjxX1_VgOQktVelKoDfnBSu8JnQ75AUAcQ3DqLsZxtTRr9bHhY'
 
-ALLOWED_HOSTS = ['localhost', 'http://localhost:8000', 'patientfunnel.solutions']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'patientfunnel.solutions']
 
 ROOT_URLCONF = 'server.urls'
 
@@ -24,7 +24,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt',
     'corsheaders',
-    'server',
+    'server',  # ou o nome do seu app principal
     # Outros aplicativos que você está usando
 ]
 
@@ -106,5 +106,11 @@ LOGGING = {
 
 RATELIMIT_USE_CACHE = 'default'
 RATELIMIT_ENABLE = True
+
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+AUTH_USER_MODEL = 'server.Usuario'
+
+
 
 
