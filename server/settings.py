@@ -6,25 +6,27 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = 'Lhd8spY0u5Mh0KmTJcjxX1_VgOQktVelKoDfnBSu8JnQ75AUAcQ3DqLsZxtTRr9bHhY'
 
-ALLOWED_HOSTS = ['localhost', 'http://localhost:8000']
+ALLOWED_HOSTS = ['localhost', 'http://localhost:8000', 'patientfunnel.solutions']
 
-ROOT_URLCONF = 'Backend.urls'
+ROOT_URLCONF = 'server.urls'
 
+WSGI_APPLICATION = 'server.wsgi.application'
+
+ASGI_APPLICATION = 'server.asgi.application'
 
 INSTALLED_APPS = [
-    'rest_framework',
-    'rest_framework_simplejwt',
-    'corsheaders',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'Backend',
+    'rest_framework',
+    'rest_framework_simplejwt',
+    'corsheaders',
+    'server',
     # Outros aplicativos que você está usando
 ]
-   
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
@@ -48,7 +50,8 @@ MIDDLEWARE = [
 ]
 
 CORS_ALLOWED_ORIGINS = [
-    'http://localhost:3000',  # URL do frontend React
+    'http://localhost:3000',
+    'https://patientfunnel.solutions'
 ]
 
 CORS_ALLOW_ALL_ORIGINS = True
@@ -68,12 +71,6 @@ TEMPLATES = [
         },
     },
 ]
-
-REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
-    )
-}
 
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),
@@ -102,9 +99,12 @@ LOGGING = {
     'loggers': {
         'django': {
             'handlers': ['console'],
-            'level': 'DEBUG',
+            'level': 'INFO',
         },
     },
 }
+
+RATELIMIT_USE_CACHE = 'default'
+RATELIMIT_ENABLE = True
 
 

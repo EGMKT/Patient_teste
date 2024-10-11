@@ -1,27 +1,42 @@
 from django.db import models
-from django.contrib.auth.models import User
+from django.contrib.auth.models import AbstractUser
+from django.core.validators import MinLengthValidator, MaxLengthValidator
 
 class Clinica(models.Model):
-    id = models.BigAutoField(primary_key=True)
-
     nome = models.CharField(max_length=255)
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    # outros campos relevantes
 
-    def __str__(self):
-        return self.nome
+class Usuario(AbstractUser):
+    clinica = models.ForeignKey(Clinica, on_delete=models.CASCADE, null=True)
+    is_admin = models.BooleanField(default=False)
+    pin = models.CharField(max_length=6, blank=True)
 
 class Medico(models.Model):
-    id = models.BigAutoField(primary_key=True)    
-    nome = models.CharField(max_length=255)
-    clinica = models.ForeignKey(Clinica, related_name='medicos', on_delete=models.CASCADE)
+    usuario = models.OneToOneField(Usuario, on_delete=models.CASCADE)
+    especialidade = models.CharField(max_length=100)
+    pin = models.CharField(
+        max_length=6,
+        validators=[MinLengthValidator(6), MaxLengthValidator(6)],
+        help_text="PIN de 6 dígitos para acesso"
+    )
 
-    def __str__(self):
-        return self.nome
+    def save(self, *args, **kwargs):
+        if not self.pin.isdigit():
+            raise ValueError("PIN deve conter apenas números")
+        super().save(*args, **kwargs)
 
 class Paciente(models.Model):
-    id = models.BigAutoField(primary_key=True)
     nome = models.CharField(max_length=255)
-    medico = models.ForeignKey(Medico, related_name='pacientes', on_delete=models.CASCADE)
+    clinica = models.ForeignKey(Clinica, on_delete=models.CASCADE)
+    # outros campos relevantes
 
-    def __str__(self):
-        return self.nome
+class Servico(models.Model):
+    nome = models.CharField(max_length=255)
+    clinica = models.ForeignKey(Clinica, on_delete=models.CASCADE)
+
+class Consulta(models.Model):
+    medico = models.ForeignKey(Medico, on_delete=models.CASCADE)
+    paciente = models.ForeignKey(Paciente, on_delete=models.CASCADE)
+    servico = models.ForeignKey(Servico, on_delete=models.CASCADE)
+    data = models.DateTimeField()
+    audio_path = models.CharField(max_length=255, blank=True)

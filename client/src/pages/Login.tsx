@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { login } from '../api';
 import { useAuth } from '../contexts/AuthContext';
 
 const Login: React.FC = () => {
@@ -13,11 +14,10 @@ const Login: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
-    const success = await login(username, password);
-    if (success) {
+    try {
+      await login(username, password);
       navigate('/doctor-selection');
-    } else {
+    } catch (error) {
       setError(t('loginError'));
     }
   };

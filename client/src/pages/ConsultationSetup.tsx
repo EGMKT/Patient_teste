@@ -1,6 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { getAudiosNaoEnviados, sincronizarAudios } from '../audioStorage';
+import Sidebar from '../components/Sidebar';
+import * as Yup from 'yup';
 
 const ConsultationSetup: React.FC = () => {
   const { t } = useTranslation();
@@ -8,6 +11,7 @@ const ConsultationSetup: React.FC = () => {
   const [service, setService] = useState('');
   const [participants, setParticipants] = useState(2);
   const navigate = useNavigate();
+  const [audiosNaoEnviados, setAudiosNaoEnviados] = useState<any[]>([]);
 
   const services = [
     t('generalConsultation'),
@@ -17,9 +21,47 @@ const ConsultationSetup: React.FC = () => {
     t('minorProcedure')
   ];
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    navigate('/audio-recording', { state: { patient, service, participants } });
+  const validationSchema = Yup.object().shape({
+    patient: Yup.string().required('Nome do paciente é obrigatório'),
+    service: Yup.string().required('Serviço é obrigatório'),
+    participants: Yup.number().min(2, 'Mínimo de 2 participantes').max(5, 'Máximo de 5 participantes'),
+  });
+
+  interface FormValues {
+    patient: string;
+    service: string;
+    participants: number;
+  }
+
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const formData = new FormData(event.currentTarget);
+    const values = {
+      patient: formData.get('patient') as string,
+      service: formData.get('service') as string,
+      participants: Number(formData.get('participants')),
+    };
+
+    try {
+      await validationSchema.validate(values);
+      // Proceed with form submission
+    } catch (error) {
+      console.error('Validation error:', error);
+    }
+  };
+
+  useEffect(() => {
+    const carregarAudios = async () => {
+      const audios = await getAudiosNaoEnviados();
+      setAudiosNaoEnviados(audios);
+    };
+    carregarAudios();
+  }, []);
+
+  const handleSincronizar = async () => {
+    await sincronizarAudios();
+    const audios = await getAudiosNaoEnviados();
+    setAudiosNaoEnviados(audios);
   };
 
   return (
@@ -33,12 +75,14 @@ const ConsultationSetup: React.FC = () => {
           onChange={(e) => setPatient(e.target.value)}
           className="w-full p-2 border border-gray-300 rounded-md"
           required
+          name="patient"
         />
         <select
           value={service}
           onChange={(e) => setService(e.target.value)}
           className="w-full p-2 border border-gray-300 rounded-md"
           required
+          name="service"
         >
           <option value="">{t('selectService')}</option>
           {services.map((s, index) => (
@@ -69,6 +113,7 @@ const ConsultationSetup: React.FC = () => {
           {t('startRecording')}
         </button>
       </form>
+      <Sidebar audios={audiosNaoEnviados} onSincronizar={handleSincronizar} />
     </div>
   );
 };
