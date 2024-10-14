@@ -10,7 +10,7 @@ class ClinicaSerializer(serializers.ModelSerializer):
 class UsuarioSerializer(serializers.ModelSerializer):
     class Meta:
         model = Usuario
-        fields = ('id', 'username', 'email', 'is_admin', 'clinica')
+        fields = ['id', 'email', 'first_name', 'last_name', 'role', 'clinica']
 
 class MedicoSerializer(serializers.ModelSerializer):
     usuario = UsuarioSerializer()
@@ -51,5 +51,17 @@ class ServicoSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
-    # Personalize conforme necessário
-    pass
+    @classmethod
+    def get_token(cls, user):
+        token = super().get_token(user)
+        token['email'] = user.email
+        token['role'] = user.role
+        return token
+
+class ConsultaListSerializer(serializers.ModelSerializer):
+    paciente = serializers.StringRelatedField()
+    medico = serializers.StringRelatedField()
+
+    class Meta:
+        model = Consulta
+        fields = ['id', 'paciente', 'medico', 'data', 'duracao', 'enviado']

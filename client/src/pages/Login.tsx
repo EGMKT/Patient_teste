@@ -5,20 +5,36 @@ import { login } from '../api';
 import { useAuth } from '../contexts/AuthContext';
 
 const Login: React.FC = () => {
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { login: authLogin } = useAuth();
   const { t } = useTranslation();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
     try {
-      await login(username, password);
-      navigate('/doctor-selection');
+      console.log('Tentando fazer login...');
+      const { access, user } = await login(email, password);
+      console.log('Login bem-sucedido:', { access, user });
+      if (user && user.email && user.role) {
+        authLogin(access, {
+          id: user.id,
+          email: user.email,
+          role: user.role,
+          username: user.username || '',
+          clinica: user.clinica || null
+        });
+        console.log('AuthLogin chamado');
+        navigate('/doctor-selection');
+      } else {
+        throw new Error('User information incomplete or not available');
+      }
     } catch (error) {
-      setError(t('loginError'));
+      console.error('Erro no login:', error);
+      setError(error instanceof Error ? error.message : 'Login failed. Please try again.');
     }
   };
 
@@ -27,12 +43,13 @@ const Login: React.FC = () => {
       <h1 className="text-3xl font-bold mb-8 text-center">{t('login')}</h1>
       <form onSubmit={handleSubmit} className="w-full max-w-md space-y-4">
         <input
-          type="text"
-          placeholder={t('username')}
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
+          type="email"
+          placeholder={t('email')}
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
           className="w-full p-2 border border-gray-300 rounded-md"
           required
+          autoComplete="username"
         />
         <input
           type="password"
@@ -41,6 +58,7 @@ const Login: React.FC = () => {
           onChange={(e) => setPassword(e.target.value)}
           className="w-full p-2 border border-gray-300 rounded-md"
           required
+          autoComplete="current-password"
         />
         {error && <p className="mt-4 text-red-500">{error}</p>}
         <button

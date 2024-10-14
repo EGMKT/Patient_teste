@@ -33,5 +33,18 @@
   "backToHome": "Back to Home",
   "audioSentSuccessfully": "Audio Sent Successfully",
   "audioSentToWebhook": "Your audio has been sent to the webhook.",
-  "startNewConsultation": "Start New Consultation"
+  "startNewConsultation": "Start New Consultation",
+  "dashboard": {
+    "title": "Administrative Dashboard",
+    "overview": "Overview",
+    "totalClinics": "Total Clinics",
+    "totalPatients": "Total Patients",
+    "totalConsultations": "Total Consultations",
+    "yourClinic": "Your Clinic",
+    "newPatients": "New Patients",
+    "clinicDetails": "Clinic Details",
+    "averageAttendanceTime": "Average Attendance Time",
+    "totalProcedures": "Total Procedures",
+    "averageSatisfaction": "Average Satisfaction"
+  }
 }

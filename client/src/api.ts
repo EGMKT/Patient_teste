@@ -1,28 +1,80 @@
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 
-const API_URL = 'http://localhost:8000/api/';
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000/api/';
 
 const api = axios.create({
   baseURL: API_URL,
+  withCredentials: true,
 });
 
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
+  console.log('API interceptor: token =', token);
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
 });
 
-export const login = async (username: string, password: string) => {
-  const response = await api.post('token/', { username, password });
-  localStorage.setItem('token', response.data.access);
+export const login = async (email: string, password: string) => {
+  try {
+    const response = await api.post('token/', { email, password });
+    console.log('API login response:', response.data);
+    localStorage.setItem('token', response.data.access);
+    
+    // Decodificar o token JWT para obter as informações do usuário
+    const decodedToken = JSON.parse(atob(response.data.access.split('.')[1]));
+    const user = {
+      id: decodedToken.user_id,
+      email: decodedToken.email,
+      role: decodedToken.role,
+      username: decodedToken.username || '',
+      clinica: decodedToken.clinica || null
+    };
+    
+    return { access: response.data.access, user };
+  } catch (error) {
+    console.error('API login error:', error);
+    if (axios.isAxiosError(error) && error.response) {
+      throw new Error(error.response.data.detail || 'Login failed');
+    }
+    throw new Error('Network error');
+  }
+};
+
+export const checkTrustedDevice = async (deviceId: string) => {
+  const response = await api.post('trusted-device/', { device_id: deviceId });
+  return response.data;
+};
+
+export const verifyTwoFactor = async (token: string, deviceId: string, rememberDevice: boolean) => {
+  const response = await api.post('two-factor/', { 
+    action: 'verify', 
+    token, 
+    device_id: deviceId, 
+    remember_device: rememberDevice 
+  });
+  return response.data;
+};
+
+export const enableTwoFactor = async () => {
+  const response = await api.post('two-factor/', { action: 'enable' });
+  return response.data;
+};
+
+export const disableTwoFactor = async () => {
+  const response = await api.post('two-factor/', { action: 'disable' });
   return response.data;
 };
 
 export const getMedicos = async () => {
-  const response = await api.get('medicos/');
-  return response.data;
+  try {
+    const response = await api.get('/medicos/');
+    return response.data;
+  } catch (error) {
+    console.error('Erro ao buscar médicos:', error);
+    throw error;
+  }
 };
 
 export const getPacientes = async () => {
@@ -40,9 +92,65 @@ export const criarConsulta = async (consultaData: any) => {
   return response.data;
 };
 
-export const enviarAudio = async (audioBlob: Blob, consultaId: number) => {
-  const formData = new FormData();
-  formData.append('audio', audioBlob, 'audio.wav');
-  const response = await api.post(`consultas/${consultaId}/audio/`, formData);
+export const enviarAudio = async (audioBase64: string, metadata: any) => {
+  const webhookUrl = 'https://n8n.patientfunnel.solutions/webhook-test/teste-patientFunnel';
+  const response = await axios.post(webhookUrl, { audio: audioBase64, metadata });
+  return response.data;
+};
+
+export const getAdminDashboard = async () => {
+  const response = await api.get('admin/dashboard/');
+  return response.data;
+};
+
+export const getDashboardGeral = async () => {
+  const response = await api.get('dashboard/geral/');
+  return response.data;
+};
+
+export const getDashboardClinica = async () => {
+  const response = await api.get('dashboard/clinica/');
+  return response.data;
+};
+
+export const verifyPin = async (doctorId: number, pin: string) => {
+  try {
+    const response = await api.post('verify-pin/', { medico_id: doctorId, pin });
+    return response.data.valid;
+  } catch (error) {
+    console.error('Erro ao verificar PIN:', error);
+    return false;
+  }
+};
+
+export const getPipedrivePatients = async () => {
+  const response = await api.get('pipedrive/patients/');
+  return response.data;
+};
+
+export const createPipedriveAppointment = async (patientId: string, doctorId: string, date: string) => {
+  const response = await api.post('pipedrive/appointments/', { patient_id: patientId, doctor_id: doctorId, date });
+  return response.data;
+};
+
+export const getConsultas = async () => {
+  const response = await api.get('consultas/');
+  return response.data;
+};
+
+export const getAudiosNaoEnviados = async () => {
+  const response = await api.get('consultas/nao-enviadas/');
+  return response.data;
+};
+
+// Adicione funções para outras chamadas de API (getClinicas, etc.)
+
+export const getDatabaseOverview = async () => {
+  const response = await api.get('database-overview/');
+  return response.data;
+};
+
+export const getClinicaInfo = async () => {
+  const response = await api.get('clinica-info/');
   return response.data;
 };

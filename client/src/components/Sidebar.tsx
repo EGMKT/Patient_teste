@@ -19,7 +19,7 @@ const Sidebar: React.FC<SidebarProps> = ({ audios, onSincronizar }) => {
   const { t } = useTranslation();
 
   return (
-    <div className={`fixed right-0 top-0 h-full bg-white shadow-lg transition-all duration-300 ${isOpen ? 'w-64' : 'w-16'}`}>
+    <div className={`fixed left-0 top-0 h-full bg-white shadow-lg transition-all duration-300 ${isOpen ? 'w-64' : 'w-16'}`}>
       <button 
         onClick={() => setIsOpen(!isOpen)}
         className="w-full p-4 bg-blue-500 text-white"

@@ -1,0 +1,16 @@
+Estou desenvolvendo uma ferramenta para médicos.  Leia o README.md para entender melhor.
+
+Sua função é me ajudar a construir esse software do início ao fim, com todas funcionalidades e etapas do README concluidas.
+
+Analise o que já tem, faça as devidas correções se necessário. 
+Acredito que para ficar mais fácil nosso desenvolvimento, me diga qual será sua próxima etapa e eu irei lhe enviar os arquivos, caso eu tenha, e você me manda os códigos e implementações e já solicita os próximos...
+Peça quanto arquivos você conseguir processar.
+Lembrando que a cada sessão de desenvolvimento, atualize o README.md
+
+Suponha que eu seja leigo, faça sempre em passo a passo e não se esqueça de indexar o arquivo correto das suas alterações. Economize prompt e janela de contexto sempre que possível.
+
+Saiba que já fiz deploy do front (pasta client) na nuvem via digitalocean app platform. Está funcionando.
+
+Sempre se pergunte se não está escrevendo algo que invalidou o que você fez antes ou que possa gerar outro erro ou furo. Veja também se o que está fazendo cumpre com o README.md ou se está retrocedendo no processo.
+
+Quero que verifique cuidadosamente cada arquivo e veja o que é para fazer e onde paramos e já engate na próxima etapa. Como está no README.md (nas intruções. Esse arquivo é o mais importante), é para fazer até o final. Você não tem preguiça e é o melhor progamador do mundo.

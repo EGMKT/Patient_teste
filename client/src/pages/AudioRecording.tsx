@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
+import { salvarAudioLocal } from '../audioStorage';
 
 const AudioRecording: React.FC = () => {
   const { t } = useTranslation();
@@ -77,11 +78,13 @@ const AudioRecording: React.FC = () => {
           };
 
           try {
-            await sendAudioToWebhook(base64Audio, metadata);
+            await enviarAudio(base64Audio, metadata);
             navigate('/success');
           } catch (error) {
-            console.error('Error sending audio to webhook:', error);
-            navigate('/error', { state: { errorMessage: 'Failed to send audio' } });
+            console.error('Error sending audio:', error);
+            const blob = await fetch(`data:audio/wav;base64,${base64Audio}`).then(res => res.blob());
+            await salvarAudioLocal(blob, metadata);
+            navigate('/error', { state: { errorMessage: 'Failed to send audio. Saved locally.' } });
           } finally {
             setIsProcessing(false);
           }
@@ -97,7 +100,7 @@ const AudioRecording: React.FC = () => {
     }
   };
 
-  const sendAudioToWebhook = async (base64Audio: string, metadata: any) => {
+  const enviarAudio = async (base64Audio: string, metadata: any) => {
     const webhookUrl = 'https://n8n.patientfunnel.solutions/webhook-test/teste-patientFunnel';
     await axios.post(webhookUrl, {
       audio: base64Audio,
