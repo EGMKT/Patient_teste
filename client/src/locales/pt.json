@@ -38,6 +38,7 @@
     "title": "Dashboard Administrativo",
     "overview": "Visão Geral",
     "totalClinics": "Total de Clínicas",
+    "totalDoctors": "Total de Médicos",
     "totalPatients": "Total de Pacientes",
     "totalConsultations": "Total de Consultas",
     "yourClinic": "Sua Clínica",
@@ -45,6 +46,9 @@
     "clinicDetails": "Detalhes da Clínica",
     "averageAttendanceTime": "Tempo Médio de Atendimento",
     "totalProcedures": "Total de Procedimentos",
-    "averageSatisfaction": "Satisfação Média"
-  }
+    "averageSatisfaction": "Satisfação Média",
+    "superAdminDashboard": "Dashboard do Super Admin",
+    "errorFetchingDashboardData": "Erro ao buscar dados do dashboard"
+  },
+  "especialidadeNaoDisponivel": "Especialidade não disponível"
 }

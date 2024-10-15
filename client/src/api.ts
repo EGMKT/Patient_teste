@@ -69,10 +69,15 @@ export const disableTwoFactor = async () => {
 
 export const getMedicos = async () => {
   try {
+    console.log('Iniciando requisição para buscar médicos');
     const response = await api.get('/medicos/');
+    console.log('Resposta recebida:', response.data);
     return response.data;
   } catch (error) {
     console.error('Erro ao buscar médicos:', error);
+    if (axios.isAxiosError(error) && error.response) {
+      console.error('Resposta do servidor:', error.response.data);
+    }
     throw error;
   }
 };
@@ -115,11 +120,12 @@ export const getDashboardClinica = async () => {
 
 export const verifyPin = async (doctorId: number, pin: string) => {
   try {
-    const response = await api.post('verify-pin/', { medico_id: doctorId, pin });
+    const response = await api.post('/verify-pin/', { medico_id: doctorId, pin });
+    console.log('Resposta da verificação do PIN:', response.data);
     return response.data.valid;
   } catch (error) {
     console.error('Erro ao verificar PIN:', error);
-    return false;
+    throw error;
   }
 };
 

@@ -46,5 +46,9 @@
     "averageAttendanceTime": "Average Attendance Time",
     "totalProcedures": "Total Procedures",
     "averageSatisfaction": "Average Satisfaction"
-  }
+  },
+  "superAdminDashboard": "Super Admin Dashboard",
+  "totalDoctors": "Total Doctors",
+  "errorFetchingDashboardData": "Error fetching dashboard data",
+  "especialidadeNaoDisponivel": "Specialty not available"
 }

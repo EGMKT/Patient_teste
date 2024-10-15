@@ -5,9 +5,9 @@ PatientFunnel é uma aplicação web desenvolvida para gerenciamento eficiente d
 
 ## Níveis de acesso
 1. Super Admin
-  - [ ] Gerenciamento do app
+  - [x] Gerenciamento do app
   - [ ] Controle de acessos de clínicas
-  - [ ] Dashboard geral
+  - [x] Dashboard geral
   - [ ] Dashboard de cada clínica
   - [ ] Configurações
 2. Admin de Clínica
@@ -15,14 +15,20 @@ PatientFunnel é uma aplicação web desenvolvida para gerenciamento eficiente d
   - [ ] Dashboard da clínica
   - [ ] Configurações
 3. Médicos
-  - [ ] Seleção de médico para consulta
-  - [ ] Configuração detalhada de consulta
-  - [ ] Gravação de áudio da consulta com visualização em tempo real
+  - [x] Seleção de médico para consulta
+  - [x] Configuração detalhada de consulta
+  - [x] Gravação de áudio da consulta com visualização em tempo real
 
 ## Funcionalidades Principais
 - [x] Autenticação de usuário (login/logout)
-- [ ] Dashboard para Super Admin e Admin de Clínica
-- [ ] Seleção de médico para consulta
+- [x] Dashboard para Super Admin
+- [ ] Resposta do backend mais rápida
+- [ ] Abreviar nome (no nome do meio) dos médicos e médicos admin automáticamente
+- [ ] Interface bonita e intuítiva do backend
+- [ ] Acesso fácil e manipulação do back e dados através do dashboard do Super Admin
+- [ ] Api documentada com (gitdocs) e exclusiva para time interno da PatientFunnel
+- [ ] Dashboard para Admin de Clínica
+- [x] Seleção de médico para consulta
 - [x] Configuração detalhada de consulta
 - [x] Gravação de áudio da consulta com visualização em tempo real
 - [x] Envio seguro de gravações para processamento posterior

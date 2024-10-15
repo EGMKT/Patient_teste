@@ -15,7 +15,9 @@ class MedicoViewSet(viewsets.ModelViewSet):
         logging.info("Requisição recebida para listar médicos")
         try:
             queryset = self.get_queryset()
+            logging.info(f"Queryset obtido: {queryset}")
             serializer = self.get_serializer(queryset, many=True)
+            logging.info("Serializer criado")
             return Response(serializer.data)
         except Exception as e:
             logging.error(f"Erro ao listar médicos: {str(e)}")
@@ -30,6 +32,13 @@ class MedicoListView(generics.ListAPIView):
     
 @api_view(['GET'])
 def get_medicos(request):
-    medicos = Medico.objects.all()
-    serializer = MedicoSerializer(medicos, many=True)
-    return Response(serializer.data)
+    logging.info("Função get_medicos chamada")
+    try:
+        medicos = Medico.objects.all()
+        logging.info(f"Médicos obtidos: {medicos}")
+        serializer = MedicoSerializer(medicos, many=True)
+        logging.info("Serializer criado")
+        return Response(serializer.data)
+    except Exception as e:
+        logging.error(f"Erro em get_medicos: {str(e)}")
+        return Response({"error": str(e)}, status=500)

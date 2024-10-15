@@ -1,26 +1,58 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
+import useTranslation from '../hooks/useTranslation';
 import { useAuth } from '../contexts/AuthContext';
 import { getMedicos, verifyPin, getClinicaInfo } from '../api';
 
+interface Doctor {
+  id: number;
+  nome: string;
+  especialidade: string;
+  cargo: string;
+}
+
 const DoctorSelection: React.FC = () => {
-  const [doctors, setDoctors] = useState([]);
+  const { t } = useTranslation();
+  const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [selectedDoctor, setSelectedDoctor] = useState<number | null>(null);
   const [pin, setPin] = useState('');
   const [clinicaInfo, setClinicaInfo] = useState({ nome: '', logo: '' });
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
   const navigate = useNavigate();
-  const { t } = useTranslation();
   const { user } = useAuth();
+  const [translations, setTranslations] = useState({
+    loading: 'Carregando...',
+    selectDoctor: 'Selecione o Médico',
+    enterPin: 'Digite o PIN',
+    submit: 'Enviar',
+    adminDoctor: 'Médico Admin',
+    errorFetchingData: 'Erro ao buscar dados',
+    invalidPin: 'PIN inválido',
+    errorVerifyingPin: 'Erro ao verificar PIN',
+    pleaseSelectDoctor: 'Por favor, selecione um médico',
+  });
 
   useEffect(() => {
-    if (!user) {
-      navigate('/login');
-      return;
-    }
+    const loadTranslations = async () => {
+      const translatedTexts = {
+        loading: await t('loading', 'Carregando...'),
+        selectDoctor: await t('selectDoctor', 'Selecione o Médico'),
+        enterPin: await t('enterPin', 'Digite o PIN'),
+        submit: await t('submit', 'Enviar'),
+        adminDoctor: await t('adminDoctor', 'Médico Admin'),
+        errorFetchingData: await t('errorFetchingData', 'Erro ao buscar dados'),
+        invalidPin: await t('invalidPin', 'PIN inválido'),
+        errorVerifyingPin: await t('errorVerifyingPin', 'Erro ao verificar PIN'),
+        pleaseSelectDoctor: await t('pleaseSelectDoctor', 'Por favor, selecione um médico'),
+      };
+      setTranslations(translatedTexts);
+    };
 
+    loadTranslations();
+  }, [t]);
+
+  useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
       try {
@@ -29,44 +61,48 @@ const DoctorSelection: React.FC = () => {
         setClinicaInfo(info);
       } catch (error) {
         console.error('Erro ao buscar dados:', error);
-        setError(t('errorFetchingData'));
+        setError(translations.errorFetchingData);
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchData();
-  }, [user, navigate, t]);
+  }, [translations.errorFetchingData]);
 
   const handleDoctorSelect = (doctorId: number) => {
     setSelectedDoctor(doctorId);
+    setPin('');
   };
 
   const handlePinSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (selectedDoctor) {
       try {
+        console.log('Enviando PIN para verificação:', { doctorId: selectedDoctor, pin });
         const isValid = await verifyPin(selectedDoctor, pin);
+        console.log('Resultado da verificação do PIN:', isValid);
         if (isValid) {
-          if (user?.role === 'AC') {
+          const selectedDoctorData = doctors.find(d => d.id === selectedDoctor);
+          if (selectedDoctorData?.cargo === 'admin') {
             navigate('/dashboard/clinica');
           } else {
             navigate('/consultation-setup', { state: { doctorId: selectedDoctor } });
           }
         } else {
-          setError(t('invalidPin'));
+          setError(await t('invalidPin', 'PIN inválido'));
         }
       } catch (error) {
         console.error('Erro ao verificar PIN:', error);
-        setError(t('errorVerifyingPin'));
+        setError(await t('errorVerifyingPin', 'Erro ao verificar PIN'));
       }
     } else {
-      setError(t('pleaseSelectDoctor'));
+      setError(await t('pleaseSelectDoctor', 'Por favor, selecione um médico'));
     }
   };
 
   if (isLoading) {
-    return <div className="flex justify-center items-center h-screen">{t('loading')}</div>;
+    return <div className="flex justify-center items-center h-screen">{translations.loading}</div>;
   }
 
   return (
@@ -75,21 +111,22 @@ const DoctorSelection: React.FC = () => {
         {clinicaInfo.logo && <img src={clinicaInfo.logo} alt="Logo da Clínica" className="h-12 mr-2" />}
         <span className="text-xl font-semibold">{clinicaInfo.nome}</span>
       </div>
-      <h1 className="text-3xl font-bold mb-8 text-center">{t('selectDoctor')}</h1>
+      <h1 className="text-3xl font-bold mb-8 text-center">{translations.selectDoctor}</h1>
       {error && <p className="text-red-500 mb-4">{error}</p>}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 w-full max-w-4xl mb-8">
-        {doctors.map((doctor: any) => (
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 w-full max-w-4xl mb-8 justify-items-center">
+        {doctors.map((doctor) => (
           <button
             key={doctor.id}
             onClick={() => handleDoctorSelect(doctor.id)}
-            className={`p-6 rounded-lg shadow-md transition-all ${
+            className={`p-6 rounded-lg shadow-md transition-all w-full max-w-xs ${
               selectedDoctor === doctor.id
                 ? 'bg-blue-500 text-white'
                 : 'bg-white hover:bg-blue-100'
             }`}
           >
-            <h2 className="text-xl font-semibold mb-2">{doctor.name}</h2>
-            <p className="text-sm">{t(doctor.specialty.toLowerCase())}</p>
+            <h2 className="text-xl font-semibold mb-2">{doctor.nome}</h2>
+            <p className="text-sm">{doctor.especialidade}</p>
+            {doctor.cargo === 'admin' && <p className="text-xs mt-1">{translations.adminDoctor}</p>}
           </button>
         ))}
       </div>
@@ -98,14 +135,14 @@ const DoctorSelection: React.FC = () => {
           type="text"
           value={pin}
           onChange={(e) => setPin(e.target.value)}
-          placeholder={t('enterPin')}
+          placeholder={translations.enterPin}
           className="p-3 rounded-lg shadow-md transition-all w-full mb-4"
         />
         <button
           type="submit"
           className="w-full px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
         >
-          {t('submit')}
+          {translations.submit}
         </button>
       </form>
     </div>

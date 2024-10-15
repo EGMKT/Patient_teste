@@ -10,7 +10,7 @@ interface HeaderProps {
 }
 
 const Header: React.FC<HeaderProps> = ({ onLanguageChange, currentLanguage }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { logout } = useAuth();
   const navigate = useNavigate();
   const [showLanguageMenu, setShowLanguageMenu] = useState(false);
@@ -25,6 +25,10 @@ const Header: React.FC<HeaderProps> = ({ onLanguageChange, currentLanguage }) =>
     { code: 'pt', name: 'Português' },
     // Adicione mais idiomas conforme necessário
   ];
+
+  const changeLanguage = (lng: string) => {
+    i18n.changeLanguage(lng);
+  };
 
   return (
     <header className="fixed top-0 left-0 right-0 p-4 flex justify-end space-x-2 bg-white shadow-md">

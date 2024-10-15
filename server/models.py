@@ -87,15 +87,10 @@ def create_custom_permissions(sender, **kwargs):
     )
 
 class Medico(models.Model):
-    usuario = models.OneToOneField(Usuario, on_delete=models.CASCADE)
+    usuario = models.OneToOneField(Usuario, on_delete=models.CASCADE, related_name='medico')
     nome = models.CharField(max_length=100)
     especialidade = models.CharField(max_length=100)
     pin = models.CharField(max_length=6, blank=True)
-
-    def save(self, *args, **kwargs):
-        if not self.pin:
-            self.pin = ''.join(random.choices(string.digits, k=6))
-        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.nome

@@ -14,6 +14,7 @@ import { AuthProvider, useAuth } from './contexts/AuthContext';
 import SuperAdminAudios from './pages/SuperAdminAudios';
 import DatabaseOverview from './pages/DatabaseOverview';
 import ProtectedRoute from './components/ProtectedRoute';
+import SuperAdminDashboard from './pages/SuperAdminDashboard';
 
 const AppRoutes: React.FC = () => {
   const { user, isAuthenticated } = useAuth();
@@ -87,6 +88,15 @@ const AppRoutes: React.FC = () => {
           element={
             <ProtectedRoute allowedRoles={['super_admin']}>
               <DatabaseOverview />
+            </ProtectedRoute>
+          } 
+        />
+
+        <Route 
+          path="/super-admin/dashboard" 
+          element={
+            <ProtectedRoute allowedRoles={['SA']}>
+              <SuperAdminDashboard />
             </ProtectedRoute>
           } 
         />

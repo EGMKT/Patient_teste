@@ -10,18 +10,20 @@ class ClinicaSerializer(serializers.ModelSerializer):
 class UsuarioSerializer(serializers.ModelSerializer):
     class Meta:
         model = Usuario
-        fields = ['id', 'email', 'first_name', 'last_name', 'role', 'clinica']
+        fields = ['id', 'email', 'first_name', 'last_name', 'role']
 
 class MedicoSerializer(serializers.ModelSerializer):
-    usuario = UsuarioSerializer()
+    usuario = UsuarioSerializer(read_only=True)
+    
     class Meta:
         model = Medico
-        fields = ['id', 'nome', 'especialidade', 'pin']
+        fields = ['id', 'nome', 'especialidade', 'pin', 'usuario']
 
-    def validate_pin(self, value):
-        if not value.isdigit() or len(value) != 6:
-            raise serializers.ValidationError("PIN deve ser um número de 6 dígitos.")
-        return value
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        representation['nome'] = instance.nome or 'Nome não disponível'
+        representation['especialidade'] = instance.especialidade or 'Especialidade não disponível'
+        return representation
 
 class PacienteSerializer(serializers.ModelSerializer):
     class Meta:
