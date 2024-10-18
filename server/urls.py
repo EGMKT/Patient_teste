@@ -6,7 +6,7 @@ from .views import (ClinicaViewSet, MedicoViewSet, PacienteViewSet, ServicoViewS
                     AdminDashboardView, DashboardGeralView, DashboardClinicaView, 
                     GravarConsultaView, VerifyPinView, DashboardView, RegistroUsuarioView,
                     AudioUploadView, TwoFactorView, TrustedDeviceView, DatabaseOverviewView,
-                    ClinicaInfoView, get_medicos)
+                    ClinicaInfoView, get_medicos, database_view, LoginView)
 from rest_framework_simplejwt.views import TokenRefreshView
 from django.contrib import admin
 
@@ -35,7 +35,8 @@ urlpatterns = [
     path('api/consultas/audio/', AudioUploadView.as_view(), name='audio_upload'),
     path('api/two-factor/', TwoFactorView.as_view(), name='two-factor'),
     path('api/trusted-device/', TrustedDeviceView.as_view(), name='trusted-device'),
-    path('api/database-overview/', DatabaseOverviewView.as_view(), name='database-overview'),
+    path('api/database-overview/', database_view.DatabaseOverviewView.as_view(), name='database-overview'),
     path('api/clinica-info/', ClinicaInfoView.as_view(), name='clinica-info'),
     path('api/get-medicos/', get_medicos, name='get-medicos'),
+    path('api/login/', LoginView.as_view(), name='login'),
 ]

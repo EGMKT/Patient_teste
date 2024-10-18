@@ -2,7 +2,7 @@ from .clinica_views import ClinicaViewSet, ServicoViewSet, ClinicaInfoView
 from .medico_views import MedicoViewSet, get_medicos
 from .paciente_views import PacienteViewSet
 from .consulta_views import ConsultaViewSet, GravarConsultaView
-from .auth_views import CustomTokenObtainPairView
+from .auth_views import CustomTokenObtainPairView, LoginView
 from .pipedrive_views import PipedrivePatientView, PipedriveAppointmentView
 from .dashboard_views import AdminDashboardView, DashboardGeralView, DashboardClinicaView, DashboardView
 from .user_views import VerifyPinView, RegistroUsuarioView

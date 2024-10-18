@@ -15,6 +15,8 @@ import SuperAdminAudios from './pages/SuperAdminAudios';
 import DatabaseOverview from './pages/DatabaseOverview';
 import ProtectedRoute from './components/ProtectedRoute';
 import SuperAdminDashboard from './pages/SuperAdminDashboard';
+import ManageUsers from './pages/ManageUsers';
+import ManageClinics from './pages/ManageClinics';
 
 const AppRoutes: React.FC = () => {
   const { user, isAuthenticated } = useAuth();
@@ -25,6 +27,19 @@ const AppRoutes: React.FC = () => {
   };
 
   console.log('AppRoutes: isAuthenticated =', isAuthenticated, 'user =', user);
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (user?.role === 'SA') {
+    return (
+      <Routes>
+        <Route path="/super-admin/*" element={<SuperAdminDashboard />} />
+        <Route path="*" element={<Navigate to="/super-admin" replace />} />
+      </Routes>
+    );
+  }
 
   return (
     <>
@@ -102,6 +117,24 @@ const AppRoutes: React.FC = () => {
         />
 
         <Route 
+          path="/manage-users"
+          element={
+            <ProtectedRoute allowedRoles={['super_admin']}>
+              <ManageUsers />
+            </ProtectedRoute>
+          }
+        />
+        
+        <Route 
+          path="/manage-clinics"
+          element={
+            <ProtectedRoute allowedRoles={['super_admin']}>
+              <ManageClinics />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route 
           path="/" 
           element={
             isAuthenticated ? (
@@ -122,7 +155,10 @@ const App: React.FC = () => {
     <AuthProvider>
       <Router>
         <div className="App min-h-screen bg-gray-100 flex flex-col">
-          <AppRoutes />
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route path="/*" element={<AppRoutes />} />
+          </Routes>
         </div>
       </Router>
     </AuthProvider>

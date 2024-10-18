@@ -2,6 +2,10 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from ..models import Medico
+from django.core.paginator import Paginator
+from django.views.decorators.cache import cache_page
+from django.utils.decorators import method_decorator
+from ..serializers import UsuarioSerializer
 
 class VerifyPinView(APIView):
     permission_classes = [IsAuthenticated]
@@ -23,3 +27,17 @@ class RegistroUsuarioView(APIView):
     def post(self, request):
         # Implemente a lógica aqui
         return Response({"message": "User registered"})
+
+class UserListView(APIView):
+    @method_decorator(cache_page(60 * 15))  # Cache por 15 minutos
+    def get(self, request):
+        users = Usuario.objects.select_related('clinica').all()
+        paginator = Paginator(users, 20)  # 20 usuários por página
+        page_number = request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
+        serializer = UsuarioSerializer(page_obj, many=True)
+        return Response({
+            'users': serializer.data,
+            'total_pages': paginator.num_pages,
+            'current_page': page_obj.number
+        })

@@ -4,17 +4,17 @@
 PatientFunnel é uma aplicação web desenvolvida para gerenciamento eficiente de consultas médicas e gravação de áudio. Esta solução visa otimizar o fluxo de trabalho em ambientes médicos, proporcionando uma interface intuitiva para profissionais de saúde.
 
 ## Níveis de acesso
-1. Super Admin
+1. Super Admin (SA)
   - [x] Gerenciamento do app
   - [ ] Controle de acessos de clínicas
   - [x] Dashboard geral
   - [ ] Dashboard de cada clínica
   - [ ] Configurações
-2. Admin de Clínica
+2. Admin de Clínica (AM)
   - [ ] Mesmo acesso dos médicos
   - [ ] Dashboard da clínica
   - [ ] Configurações
-3. Médicos
+3. Médicos (ME)
   - [x] Seleção de médico para consulta
   - [x] Configuração detalhada de consulta
   - [x] Gravação de áudio da consulta com visualização em tempo real
@@ -24,7 +24,7 @@ PatientFunnel é uma aplicação web desenvolvida para gerenciamento eficiente d
 - [x] Dashboard para Super Admin
 - [ ] Resposta do backend mais rápida
 - [ ] Abreviar nome (no nome do meio) dos médicos e médicos admin automáticamente
-- [ ] Interface bonita e intuítiva do backend
+- [x] Interface para Super Admin visualizar os bancos de dados
 - [ ] Acesso fácil e manipulação do back e dados através do dashboard do Super Admin
 - [ ] Api documentada com (gitdocs) e exclusiva para time interno da PatientFunnel
 - [ ] Dashboard para Admin de Clínica
@@ -38,6 +38,10 @@ PatientFunnel é uma aplicação web desenvolvida para gerenciamento eficiente d
 - [x] Verificação de Duplo Fator para médicos (opcional)
 - [x] Funcionalidade "Lembrar desse dispositivo" para 2FA
 - [ ] Aba de configurações básica do médico (Ativa e desativa 2FA)
+- [ ] Segurança de dados  
+- [ ] Segurança de infraestrutura
+- [ ] Segurança contra acessos não autorizados e forçados (ex: tentar acessar uma página que não tem autorização, acesso revogado, etc)
+- [ ] Página de erro 404 (página não encontrada)
 
 ## Tecnologias Utilizadas
 PatientFunnel está hospedado no DigitalOcean.
@@ -140,7 +144,11 @@ PatientFunnel-test/
 │ │ │ ├── AudioRecording.tsx
 │ │ │ ├── DatabaseOverview.tsx
 │ │ │ ├── ErrorPage.tsx
-│ │ │ └── SuccessPage.tsx
+│ │ │ ├── SuccessPage.tsx
+│ │ │ ├── ManageClinics.tsx
+│ │ │ ├── ManageUsers.tsx
+│ │ │ ├── SuperAdminDashboard.tsx
+│ │ │ ├── DatabaseOverview.tsx
 │ │ ├── api.ts
 │ │ ├── audioStorage.ts
 │ │ ├── App.tsx
@@ -183,6 +191,7 @@ PatientFunnel-test/
 │ │ ├── two_factor_view.py
 │ │ ├── servico_view.py
 │ │ ├── user_view.py
+│ │ ├── database_view.py
 │ │ ├── __init__.py
 │ │ ├── __pycache__/
 │ │ │ └── (...)
@@ -296,13 +305,14 @@ PatientFunnel-test/
 4. ~~Melhorar a interface do usuário, incluindo sidebar para áudios não enviados~~
 5. ~~Implementar funcionalidades offline~~
 6. ~~Implementar Interface para Super Admin para visualização de áudios não enviados das clínicas~~
-7. Implementar Interface para Super Admin para visualização de Banco de Dados
-8. Gerar um Relatório de Faturamento para ser preenchido pelos Administradores das Clínicas
-9. ~~Habilitar funcionalidade de Verificação de Duplo Fator para cada médico~~
-10. Verificar Estrutura do Diretório
-11. ~~Integrar com o Frontend~~
-12. Tornar dados dinâmicos
-13. Deploy do Back no DigitalOcean
+7. ~~Implementar Interface para Super Admin para visualização de Banco de Dados~~
+8. ~~Implementar acesso diferenciado para Super Admin~~
+9. Gerar um Relatório de Faturamento para ser preenchido pelos Administradores das Clínicas
+10. ~~Habilitar funcionalidade de Verificação de Duplo Fator para cada médico~~
+11. Verificar Estrutura do Diretório
+12. ~~Integrar com o Frontend~~
+13. Tornar dados dinâmicos
+14. Deploy do Back no DigitalOcean
 
 ## Webhook
 O Webhook está sendo recebido no n8n, que converte, trata e resume o áudio/consulta, e identifica oportunidades de marketing.

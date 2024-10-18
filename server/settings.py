@@ -165,3 +165,5 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 X_FRAME_OPTIONS = 'SAMEORIGIN'
 SILENCED_SYSTEM_CHECKS = ['security.W019']
+
+PIPEDRIVE_API_TOKEN = 'seu_token_aqui'

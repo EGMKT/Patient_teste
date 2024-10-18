@@ -152,11 +152,74 @@ export const getAudiosNaoEnviados = async () => {
 // Adicione funções para outras chamadas de API (getClinicas, etc.)
 
 export const getDatabaseOverview = async () => {
-  const response = await api.get('database-overview/');
-  return response.data;
+  try {
+    const response = await axios.get('/api/database-overview/');
+    return response.data;
+  } catch (error) {
+    console.error('Erro ao obter visão geral do banco de dados:', error);
+    throw error;
+  }
 };
 
 export const getClinicaInfo = async () => {
   const response = await api.get('clinica-info/');
   return response.data;
+};
+
+export const getUsers = async () => {
+  try {
+    const response = await axios.get('/api/users/');
+    return response.data;
+  } catch (error) {
+    console.error('Erro ao obter usuários:', error);
+    throw error;
+  }
+};
+
+export const deleteUser = async (userId: number) => {
+  try {
+    await axios.delete(`/api/users/${userId}/`);
+  } catch (error) {
+    console.error('Erro ao deletar usuário:', error);
+    throw error;
+  }
+};
+
+export const getClinics = async () => {
+  try {
+    const response = await axios.get('/api/clinics/');
+    return response.data;
+  } catch (error) {
+    console.error('Erro ao obter clínicas:', error);
+    throw error;
+  }
+};
+
+export const createClinic = async (clinicData: { name: string; address: string }) => {
+  try {
+    const response = await axios.post('/api/clinics/', clinicData);
+    return response.data;
+  } catch (error) {
+    console.error('Erro ao criar clínica:', error);
+    throw error;
+  }
+};
+
+export const updateClinic = async (clinicId: number, clinicData: { name: string; address: string }) => {
+  try {
+    const response = await axios.put(`/api/clinics/${clinicId}/`, clinicData);
+    return response.data;
+  } catch (error) {
+    console.error('Erro ao atualizar clínica:', error);
+    throw error;
+  }
+};
+
+export const deleteClinic = async (clinicId: number) => {
+  try {
+    await axios.delete(`/api/clinics/${clinicId}/`);
+  } catch (error) {
+    console.error('Erro ao deletar clínica:', error);
+    throw error;
+  }
 };

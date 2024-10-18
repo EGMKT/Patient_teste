@@ -10,7 +10,7 @@ class ClinicaSerializer(serializers.ModelSerializer):
 class UsuarioSerializer(serializers.ModelSerializer):
     class Meta:
         model = Usuario
-        fields = ['id', 'email', 'first_name', 'last_name', 'role']
+        fields = ['id', 'email', 'first_name', 'last_name', 'role', 'clinica']
 
 class MedicoSerializer(serializers.ModelSerializer):
     usuario = UsuarioSerializer(read_only=True)
