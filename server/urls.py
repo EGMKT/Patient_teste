@@ -1,14 +1,14 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from .views import (ClinicaViewSet, MedicoViewSet, PacienteViewSet, ServicoViewSet, 
-                    ConsultaViewSet, CustomTokenObtainPairView, 
-                    PipedrivePatientView, PipedriveAppointmentView, home, 
+                    ConsultaViewSet, CustomTokenObtainPairView, home, 
                     AdminDashboardView, DashboardGeralView, DashboardClinicaView, 
                     GravarConsultaView, VerifyPinView, DashboardView, RegistroUsuarioView,
                     AudioUploadView, TwoFactorView, TrustedDeviceView, DatabaseOverviewView,
-                    ClinicaInfoView, get_medicos, database_view, LoginView)
+                    ClinicaInfoView, get_medicos, database_views, LoginView)
 from rest_framework_simplejwt.views import TokenRefreshView
 from django.contrib import admin
+from server.views.pipedrive_views import PipedrivePatientView
 
 router = DefaultRouter()
 router.register(r'clinicas', ClinicaViewSet)
@@ -22,8 +22,7 @@ urlpatterns = [
     path('api/', include(router.urls)),
     path('api/token/', CustomTokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-    path('api/pipedrive/patients/', PipedrivePatientView.as_view()),
-    path('api/pipedrive/appointments/', PipedriveAppointmentView.as_view()),
+    path('api/pipedrive/patients/', PipedrivePatientView.as_view(), name='pipedrive_patients'),
     path('api/admin/dashboard/', AdminDashboardView.as_view(), name='admin-dashboard'),
     path('api/verify-pin/', VerifyPinView.as_view(), name='verify_pin'),
     path('api/dashboard/geral/', DashboardGeralView.as_view(), name='dashboard_geral'),
@@ -35,7 +34,7 @@ urlpatterns = [
     path('api/consultas/audio/', AudioUploadView.as_view(), name='audio_upload'),
     path('api/two-factor/', TwoFactorView.as_view(), name='two-factor'),
     path('api/trusted-device/', TrustedDeviceView.as_view(), name='trusted-device'),
-    path('api/database-overview/', database_view.DatabaseOverviewView.as_view(), name='database-overview'),
+    path('api/database-overview/', database_views.DatabaseOverviewView.as_view(), name='database-overview'),
     path('api/clinica-info/', ClinicaInfoView.as_view(), name='clinica-info'),
     path('api/get-medicos/', get_medicos, name='get-medicos'),
     path('api/login/', LoginView.as_view(), name='login'),

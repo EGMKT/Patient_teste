@@ -57,6 +57,7 @@ MIDDLEWARE = [
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
+    "http://127.0.0.1:3000",
     "https://app.patientfunnel.solutions"
 ]
 
@@ -166,4 +167,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 X_FRAME_OPTIONS = 'SAMEORIGIN'
 SILENCED_SYSTEM_CHECKS = ['security.W019']
 
-PIPEDRIVE_API_TOKEN = 'seu_token_aqui'
+PIPEDRIVE_API_TOKEN = '07c71fdd046e9a98c6d61601fe0dc77102ad887a'
+PIPEDRIVE_API_URL = "https://api.pipedrive.com/v1/"
+
+CORS_ALLOW_ALL_ORIGINS = True  # Para desenvolvimento. Em produção, especifique os domínios permitidos.

@@ -26,7 +26,7 @@ PatientFunnel é uma aplicação web desenvolvida para gerenciamento eficiente d
 - [ ] Abreviar nome (no nome do meio) dos médicos e médicos admin automáticamente
 - [x] Interface para Super Admin visualizar os bancos de dados
 - [ ] Acesso fácil e manipulação do back e dados através do dashboard do Super Admin
-- [ ] Api documentada com (gitdocs) e exclusiva para time interno da PatientFunnel
+- [ ] Api documentada com (gitbook) e exclusiva para time interno da PatientFunnel
 - [ ] Dashboard para Admin de Clínica
 - [x] Seleção de médico para consulta
 - [x] Configuração detalhada de consulta
@@ -125,8 +125,11 @@ PatientFunnel-test/
 │ ├── src/
 │ │ ├── components/
 │ │ │ ├── Header.tsx
+│ │ │ ├── NewClinicsChart.tsx
+│ │ │ ├── SuperAdminSidebar.tsx
 │ │ │ ├── ProtectedRoute.tsx
 │ │ │ ├── TwoFactorSettings.tsx
+│ │ │ ├── UserSettingsModal.tsx
 │ │ │ └── Sidebar.tsx
 │ │ ├── contexts/
 │ │ │ └── AuthContext.tsx
@@ -147,8 +150,10 @@ PatientFunnel-test/
 │ │ │ ├── SuccessPage.tsx
 │ │ │ ├── ManageClinics.tsx
 │ │ │ ├── ManageUsers.tsx
+│ │ │ ├── NotFound.tsx 
 │ │ │ ├── SuperAdminDashboard.tsx
-│ │ │ ├── DatabaseOverview.tsx
+│ │ │ ├── DoctorSettings.tsx
+│ │ │ ├── ViewReports.tsx
 │ │ ├── api.ts
 │ │ ├── audioStorage.ts
 │ │ ├── App.tsx
@@ -179,19 +184,18 @@ PatientFunnel-test/
 │ │ │ └── (...)
 │ ├── views/
 │ │ ├── dashboards.py
-│ │ ├── audio_view.py
-│ │ ├── auth_view.py
-│ │ ├── clinica_view.py
-│ │ ├── consulta_view.py
-│ │ ├── database_view.py
-│ │ ├── home_view.py
-│ │ ├── medico_view.py
-│ │ ├── paciente_view.py
-│ │ ├── pipedrive_view.py
-│ │ ├── two_factor_view.py
-│ │ ├── servico_view.py
-│ │ ├── user_view.py
-│ │ ├── database_view.py
+│ │ ├── audio_views.py
+│ │ ├── auth_views.py
+│ │ ├── clinica_views.py
+│ │ ├── consulta_views.py
+│ │ ├── database_views.py
+│ │ ├── home_views.py
+│ │ ├── medico_views.py
+│ │ ├── paciente_views.py
+│ │ ├── pipedrive_views.py
+│ │ ├── two_factor_views.py
+│ │ ├── servico_views.py
+│ │ ├── user_views.py
 │ │ ├── __init__.py
 │ │ ├── __pycache__/
 │ │ │ └── (...)
@@ -296,7 +300,7 @@ PatientFunnel-test/
 - [ ] Propor e implementar arquitetura de sistema que atenda a todos os requisitos
 - [ ] Justificar escolhas de tecnologias
 - [ ] Implementar autenticação de dois fatores
-- [ ] Integrar/Documentar código API com GitDocs
+- [ ] Integrar/Documentar código API com GitBook
 
 ## Próximos Passos
 1. ~~Implementar dashboard completo para Super Admin e Admin de Clínica~~

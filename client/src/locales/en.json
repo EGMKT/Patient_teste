@@ -50,5 +50,7 @@
   "superAdminDashboard": "Super Admin Dashboard",
   "totalDoctors": "Total Doctors",
   "errorFetchingDashboardData": "Error fetching dashboard data",
-  "especialidadeNaoDisponivel": "Specialty not available"
+  "especialidadeNaoDisponivel": "Specialty not available",
+  "selectPatient": "Select Patient",
+  "audiosNaoEnviados": "Unsent Audios"
 }

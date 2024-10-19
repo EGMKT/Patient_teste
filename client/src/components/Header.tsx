@@ -1,19 +1,22 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { FiGlobe, FiLogOut } from 'react-icons/fi';
+import { FiGlobe, FiLogOut, FiSettings } from 'react-icons/fi';
 import { useAuth } from '../contexts/AuthContext';
+import UserSettingsModal from './UserSettingsModal';
 
 interface HeaderProps {
   onLanguageChange: (lang: string) => void;
   currentLanguage: string;
+  showSettings?: boolean;
 }
 
-const Header: React.FC<HeaderProps> = ({ onLanguageChange, currentLanguage }) => {
+const Header: React.FC<HeaderProps> = ({ onLanguageChange, currentLanguage, showSettings = false }) => {
   const { t, i18n } = useTranslation();
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
   const navigate = useNavigate();
   const [showLanguageMenu, setShowLanguageMenu] = useState(false);
+  const [settingsModalOpen, setSettingsModalOpen] = useState(false);
 
   const handleLogout = () => {
     logout();
@@ -59,6 +62,15 @@ const Header: React.FC<HeaderProps> = ({ onLanguageChange, currentLanguage }) =>
           </div>
         )}
       </div>
+      {showSettings && (
+        <button
+          onClick={() => setSettingsModalOpen(true)}
+          className="p-2 rounded-full bg-gray-200 hover:bg-gray-300 transition-colors"
+          aria-label={t('settings')}
+        >
+          <FiSettings className="text-gray-600" />
+        </button>
+      )}
       <button
         onClick={handleLogout}
         className="p-2 rounded-full bg-gray-200 hover:bg-gray-300 transition-colors"
@@ -66,6 +78,12 @@ const Header: React.FC<HeaderProps> = ({ onLanguageChange, currentLanguage }) =>
       >
         <FiLogOut className="text-red-500" />
       </button>
+      {showSettings && user && (
+        <UserSettingsModal
+          open={settingsModalOpen}
+          onClose={() => setSettingsModalOpen(false)}
+        />
+      )}
     </header>
   );
 };

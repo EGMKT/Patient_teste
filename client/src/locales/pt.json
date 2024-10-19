@@ -47,8 +47,22 @@
     "averageAttendanceTime": "Tempo Médio de Atendimento",
     "totalProcedures": "Total de Procedimentos",
     "averageSatisfaction": "Satisfação Média",
-    "superAdminDashboard": "Dashboard do Super Admin",
+    "superAdminDashboard": "Painel do Super Admin",
     "errorFetchingDashboardData": "Erro ao buscar dados do dashboard"
   },
-  "especialidadeNaoDisponivel": "Especialidade não disponível"
+  "especialidadeNaoDisponivel": "Especialidade não disponível",
+  "superAdminDashboard": "Painel do Super Admin",
+  "databaseOverview": "Visão Geral do Banco de Dados",
+  "manageUsers": "Gerenciar Usuários",
+  "manageClinics": "Gerenciar Clínicas",
+  "viewReports": "Ver Relatórios",
+  "id": "ID",
+  "email": "E-mail",
+  "username": "Nome de Usuário",
+  "role": "Função",
+  "actions": "Ações",
+  "edit": "Editar",
+  "delete": "Excluir",
+  "selectPatient": "Selecionar Paciente",
+  "audiosNaoEnviados": "Áudios Não Enviados"
 }

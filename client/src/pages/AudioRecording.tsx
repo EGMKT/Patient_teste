@@ -23,6 +23,7 @@ const AudioRecording: React.FC = () => {
   const wavesurferRef = useRef<WaveSurfer | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
+  const startTimeRef = useRef<string>('');
 
   useEffect(() => {
     const loadTranslations = async () => {
@@ -63,6 +64,7 @@ const AudioRecording: React.FC = () => {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       mediaRecorderRef.current = new MediaRecorder(stream);
       audioChunksRef.current = [];
+      startTimeRef.current = new Date().toISOString();
 
       mediaRecorderRef.current.ondataavailable = (e) => {
         if (e.data.size > 0) {
@@ -100,13 +102,19 @@ const AudioRecording: React.FC = () => {
         reader.readAsDataURL(audioBlob);
         reader.onloadend = async () => {
           const base64Audio = reader.result as string;
-          const metadata = location.state;
+          const metadata = {
+            ...location.state,
+            startTime: startTimeRef.current
+          };
           await enviarAudio(base64Audio.split(',')[1], metadata);
           navigate('/success');
         };
       } catch (error) {
         console.error('Erro ao enviar áudio:', error);
-        await saveAudioLocally(audioBlob, location.state);
+        await saveAudioLocally(audioBlob, {
+          ...location.state,
+          startTime: startTimeRef.current
+        });
         navigate('/error');
       } finally {
         setIsProcessing(false);

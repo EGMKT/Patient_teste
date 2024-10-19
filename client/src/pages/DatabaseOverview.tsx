@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { getDatabaseOverview } from '../api';
-import { Table, TableHead, TableBody, TableRow, TableCell, Paper, TableContainer } from '@mui/material';
+import { Table, TableHead, TableBody, TableRow, TableCell, Paper, TableContainer, Button, TextField } from '@mui/material';
 
 interface DatabaseData {
   clinicas: any[];
@@ -15,6 +15,7 @@ interface DatabaseData {
 const DatabaseOverview: React.FC = () => {
   const [data, setData] = useState<DatabaseData | null>(null);
   const [selectedTable, setSelectedTable] = useState<keyof DatabaseData | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
   const { t } = useTranslation();
 
   useEffect(() => {
@@ -37,10 +38,24 @@ const DatabaseOverview: React.FC = () => {
     const tableData = data[tableName];
     if (!tableData || tableData.length === 0) return null;
 
+    const filteredData = tableData.filter((row) =>
+      Object.values(row).some((value) =>
+        value?.toString().toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    );
+
     const headers = Object.keys(tableData[0]);
 
     return (
       <TableContainer component={Paper}>
+        <TextField
+          label={t('search')}
+          variant="outlined"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          fullWidth
+          margin="normal"
+        />
         <Table>
           <TableHead>
             <TableRow>
@@ -50,10 +65,10 @@ const DatabaseOverview: React.FC = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {tableData.map((row, index) => (
+            {filteredData.map((row, index) => (
               <TableRow key={index}>
                 {headers.map((header) => (
-                  <TableCell key={header}>{row[header]}</TableCell>
+                  <TableCell key={header}>{row[header]?.toString() || ''}</TableCell>
                 ))}
               </TableRow>
             ))}
@@ -68,13 +83,14 @@ const DatabaseOverview: React.FC = () => {
       <h1 className="text-2xl font-bold mb-4">{t('databaseOverview')}</h1>
       <div className="mb-4">
         {Object.keys(data).map((tableName) => (
-          <button
+          <Button
             key={tableName}
             onClick={() => setSelectedTable(tableName as keyof DatabaseData)}
-            className="mr-2 mb-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+            variant={selectedTable === tableName ? "contained" : "outlined"}
+            className="mr-2 mb-2"
           >
             {t(tableName)}
-          </button>
+          </Button>
         ))}
       </div>
       {selectedTable && renderTable(selectedTable)}

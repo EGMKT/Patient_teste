@@ -17,6 +17,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import SuperAdminDashboard from './pages/SuperAdminDashboard';
 import ManageUsers from './pages/ManageUsers';
 import ManageClinics from './pages/ManageClinics';
+import NotFound from './pages/NotFound';
 
 const AppRoutes: React.FC = () => {
   const { user, isAuthenticated } = useAuth();
@@ -85,7 +86,7 @@ const AppRoutes: React.FC = () => {
         <Route 
           path="/admin/dashboard" 
           element={
-            <ProtectedRoute allowedRoles={['super_admin']}>
+            <ProtectedRoute allowedRoles={['SA']}>
               <AdminDashboard />
             </ProtectedRoute>
           } 
@@ -93,7 +94,7 @@ const AppRoutes: React.FC = () => {
         <Route 
           path="/admin/audios-nao-enviados" 
           element={
-            <ProtectedRoute allowedRoles={['super_admin']}>
+            <ProtectedRoute allowedRoles={['SA']}>
               <SuperAdminAudios />
             </ProtectedRoute>
           } 
@@ -101,7 +102,7 @@ const AppRoutes: React.FC = () => {
         <Route 
           path="/admin/database-overview" 
           element={
-            <ProtectedRoute allowedRoles={['super_admin']}>
+            <ProtectedRoute allowedRoles={['SA']}>
               <DatabaseOverview />
             </ProtectedRoute>
           } 
@@ -119,7 +120,7 @@ const AppRoutes: React.FC = () => {
         <Route 
           path="/manage-users"
           element={
-            <ProtectedRoute allowedRoles={['super_admin']}>
+            <ProtectedRoute allowedRoles={['SA']}>
               <ManageUsers />
             </ProtectedRoute>
           }
@@ -128,7 +129,7 @@ const AppRoutes: React.FC = () => {
         <Route 
           path="/manage-clinics"
           element={
-            <ProtectedRoute allowedRoles={['super_admin']}>
+            <ProtectedRoute allowedRoles={['SA']}>
               <ManageClinics />
             </ProtectedRoute>
           }
@@ -138,13 +139,13 @@ const AppRoutes: React.FC = () => {
           path="/" 
           element={
             isAuthenticated ? (
-              <Navigate to={user?.role === 'super_admin' ? "/admin/dashboard" : "/doctor-selection"} replace />
+              <Navigate to={user?.role === 'SA' ? "/admin/dashboard" : "/doctor-selection"} replace />
             ) : (
               <Navigate to="/login" replace />
             )
           } 
         />
-        <Route path="*" element={<ErrorPage />} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </>
   );

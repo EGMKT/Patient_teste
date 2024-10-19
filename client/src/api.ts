@@ -130,13 +130,28 @@ export const verifyPin = async (doctorId: number, pin: string) => {
 };
 
 export const getPipedrivePatients = async () => {
-  const response = await api.get('pipedrive/patients/');
-  return response.data;
-};
-
-export const createPipedriveAppointment = async (patientId: string, doctorId: string, date: string) => {
-  const response = await api.post('pipedrive/appointments/', { patient_id: patientId, doctor_id: doctorId, date });
-  return response.data;
+  try {
+    console.log('Chamando API:', `${API_URL}pipedrive/patients/`);
+    const response = await api.get('pipedrive/patients/');
+    console.log('Resposta do Pipedrive:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Erro ao buscar pacientes do Pipedrive:', error);
+    if (axios.isAxiosError(error)) {
+      if (error.response) {
+        console.error('Dados do erro:', error.response.data);
+        console.error('Status do erro:', error.response.status);
+        console.error('Headers do erro:', error.response.headers);
+      } else if (error.request) {
+        console.error('Erro na requisição:', error.request);
+      } else {
+        console.error('Erro:', error.message);
+      }
+    } else {
+      console.error('Erro não-Axios:', error);
+    }
+    throw error;
+  }
 };
 
 export const getConsultas = async () => {
@@ -220,6 +235,31 @@ export const deleteClinic = async (clinicId: number) => {
     await axios.delete(`/api/clinics/${clinicId}/`);
   } catch (error) {
     console.error('Erro ao deletar clínica:', error);
+    throw error;
+  }
+};
+
+export const getDoctorSettings = async () => {
+  const response = await api.get('/doctor-settings/');
+  return response.data;
+};
+
+export const getReports = async () => {
+  try {
+    const response = await axios.get('/api/reports/');
+    return response.data;
+  } catch (error) {
+    console.error('Erro ao obter relatórios:', error);
+    throw error;
+  }
+};
+
+export const getNewClinicsData = async () => {
+  try {
+    const response = await axios.get('/api/new-clinics-data/');
+    return response.data;
+  } catch (error) {
+    console.error('Erro ao obter dados de novas clínicas:', error);
     throw error;
   }
 };
