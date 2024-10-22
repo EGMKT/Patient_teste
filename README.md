@@ -128,19 +128,19 @@ PatientFunnel-test/
 │ │ │ ├── NewClinicsChart.tsx
 │ │ │ ├── SuperAdminSidebar.tsx
 │ │ │ ├── ProtectedRoute.tsx
-│ │ │ ├── TwoFactorSettings.tsx
-│ │ │ ├── UserSettingsModal.tsx
+│ │ │ ├── SuperAdminHeader.tsx
+│ │ │ ├── TwoFactorSettingsModal.tsx
 │ │ │ └── Sidebar.tsx
 │ │ ├── contexts/
 │ │ │ └── AuthContext.tsx
 │ │ ├── hooks/
+│ │ │ ├── useTranslation.ts
 │ │ ├── locales/
 │ │ │ ├── en.json
 │ │ │ └── pt.json
 │ │ ├── pages/
 │ │ │ ├── Login.tsx
 │ │ │ ├── SuperAdminAudios.tsx
-│ │ │ ├── AdminDashboard.tsx
 │ │ │ ├── DoctorSelection.tsx
 │ │ │ ├── ConsultationList.tsx
 │ │ │ ├── ConsultationSetup.tsx
@@ -151,13 +151,18 @@ PatientFunnel-test/
 │ │ │ ├── ManageClinics.tsx
 │ │ │ ├── ManageUsers.tsx
 │ │ │ ├── NotFound.tsx 
+│ │ │ ├── ClinicRegistration.tsx
+│ │ │ ├── ManageClinicRegistrations.tsx
 │ │ │ ├── SuperAdminDashboard.tsx
 │ │ │ ├── DoctorSettings.tsx
 │ │ │ ├── ViewReports.tsx
+│ │ ├── types/
+│ │ │ └── wavesurfer.d.ts
 │ │ ├── api.ts
 │ │ ├── audioStorage.ts
 │ │ ├── App.tsx
 │ │ ├── i18n.ts
+│ │ ├── types.tsx
 │ │ ├── index.css
 │ │ └── index.tsx
 │ ├── .gitignore
@@ -178,12 +183,9 @@ PatientFunnel-test/
 │ │ ├── __init__.py
 │ │ └── pipedrive.py
 │ ├── migrations/
-│ │ ├── 0001_initial.py
-│ │ ├── __init__.py
-│ │ ├── __pycache__/
 │ │ │ └── (...)
 │ ├── views/
-│ │ ├── dashboards.py
+│ │ ├── dashboard_views.py
 │ │ ├── audio_views.py
 │ │ ├── auth_views.py
 │ │ ├── clinica_views.py
@@ -201,7 +203,6 @@ PatientFunnel-test/
 │ │ │ └── (...)
 │ ├── __init__.py
 │ ├── admin.py
-│ ├── pipedrive_integration.py
 │ ├── requirements.txt
 │ ├── manage.py
 │ ├── models.py
@@ -213,6 +214,89 @@ PatientFunnel-test/
 │ └── .env
 └── README.md
 
+
+## Para Entregar até o Final de Hoje
+- [x] **Interface para o Super Admin (SA)**:
+  - [ ] Criar interface administrativa para configuração do back-end.
+  - [ ] Implementar gerenciamento de acessos e aprovação de cadastros.
+  - [ ] Desenvolver visualização de relatórios e dados.
+  - [x] Ativar tradução automática e atualizar arquivos de tradução.
+
+- [x] **Interface do Doctor Selection**:
+  - [x] Melhorar a interface do PIN. Quero que seja aceitavel somente números. E que fique mais bonito.
+
+- [ ] **Implementação de Formulários de Cadastro**:
+  - [ ] Página de aprovação de cadastro para clínicas.
+  - [ ] Página de aprovação de cadastro para médicos.
+
+- [x] **Autenticação por PIN para Médicos**:
+  - [x] Implementar sistema de login por PIN para médicos e médicos admin.
+
+- [x] **Desativação da Aba de Sincronização de Áudios**:
+  - [x] Remover ou ocultar a aba até que a funcionalidade esteja operacional.
+
+- [ ] **Verificação e Ajuste da Estrutura do Back-end**:
+  - [ ] Revisar modelos e relacionamentos.
+  - [ ] Ajustar conforme necessidades atuais.
+
+- [ ] **Melhoria no JSON Enviado pelo Webhook**:
+  - [ ] Definir novo esquema de JSON.
+  - [ ] Implementar melhorias no código de geração do JSON.
+
+- [ ] **Otimização do Back-end**:
+  - [ ] Identificar e corrigir gargalos de performance.
+  - [ ] Implementar melhorias necessárias.
+  - [ ] Aceitar somente números nos PINs dos médicos
+
+## Estrutura de Dados e Usuários
+
+- **Login com email da clínica**:
+  - Acesso permitido apenas para emails cadastrados das clínicas ou SA.
+
+- **Médico com PIN**:
+  - Autenticação por PIN, sem necessidade de email no momento.
+
+- **Médico Admin com PIN**:
+  - Autenticação por PIN, com permissões adicionais.
+
+## Relatórios e Dados
+
+- [ ] Implementar geração e visualização dos seguintes relatórios:
+  - [ ] Quantidade total de pacientes atendidos.
+  - [ ] Quantidade de pacientes atendidos por profissional.
+  - [ ] Quantidade total de pacientes novos atendidos.
+  - [ ] Quantidade total de pacientes antigos atendidos.
+  - [ ] Índice de fidelização de pacientes.
+  - [ ] Tempo médio de cada atendimento.
+  - [ ] Quantidade de procedimentos realizados.
+  - [ ] Quantidade de incidentes ocorridos.
+  - [ ] Índice de satisfação geral dos pacientes (análise semântica).
+  - [ ] Índice de qualidade do atendimento de cada profissional (análise semântica).
+  - [ ] Dados gerais (Faixa de Idade, gênero, ocupação e localização dos pacientes).
+
+## Fluxo n8n
+
+O fluxo atual do n8n é:
+
+1. Recebimento do webhook do aplicativo.
+2. Conversão de base64 para arquivo binário no n8n.
+3. Envio para o AssemblyAI para transcrição.
+4. Identificação do médico.
+5. Resumo do conteúdo.
+6. Extração de oportunidades de marketing.
+
+**Problemática**:
+- Necessidade de extrair demais dados.
+- Decidir se vale a pena extrair mais informações no n8n ou transferir parte do processo para o código do app.
+- Considerar enviar os resumos e oportunidades de marketing para o banco de dados do PatientFunnel.
+- Avaliar se esses dados devem ser apresentados na interface do SA.
+
+**Ações Propostas**:
+- Analisar quais dados adicionais precisam ser extraídos.
+- Decidir a melhor plataforma para processamento (n8n vs back-end do app).
+- Planejar a integração dos resultados no banco de dados e na interface do SA.
+
+## Checklist
 ### Visual
 - [ ] Interface para Super ADM (donos do PatientFunnel)
   - [ ] Gerenciamento do app
@@ -293,7 +377,8 @@ PatientFunnel-test/
   - [ ] Implementar lazy loading para componentes e rotas.
   - [ ] Otimizar consultas ao banco de dados no backend.
 - [ ] Configurar o .env
-
+- [ ] Estruturar melhor os dados a serem enviados para o Webhook
+- [ ] Reconstruir rotas
 
 ### Infraestrutura e Segurança
 - [ ] Implementar estrutura de banco de dados que suporte todas as funcionalidades mencionadas
@@ -301,22 +386,6 @@ PatientFunnel-test/
 - [ ] Justificar escolhas de tecnologias
 - [ ] Implementar autenticação de dois fatores
 - [ ] Integrar/Documentar código API com GitBook
-
-## Próximos Passos
-1. ~~Implementar dashboard completo para Super Admin e Admin de Clínica~~
-2. ~~Finalizar integração com Pipedrive~~
-3. ~~Implementar sistema de armazenamento local de áudios e sincronização~~
-4. ~~Melhorar a interface do usuário, incluindo sidebar para áudios não enviados~~
-5. ~~Implementar funcionalidades offline~~
-6. ~~Implementar Interface para Super Admin para visualização de áudios não enviados das clínicas~~
-7. ~~Implementar Interface para Super Admin para visualização de Banco de Dados~~
-8. ~~Implementar acesso diferenciado para Super Admin~~
-9. Gerar um Relatório de Faturamento para ser preenchido pelos Administradores das Clínicas
-10. ~~Habilitar funcionalidade de Verificação de Duplo Fator para cada médico~~
-11. Verificar Estrutura do Diretório
-12. ~~Integrar com o Frontend~~
-13. Tornar dados dinâmicos
-14. Deploy do Back no DigitalOcean
 
 ## Webhook
 O Webhook está sendo recebido no n8n, que converte, trata e resume o áudio/consulta, e identifica oportunidades de marketing.

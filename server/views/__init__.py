@@ -4,7 +4,7 @@ from .paciente_views import PacienteViewSet
 from .consulta_views import ConsultaViewSet, GravarConsultaView
 from .auth_views import CustomTokenObtainPairView, LoginView
 from .pipedrive_views import PipedrivePatientView
-from .dashboard_views import AdminDashboardView, DashboardGeralView, DashboardClinicaView, DashboardView
+from .dashboard_views import DashboardGeralView, DashboardView
 from .user_views import VerifyPinView, RegistroUsuarioView
 from .audio_views import AudioUploadView
 from .two_factor_views import TwoFactorView, TrustedDeviceView
@@ -14,8 +14,7 @@ from .home_views import home
 __all__ = [
     'ClinicaViewSet', 'MedicoViewSet', 'PacienteViewSet', 'ServicoViewSet',
     'ConsultaViewSet', 'CustomTokenObtainPairView', 'PipedrivePatientView',
-    'AdminDashboardView', 'DashboardGeralView',
-    'DashboardClinicaView', 'DashboardView', 'GravarConsultaView', 'VerifyPinView',
+    'DashboardGeralView', 'DashboardView', 'GravarConsultaView', 'VerifyPinView',
     'RegistroUsuarioView', 'AudioUploadView', 'TwoFactorView', 'TrustedDeviceView',
-    'DatabaseOverviewView', 'home', 'ClinicaInfoView', 'get_medicos'
+    'DatabaseOverviewView', 'home', 'ClinicaInfoView', 'get_medicos', 'LoginView'
 ]

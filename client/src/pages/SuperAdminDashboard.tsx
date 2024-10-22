@@ -1,19 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { getAdminDashboard, getNewClinicsData } from '../api';
-import { Card, CardContent, Typography, Grid, Button, IconButton } from '@mui/material';
-import { DataUsage, People, LocalHospital, EventNote, ExitToApp, Translate, Menu as MenuIcon } from '@mui/icons-material';
-import { useAuth } from '../contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
-import { Link } from 'react-router-dom';
-import SuperAdminSidebar from '../components/SuperAdminSidebar';
+import { Card, CardContent, Typography, Grid, CircularProgress } from '@mui/material';
+import Header from '../components/Header';
 import NewClinicsChart from '../components/NewClinicsChart';
 
 interface DashboardData {
-  totalClinics: number;
-  totalDoctors: number;
-  totalPatients: number;
-  totalConsultations: number;
+  total_clinicas: number;
+  total_medicos: number;
+  total_pacientes: number;
+  total_consultas: number;
 }
 
 const SuperAdminDashboard: React.FC = () => {
@@ -21,104 +17,68 @@ const SuperAdminDashboard: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { t, i18n } = useTranslation();
-  const navigate = useNavigate();
-  const { logout } = useAuth();
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [newClinicsData, setNewClinicsData] = useState([]);
 
   useEffect(() => {
-    const fetchDashboardData = async () => {
+    const fetchData = async () => {
+      setIsLoading(true);
       try {
-        const data = await getAdminDashboard();
-        setDashboardData(data);
+        const [dashboard, clinics] = await Promise.all([
+          getAdminDashboard(),
+          getNewClinicsData()
+        ]);
+        setDashboardData(dashboard);
+        setNewClinicsData(clinics);
       } catch (err) {
-        setError(t('errorFetchingDashboardData'));
+        console.error('Erro ao buscar dados:', err);
+        setError(t('errorFetchingData'));
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchDashboardData();
+    fetchData();
   }, [t]);
 
-  useEffect(() => {
-    const fetchNewClinicsData = async () => {
-      try {
-        const data = await getNewClinicsData();
-        setNewClinicsData(data);
-      } catch (error) {
-        console.error('Erro ao buscar dados de novas clínicas:', error);
-      }
-    };
-    fetchNewClinicsData();
-  }, []);
-
-  const dashboardItems = [
-    { title: 'databaseOverview', icon: <DataUsage />, link: '/super-admin/database-overview' },
-    { title: 'manageUsers', icon: <People />, link: '/super-admin/manage-users' },
-    { title: 'manageClinics', icon: <LocalHospital />, link: '/super-admin/manage-clinics' },
-    { title: 'viewReports', icon: <EventNote />, link: '/super-admin/view-reports' },
-  ];
-
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
-  };
-
-  const toggleLanguage = () => {
-    i18n.changeLanguage(i18n.language === 'pt' ? 'en' : 'pt');
-  };
-
   if (isLoading) {
-    return <div>{t('loading')}</div>;
+    return <CircularProgress />;
   }
 
   if (error) {
-    return <div>{error}</div>;
+    return <Typography color="error">{error}</Typography>;
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-8">
-        <Typography variant="h4" component="h1">
+    <div className="flex flex-col min-h-screen">
+      <Header 
+        onLanguageChange={(lang) => i18n.changeLanguage(lang)} 
+        currentLanguage={i18n.language}
+      />
+      <div className="container mx-auto px-4 py-8 flex-grow">
+        <Typography variant="h4" component="h1" className="mb-8">
           {t('superAdminDashboard')}
         </Typography>
-        <div>
-          <IconButton onClick={() => setSidebarOpen(true)} className="mr-2">
-            <MenuIcon />
-          </IconButton>
-          <Button
-            startIcon={<Translate />}
-            onClick={toggleLanguage}
-            variant="contained"
-            color="primary"
-            className="mr-2"
-          >
-            {t('changeLanguage')}
-          </Button>
-          <Button
-            startIcon={<ExitToApp />}
-            onClick={handleLogout}
-            variant="contained"
-            color="secondary"
-          >
-            {t('logout')}
-          </Button>
-        </div>
+        {dashboardData && (
+          <Grid container spacing={3}>
+            <Grid item xs={12} sm={6} md={3}>
+              <DashboardCard title={t('totalClinics')} value={dashboardData.total_clinicas} />
+            </Grid>
+            <Grid item xs={12} sm={6} md={3}>
+              <DashboardCard title={t('totalDoctors')} value={dashboardData.total_medicos} />
+            </Grid>
+            <Grid item xs={12} sm={6} md={3}>
+              <DashboardCard title={t('totalPatients')} value={dashboardData.total_pacientes} />
+            </Grid>
+            <Grid item xs={12} sm={6} md={3}>
+              <DashboardCard title={t('totalConsultations')} value={dashboardData.total_consultas} />
+            </Grid>
+          </Grid>
+        )}
+        <Typography variant="h5" component="h2" className="mt-8 mb-4">
+          {t('newClinicsOverTime')}
+        </Typography>
+        <NewClinicsChart data={newClinicsData} />
       </div>
-      {dashboardData && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <DashboardCard title={t('totalClinics')} value={dashboardData.totalClinics} />
-          <DashboardCard title={t('totalDoctors')} value={dashboardData.totalDoctors} />
-          <DashboardCard title={t('totalPatients')} value={dashboardData.totalPatients} />
-          <DashboardCard title={t('totalConsultations')} value={dashboardData.totalConsultations} />
-        </div>
-      )}
-      <Typography variant="h5" component="h2" className="mt-8 mb-4">
-        {t('newClinicsOverTime')}
-      </Typography>
-      <NewClinicsChart data={newClinicsData} />
-      <SuperAdminSidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
     </div>
   );
 };
@@ -129,10 +89,16 @@ interface DashboardCardProps {
 }
 
 const DashboardCard: React.FC<DashboardCardProps> = ({ title, value }) => (
-  <div className="bg-white shadow-md rounded-lg p-6">
-    <h2 className="text-xl font-semibold mb-2">{title}</h2>
-    <p className="text-3xl font-bold">{value}</p>
-  </div>
+  <Card>
+    <CardContent>
+      <Typography color="textSecondary" gutterBottom>
+        {title}
+      </Typography>
+      <Typography variant="h5" component="h2">
+        {value}
+      </Typography>
+    </CardContent>
+  </Card>
 );
 
 export default SuperAdminDashboard;

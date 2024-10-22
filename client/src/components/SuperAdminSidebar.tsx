@@ -2,7 +2,7 @@ import React from 'react';
 import { Drawer, List, ListItem, ListItemIcon, ListItemText } from '@mui/material';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { DataUsage, People, LocalHospital, EventNote } from '@mui/icons-material';
+import { Dashboard, DataUsage, People, LocalHospital, Assessment } from '@mui/icons-material';
 
 interface SuperAdminSidebarProps {
   open: boolean;
@@ -13,10 +13,11 @@ const SuperAdminSidebar: React.FC<SuperAdminSidebarProps> = ({ open, onClose }) 
   const { t } = useTranslation();
 
   const menuItems = [
-    { title: 'databaseOverview', icon: <DataUsage />, link: '/super-admin/database-overview' },
-    { title: 'manageUsers', icon: <People />, link: '/super-admin/manage-users' },
-    { title: 'manageClinics', icon: <LocalHospital />, link: '/super-admin/manage-clinics' },
-    { title: 'viewReports', icon: <EventNote />, link: '/super-admin/view-reports' },
+    { title: 'dashboard', icon: <Dashboard />, link: '/SA' },
+    { title: 'databaseOverview', icon: <DataUsage />, link: '/SA/database-overview' },
+    { title: 'manageUsers', icon: <People />, link: '/SA/manage-users' },
+    { title: 'manageClinics', icon: <LocalHospital />, link: '/SA/manage-clinics' },
+    { title: 'viewReports', icon: <Assessment />, link: '/SA/view-reports' },
   ];
 
   return (

@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Clinica, Usuario, Medico, Paciente, Servico, Consulta
+from .models import Clinica, Usuario, Medico, Paciente, Servico, Consulta, ClinicRegistration
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 class ClinicaSerializer(serializers.ModelSerializer):
@@ -10,7 +10,8 @@ class ClinicaSerializer(serializers.ModelSerializer):
 class UsuarioSerializer(serializers.ModelSerializer):
     class Meta:
         model = Usuario
-        fields = ['id', 'email', 'first_name', 'last_name', 'role', 'clinica']
+        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'is_active', 'is_staff']
+        # Adicione ou remova campos conforme necessário
 
 class MedicoSerializer(serializers.ModelSerializer):
     usuario = UsuarioSerializer(read_only=True)
@@ -67,3 +68,8 @@ class ConsultaListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Consulta
         fields = ['id', 'paciente', 'medico', 'data', 'duracao', 'enviado']
+
+class ClinicRegistrationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ClinicRegistration
+        fields = '__all__'

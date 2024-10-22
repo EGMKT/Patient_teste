@@ -4,9 +4,23 @@ import WaveSurfer from 'wavesurfer.js';
 import { enviarAudio } from '../api';
 import { saveAudioLocally } from '../audioStorage';
 import useTranslation from '../hooks/useTranslation';
+import { useAuth } from '../contexts/AuthContext';
+
+// Adicione esta declaração no topo do arquivo
+declare global {
+  interface Window {
+    webkitAudioContext: typeof AudioContext;
+  }
+}
+
+// Adicionando uma declaração de tipo para o backend do WaveSurfer
+interface WaveSurferBackend {
+  setBuffer?: (buffer: Float32Array) => void;
+}
 
 const AudioRecording: React.FC = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const { user } = useAuth();
   const [translations, setTranslations] = useState({
     audioRecording: '',
     startRecording: '',
@@ -17,13 +31,19 @@ const AudioRecording: React.FC = () => {
   const [isRecording, setIsRecording] = useState(false);
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [recordingTime, setRecordingTime] = useState(0);
   const location = useLocation();
   const navigate = useNavigate();
   const waveformRef = useRef<HTMLDivElement>(null);
   const wavesurferRef = useRef<WaveSurfer | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-  const audioChunksRef = useRef<Blob[]>([]);
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const analyserRef = useRef<AnalyserNode | null>(null);
+  const dataArrayRef = useRef<Uint8Array | null>(null);
+  const sourceRef = useRef<MediaStreamAudioSourceNode | null>(null);
   const startTimeRef = useRef<string>('');
+  const timerIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const [clinicName, setClinicName] = useState('');
 
   useEffect(() => {
     const loadTranslations = async () => {
@@ -49,41 +69,76 @@ const AudioRecording: React.FC = () => {
         container: waveformRef.current,
         waveColor: 'violet',
         progressColor: 'purple',
+        cursorWidth: 1,
+        cursorColor: 'lightblue',
+        barWidth: 2,
+        barRadius: 3,
+        height: 100,
       });
     }
+
 
     return () => {
       if (wavesurferRef.current) {
         wavesurferRef.current.destroy();
       }
+      if (timerIntervalRef.current) {
+        clearInterval(timerIntervalRef.current);
+      }
+      if (audioContextRef.current) {
+        audioContextRef.current.close();
+      }
     };
-  }, [t]);
+  }, [t, user]);
 
   const startRecording = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      audioContextRef.current = new (window.AudioContext || window.webkitAudioContext)();
+      analyserRef.current = audioContextRef.current.createAnalyser();
+      sourceRef.current = audioContextRef.current.createMediaStreamSource(stream);
+      sourceRef.current.connect(analyserRef.current);
+
+      analyserRef.current.fftSize = 2048;
+      const bufferLength = analyserRef.current.frequencyBinCount;
+      dataArrayRef.current = new Uint8Array(bufferLength);
+
       mediaRecorderRef.current = new MediaRecorder(stream);
-      audioChunksRef.current = [];
       startTimeRef.current = new Date().toISOString();
 
       mediaRecorderRef.current.ondataavailable = (e) => {
         if (e.data.size > 0) {
-          audioChunksRef.current.push(e.data);
+          if (wavesurferRef.current) {
+            wavesurferRef.current.loadBlob(e.data);
+          }
         }
       };
 
-      mediaRecorderRef.current.onstop = () => {
-        const blob = new Blob(audioChunksRef.current, { type: 'audio/wav' });
-        setAudioBlob(blob);
-        if (wavesurferRef.current) {
-          wavesurferRef.current.loadBlob(blob);
-        }
-      };
-
-      mediaRecorderRef.current.start();
+      mediaRecorderRef.current.start(100);
       setIsRecording(true);
+      setRecordingTime(0);
+      timerIntervalRef.current = setInterval(() => {
+        setRecordingTime((prevTime) => prevTime + 1);
+        updateWaveform();
+      }, 100);
     } catch (error) {
       console.error('Erro ao iniciar gravação:', error);
+    }
+  };
+
+  const updateWaveform = () => {
+    if (analyserRef.current && dataArrayRef.current && wavesurferRef.current) {
+      analyserRef.current.getByteTimeDomainData(dataArrayRef.current);
+      const normalizedData = Array.from(dataArrayRef.current).map(value => (value / 128) - 1);
+      
+      // Atualizamos diretamente os dados do waveform
+      const backend = wavesurferRef.current.backend as WaveSurferBackend;
+      if (backend && typeof backend.setBuffer === 'function') {
+        backend.setBuffer(new Float32Array(normalizedData));
+        wavesurferRef.current.drawBuffer();
+      } else {
+        console.warn('setBuffer method not available on WaveSurfer backend');
+      }
     }
   };
 
@@ -91,6 +146,20 @@ const AudioRecording: React.FC = () => {
     if (mediaRecorderRef.current && isRecording) {
       mediaRecorderRef.current.stop();
       setIsRecording(false);
+      if (timerIntervalRef.current) {
+        clearInterval(timerIntervalRef.current);
+      }
+      if (sourceRef.current) {
+        sourceRef.current.disconnect();
+      }
+      mediaRecorderRef.current.ondataavailable = (e) => {
+        if (e.data.size > 0) {
+          setAudioBlob(e.data);
+          if (wavesurferRef.current) {
+            wavesurferRef.current.loadBlob(e.data);
+          }
+        }
+      };
     }
   };
 
@@ -122,10 +191,20 @@ const AudioRecording: React.FC = () => {
     }
   };
 
+  const formatTime = (seconds: number) => {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+  };
+
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-4">
+      <div className="absolute top-4 left-0 right-0 flex justify-center items-center">
+        <span className="text-xl font-semibold">{clinicName}</span>
+      </div>
       <h1 className="text-3xl font-bold mb-8">{translations.audioRecording}</h1>
       <div ref={waveformRef} className="w-full max-w-2xl mb-8"></div>
+      <div className="mb-4 text-xl font-semibold">{formatTime(recordingTime)}</div>
       {!isRecording && !audioBlob && (
         <button
           onClick={startRecording}

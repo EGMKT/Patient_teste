@@ -15,11 +15,11 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, allowedRoles 
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  if (user && !allowedRoles.includes(user.role)) {
-    return <Navigate to="/error" replace />;
+  if (user && allowedRoles.includes(user.role)) {
+    return <>{children}</>;
   }
 
-  return <>{children}</>;
+  return <Navigate to="/error" replace />;
 };
 
 export default ProtectedRoute;

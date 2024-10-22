@@ -8,11 +8,15 @@ import pyotp
 import string
 
 class Clinica(models.Model):
-    nome = models.CharField(max_length=255)
-    logo = models.ImageField(upload_to='logos/', null=True, blank=True)
-    pipedrive_api_token = models.CharField(max_length=255, blank=True)
-    data_criacao = models.DateTimeField(auto_now_add=True)
+    nome = models.CharField(max_length=100)
+    endereco = models.CharField(max_length=200)
+    created_at = models.DateTimeField(auto_now_add=True)
     ativa = models.BooleanField(default=True)
+    email = models.EmailField(unique=True)
+    password = models.CharField(max_length=255)  # Você deve usar um campo mais seguro para senhas
+    address = models.CharField(max_length=255, default='Endereço não especificado')
+    phone = models.CharField(max_length=20)
+    status = models.CharField(max_length=10, choices=[('active', 'Active'), ('inactive', 'Inactive')])
     # outros campos relevantes
 
     def __str__(self):
@@ -158,3 +162,13 @@ class Consulta(models.Model):
 
     def __str__(self):
         return f"Consulta {self.id} - {self.medico} - {self.paciente}"
+
+class ClinicRegistration(models.Model):
+    name = models.CharField(max_length=255)
+    email = models.EmailField()
+    address = models.TextField()
+    status = models.CharField(max_length=20, choices=[('pending', 'Pending'), ('approved', 'Approved'), ('rejected', 'Rejected')], default='pending')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.name

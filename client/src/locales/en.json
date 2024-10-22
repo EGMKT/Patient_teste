@@ -48,9 +48,14 @@
     "averageSatisfaction": "Average Satisfaction"
   },
   "superAdminDashboard": "Super Admin Dashboard",
+  "totalClinics": "Total Clinics",
   "totalDoctors": "Total Doctors",
+  "totalPatients": "Total Patients",
+  "totalConsultations": "Total Consultations",
   "errorFetchingDashboardData": "Error fetching dashboard data",
   "especialidadeNaoDisponivel": "Specialty not available",
+  "newClinicsOverTime": "New Clinics Over Time",
+  "errorFetchingData": "Error fetching data",
   "selectPatient": "Select Patient",
   "audiosNaoEnviados": "Unsent Audios"
 }

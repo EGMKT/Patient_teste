@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { getAudiosNaoEnviados, sincronizarAudios } from '../audioStorage';
 import { getPipedrivePatients } from '../api';
-import Sidebar from '../components/Sidebar';
 import { TextField, Button, Select, MenuItem, FormControl, InputLabel } from '@mui/material';
 import * as Yup from 'yup';
+import { useAuth } from '../contexts/AuthContext';
 
 interface Patient {
   id: string;
@@ -13,14 +12,15 @@ interface Patient {
 }
 
 const ConsultationSetup: React.FC = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const { user } = useAuth();
   const [patients, setPatients] = useState<Patient[]>([]);
   const [selectedPatient, setSelectedPatient] = useState('');
   const [service, setService] = useState('');
   const [participants, setParticipants] = useState(2);
   const navigate = useNavigate();
-  const [audiosNaoEnviados, setAudiosNaoEnviados] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [clinicName, setClinicName] = useState('');
 
   const services = [
     t('generalConsultation'),
@@ -39,12 +39,7 @@ const ConsultationSetup: React.FC = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [patientsData, audiosData] = await Promise.all([
-          getPipedrivePatients(),
-          getAudiosNaoEnviados()
-        ]);
-
-        console.log('Dados recebidos:', patientsData);
+        const patientsData = await getPipedrivePatients();
         if (patientsData && patientsData.data) {
           setPatients(patientsData.data.map((patient: any) => ({
             id: patient.id.toString(),
@@ -54,8 +49,8 @@ const ConsultationSetup: React.FC = () => {
           console.error('Formato de dados inesperado:', patientsData);
           setPatients([]);
         }
+        // Aqui você deve buscar o nome da clínica do usuário logado
 
-        setAudiosNaoEnviados(audiosData);
       } catch (error) {
         console.error('Erro ao buscar dados:', error);
         setPatients([]);
@@ -65,7 +60,7 @@ const ConsultationSetup: React.FC = () => {
     };
 
     fetchData();
-  }, []); // Dependência vazia para garantir que seja executado apenas uma vez
+  }, [user]);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -78,19 +73,26 @@ const ConsultationSetup: React.FC = () => {
     try {
       await validationSchema.validate(values);
       const currentDate = new Date().toISOString();
+      
+      // Navegar para a página de gravação de áudio com os dados da consulta
+      navigate('/audio-recording', { 
+        state: { 
+          patientId: selectedPatient,
+          service: service,
+          participants: participants,
+          startTime: currentDate
+        } 
+      });
     } catch (error) {
-      console.error('Erro na validação ou criação da consulta:', error);
+      console.error('Erro na validação:', error);
     }
-  };
-
-  const handleSincronizar = async () => {
-    await sincronizarAudios();
-    const audios = await getAudiosNaoEnviados();
-    setAudiosNaoEnviados(audios);
   };
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-4">
+      <div className="absolute top-4 left-0 right-0 flex justify-center items-center">
+        <span className="text-xl font-semibold">{clinicName}</span>
+      </div>
       <h1 className="text-3xl font-bold mb-8 text-center">{t('consultationSetup')}</h1>
       {isLoading ? (
         <div>Carregando...</div>
@@ -149,7 +151,6 @@ const ConsultationSetup: React.FC = () => {
           </Button>
         </form>
       )}
-      <Sidebar audios={audiosNaoEnviados} onSincronizar={handleSincronizar} />
     </div>
   );
 };

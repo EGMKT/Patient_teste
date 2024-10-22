@@ -5,3 +5,47 @@
 body {
   @apply bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300;
 }
+
+.pin-input-container {
+  position: relative;
+  width: 200px;
+}
+
+.pin-input {
+  width: 100%;
+  height: 50px;
+  font-size: 24px;
+  text-align: center;
+  letter-spacing: 20px;
+  background-color: transparent;
+  border: none;
+  outline: none;
+}
+
+.pin-underline {
+  display: flex;
+  justify-content: space-between;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+
+.pin-digit {
+  width: 40px;
+  height: 4px;
+  background-color: #ccc;
+  transition: background-color 0.3s;
+}
+
+.pin-digit.filled {
+  background-color: #4CAF50;
+}
+
+.login-page {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}

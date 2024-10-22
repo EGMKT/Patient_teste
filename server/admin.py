@@ -25,7 +25,7 @@ class CustomUserAdmin(UserAdmin):
 
 @admin.register(Clinica)
 class ClinicaAdmin(admin.ModelAdmin):
-    list_display = ('nome', 'data_criacao', 'ativa')
+    list_display = ('nome', 'created_at', 'ativa')
     list_filter = ('ativa',)
     search_fields = ('nome',)
 

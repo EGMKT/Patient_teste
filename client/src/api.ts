@@ -47,25 +47,6 @@ export const checkTrustedDevice = async (deviceId: string) => {
   return response.data;
 };
 
-export const verifyTwoFactor = async (token: string, deviceId: string, rememberDevice: boolean) => {
-  const response = await api.post('two-factor/', { 
-    action: 'verify', 
-    token, 
-    device_id: deviceId, 
-    remember_device: rememberDevice 
-  });
-  return response.data;
-};
-
-export const enableTwoFactor = async () => {
-  const response = await api.post('two-factor/', { action: 'enable' });
-  return response.data;
-};
-
-export const disableTwoFactor = async () => {
-  const response = await api.post('two-factor/', { action: 'disable' });
-  return response.data;
-};
 
 export const getMedicos = async () => {
   try {
@@ -104,8 +85,13 @@ export const enviarAudio = async (audioBase64: string, metadata: any) => {
 };
 
 export const getAdminDashboard = async () => {
-  const response = await api.get('admin/dashboard/');
-  return response.data;
+  try {
+    const response = await api.get('/dashboard/geral/');
+    return response.data;
+  } catch (error) {
+    console.error('Erro ao buscar dados do dashboard:', error);
+    throw error;
+  }
 };
 
 export const getDashboardGeral = async () => {
@@ -167,13 +153,8 @@ export const getAudiosNaoEnviados = async () => {
 // Adicione funções para outras chamadas de API (getClinicas, etc.)
 
 export const getDatabaseOverview = async () => {
-  try {
-    const response = await axios.get('/api/database-overview/');
-    return response.data;
-  } catch (error) {
-    console.error('Erro ao obter visão geral do banco de dados:', error);
-    throw error;
-  }
+  const response = await api.get('/api/database-overview/');
+  return response.data;
 };
 
 export const getClinicaInfo = async () => {
@@ -202,7 +183,7 @@ export const deleteUser = async (userId: number) => {
 
 export const getClinics = async () => {
   try {
-    const response = await axios.get('/api/clinics/');
+    const response = await api.get('/clinics/');
     return response.data;
   } catch (error) {
     console.error('Erro ao obter clínicas:', error);
@@ -210,9 +191,9 @@ export const getClinics = async () => {
   }
 };
 
-export const createClinic = async (clinicData: { name: string; address: string }) => {
+export const createClinic = async (clinicData: Omit<Clinic, 'id' | 'createdAt'>) => {
   try {
-    const response = await axios.post('/api/clinics/', clinicData);
+    const response = await api.post('/clinics/', clinicData);
     return response.data;
   } catch (error) {
     console.error('Erro ao criar clínica:', error);
@@ -220,9 +201,9 @@ export const createClinic = async (clinicData: { name: string; address: string }
   }
 };
 
-export const updateClinic = async (clinicId: number, clinicData: { name: string; address: string }) => {
+export const updateClinic = async (id: number, clinicData: Partial<Clinic>) => {
   try {
-    const response = await axios.put(`/api/clinics/${clinicId}/`, clinicData);
+    const response = await api.put(`/clinics/${id}/`, clinicData);
     return response.data;
   } catch (error) {
     console.error('Erro ao atualizar clínica:', error);
@@ -230,9 +211,9 @@ export const updateClinic = async (clinicId: number, clinicData: { name: string;
   }
 };
 
-export const deleteClinic = async (clinicId: number) => {
+export const deleteClinic = async (id: number) => {
   try {
-    await axios.delete(`/api/clinics/${clinicId}/`);
+    await api.delete(`/clinics/${id}/`);
   } catch (error) {
     console.error('Erro ao deletar clínica:', error);
     throw error;
@@ -256,10 +237,135 @@ export const getReports = async () => {
 
 export const getNewClinicsData = async () => {
   try {
-    const response = await axios.get('/api/new-clinics-data/');
+    const response = await api.get('dashboard/clinica/');
     return response.data;
   } catch (error) {
-    console.error('Erro ao obter dados de novas clínicas:', error);
+    console.error('Erro ao buscar dados de novas clínicas:', error);
     throw error;
   }
 };
+
+export const getTwoFactorStatus = async () => {
+  const response = await api.get('/two-factor/status');
+  return response.data;
+};
+
+export const enableTwoFactor = async () => {
+  const response = await api.post('/two-factor/enable');
+  return response.data;
+};
+
+export const disableTwoFactor = async () => {
+  const response = await api.post('/two-factor/disable');
+  return response.data;
+};
+
+export const verifyTwoFactor = async (code: string) => {
+  const response = await api.post('/two-factor/verify', { code });
+  return response.data;
+};
+
+export const getClinicRegistrations = async () => {
+  try {
+    const response = await api.get('/clinic-registrations/');
+    return response.data;
+  } catch (error) {
+    console.error('Erro ao buscar registros de clínicas:', error);
+    throw error;
+  }
+};
+
+export const updateClinicRegistrationStatus = async (id: number, status: 'approved' | 'rejected') => {
+  try {
+    const response = await api.put(`/clinic-registrations/${id}/`, { status });
+    return response.data;
+  } catch (error) {
+    console.error('Erro ao atualizar status do registro de clínica:', error);
+    throw error;
+  }
+};
+
+export const getSuperAdmins = async () => {
+  try {
+    const response = await api.get('/super-admins/');
+    return response.data;
+  } catch (error) {
+    console.error('Erro ao buscar super admins:', error);
+    throw error;
+  }
+};
+
+export const createSuperAdmin = async (superAdminData: Omit<SuperAdmin, 'id'>) => {
+  try {
+    const response = await api.post('/super-admins/', superAdminData);
+    return response.data;
+  } catch (error) {
+    console.error('Erro ao criar super admin:', error);
+    throw error;
+  }
+};
+
+export const updateSuperAdmin = async (id: number, superAdminData: Partial<SuperAdmin>) => {
+  try {
+    const response = await api.put(`/super-admins/${id}/`, superAdminData);
+    return response.data;
+  } catch (error) {
+    console.error('Erro ao atualizar super admin:', error);
+    throw error;
+  }
+};
+
+export const deleteSuperAdmin = async (id: number) => {
+  try {
+    await api.delete(`/super-admins/${id}/`);
+  } catch (error) {
+    console.error('Erro ao deletar super admin:', error);
+    throw error;
+  }
+};
+
+export interface SuperAdmin {
+  id: number;
+  username: string;
+  email: string;
+}
+
+export default api;
+
+export const createUser = async (userData: Omit<User, 'id'>) => {
+  try {
+    const response = await api.post('/users/', userData);
+    return response.data;
+  } catch (error) {
+    console.error('Erro ao criar usuário:', error);
+    throw error;
+  }
+};
+
+export const updateUser = async (id: number, userData: Partial<User>) => {
+  try {
+    const response = await api.put(`/users/${id}/`, userData);
+    return response.data;
+  } catch (error) {
+    console.error('Erro ao atualizar usuário:', error);
+    throw error;
+  }
+};
+
+export interface Clinic {
+  id: number;
+  name: string;
+  email: string;
+  password: string;
+  address: string;
+  phone: string;
+  status: 'active' | 'inactive';
+  createdAt: Date;
+}
+
+export interface User {
+  id: number;
+  username: string;
+  email: string;
+  role: string;
+}

@@ -8,7 +8,6 @@ import ConsultationSetup from './pages/ConsultationSetup';
 import AudioRecording from './pages/AudioRecording';
 import ErrorPage from './pages/ErrorPage';
 import SuccessPage from './pages/SuccessPage';
-import AdminDashboard from './pages/AdminDashboard';
 import ConsultationList from './pages/ConsultationList';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import SuperAdminAudios from './pages/SuperAdminAudios';
@@ -17,7 +16,9 @@ import ProtectedRoute from './components/ProtectedRoute';
 import SuperAdminDashboard from './pages/SuperAdminDashboard';
 import ManageUsers from './pages/ManageUsers';
 import ManageClinics from './pages/ManageClinics';
+import ViewReports from './pages/ViewReports';
 import NotFound from './pages/NotFound';
+import ManageClinicRegistrations from './pages/ManageClinicRegistrations';
 
 const AppRoutes: React.FC = () => {
   const { user, isAuthenticated } = useAuth();
@@ -27,8 +28,6 @@ const AppRoutes: React.FC = () => {
     i18n.changeLanguage(lang);
   };
 
-  console.log('AppRoutes: isAuthenticated =', isAuthenticated, 'user =', user);
-
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
@@ -36,8 +35,13 @@ const AppRoutes: React.FC = () => {
   if (user?.role === 'SA') {
     return (
       <Routes>
-        <Route path="/super-admin/*" element={<SuperAdminDashboard />} />
-        <Route path="*" element={<Navigate to="/super-admin" replace />} />
+        <Route path="/SA" element={<SuperAdminDashboard />} />
+        <Route path="/SA/database-overview" element={<DatabaseOverview />} />
+        <Route path="/SA/manage-users" element={<ManageUsers />} />
+        <Route path="/SA/manage-clinics" element={<ManageClinics />} />
+        <Route path="/SA/manage-registrations" element={<ManageClinicRegistrations />} />
+        <Route path="/SA/view-reports" element={<ViewReports />} />
+        <Route path="*" element={<Navigate to="/SA" replace />} />
       </Routes>
     );
   }
@@ -84,14 +88,6 @@ const AppRoutes: React.FC = () => {
         />
 
         <Route 
-          path="/admin/dashboard" 
-          element={
-            <ProtectedRoute allowedRoles={['SA']}>
-              <AdminDashboard />
-            </ProtectedRoute>
-          } 
-        />
-        <Route 
           path="/admin/audios-nao-enviados" 
           element={
             <ProtectedRoute allowedRoles={['SA']}>
@@ -109,7 +105,7 @@ const AppRoutes: React.FC = () => {
         />
 
         <Route 
-          path="/super-admin/dashboard" 
+          path="/SA/dashboard" 
           element={
             <ProtectedRoute allowedRoles={['SA']}>
               <SuperAdminDashboard />

@@ -64,5 +64,7 @@
   "edit": "Editar",
   "delete": "Excluir",
   "selectPatient": "Selecionar Paciente",
-  "audiosNaoEnviados": "Áudios Não Enviados"
+  "audiosNaoEnviados": "Áudios Não Enviados",
+  "newClinicsOverTime": "Novas Clínicas ao Longo do Tempo",
+  "errorFetchingData": "Erro ao buscar dados"
 }
