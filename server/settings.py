@@ -53,6 +53,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django.middleware.gzip.GZipMiddleware',
 ]
 
 CORS_ALLOWED_ORIGINS = [
@@ -132,10 +133,19 @@ LOGGING = {
             'class': 'logging.StreamHandler',
         },
     },
+    'root': {
+        'handlers': ['console'],
+        'level': 'WARNING',
+    },
     'loggers': {
         'django': {
             'handlers': ['console'],
             'level': 'INFO',
+            'propagate': False,
+        },
+        'django.db.backends': {
+            'level': 'DEBUG',
+            'handlers': ['console'],
         },
     },
 }
@@ -167,7 +177,23 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 X_FRAME_OPTIONS = 'SAMEORIGIN'
 SILENCED_SYSTEM_CHECKS = ['security.W019']
 
-PIPEDRIVE_API_TOKEN = '07c71fdd046e9a98c6d61601fe0dc77102ad887a'
+# PIPEDRIVE_API_TOKEN = '07c71fdd046e9a98c6d61601fe0dc77102ad887a'
 PIPEDRIVE_API_URL = "https://api.pipedrive.com/v1/"
 
 CORS_ALLOW_ALL_ORIGINS = True  # Para desenvolvimento. Em produção, especifique os domínios permitidos.
+
+# Configurações de cache
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'unique-snowflake',
+    }
+}
+
+# Configuração de arquivos estáticos
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
+
+# Otimização de consultas ao banco de dados
+CONN_MAX_AGE = 60  # Mantém conexões de banco de dados abertas por 60 segundos

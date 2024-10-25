@@ -1,7 +1,15 @@
 {
-  "changeLanguage": "Mudar Idioma",
+  "changeLanguage": "Mudar idioma",
   "logout": "Sair",
-  "login": "Entrar",
+  "login": {
+    "title": "Entre na sua conta",
+    "email": "Endereço de e-mail",
+    "password": "Senha",
+    "signIn": "Entrar",
+    "unknownUserType": "Tipo de usuário desconhecido",
+    "incompleteUserInfo": "Informações do usuário incompletas",
+    "genericError": "Falha no login. Por favor, tente novamente."
+  },
   "username": "Nome de usuário",
   "password": "Senha",
   "loginButton": "Entrar",

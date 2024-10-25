@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { getAdminDashboard, getNewClinicsData } from '../api';
 import { Card, CardContent, Typography, Grid, CircularProgress } from '@mui/material';
-import Header from '../components/Header';
+import SuperAdminHeader from '../components/SuperAdminHeader';
 import NewClinicsChart from '../components/NewClinicsChart';
 
 interface DashboardData {
@@ -50,7 +50,7 @@ const SuperAdminDashboard: React.FC = () => {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <Header 
+      <SuperAdminHeader 
         onLanguageChange={(lang) => i18n.changeLanguage(lang)} 
         currentLanguage={i18n.language}
       />

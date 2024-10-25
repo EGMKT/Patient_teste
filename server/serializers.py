@@ -5,26 +5,32 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 class ClinicaSerializer(serializers.ModelSerializer):
     class Meta:
         model = Clinica
-        fields = '__all__'
+        fields = ['id', 'nome', 'created_at', 'ativa', 'pipedrive_api_token']
 
 class UsuarioSerializer(serializers.ModelSerializer):
     class Meta:
         model = Usuario
-        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'is_active', 'is_staff']
-        # Adicione ou remova campos conforme necessário
+        fields = ['id', 'email', 'first_name', 'last_name', 'role']
 
 class MedicoSerializer(serializers.ModelSerializer):
-    usuario = UsuarioSerializer(read_only=True)
+    usuario_email = serializers.EmailField(source='usuario.email', read_only=True)
     
     class Meta:
         model = Medico
-        fields = ['id', 'nome', 'especialidade', 'pin', 'usuario']
+        fields = ['usuario', 'usuario_email', 'especialidade', 'clinica']
 
-    def to_representation(self, instance):
-        representation = super().to_representation(instance)
-        representation['nome'] = instance.nome or 'Nome não disponível'
-        representation['especialidade'] = instance.especialidade or 'Especialidade não disponível'
-        return representation
+    def create(self, validated_data):
+        usuario_email = self.context['request'].data.get('usuario_email')
+        if not usuario_email:
+            raise serializers.ValidationError("O email do usuário é obrigatório.")
+        
+        try:
+            usuario = Usuario.objects.get(email=usuario_email, role__in=['ME', 'AC'])
+        except Usuario.DoesNotExist:
+            raise serializers.ValidationError("Usuário não encontrado ou não é um médico/admin clínica.")
+        
+        validated_data['usuario'] = usuario
+        return Medico.objects.create(**validated_data)
 
 class PacienteSerializer(serializers.ModelSerializer):
     class Meta:

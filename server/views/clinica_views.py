@@ -10,12 +10,17 @@ from ..models import Clinica, Servico, ClinicRegistration
 from ..serializers import ClinicaSerializer, ServicoSerializer, ClinicRegistrationSerializer
 import logging
 import traceback
+from django.core.paginator import Paginator
 
 logger = logging.getLogger(__name__)
 
 class ClinicaViewSet(viewsets.ModelViewSet):
     queryset = Clinica.objects.all()
     serializer_class = ClinicaSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return Clinica.objects.filter(ativa=True)  # Filtra apenas clínicas ativas
 
 class ServicoViewSet(viewsets.ModelViewSet):
     queryset = Servico.objects.all()
@@ -73,3 +78,18 @@ class DashboardClinicaView(APIView):
             logger.error(f"Erro ao gerar dados do dashboard da clínica: {str(e)}")
             logger.error(traceback.format_exc())
             return Response({'error': 'Erro interno do servidor'}, status=500)
+
+class ClinicaListView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        clinicas = Clinica.objects.all().order_by('nome')
+        paginator = Paginator(clinicas, 20)
+        page_number = request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
+        serializer = ClinicaSerializer(page_obj, many=True)
+        return Response({
+            'clinicas': serializer.data,
+            'total_pages': paginator.num_pages,
+            'current_page': page_obj.number
+        })

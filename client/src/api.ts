@@ -19,10 +19,8 @@ api.interceptors.request.use((config) => {
 export const login = async (email: string, password: string) => {
   try {
     const response = await api.post('token/', { email, password });
-    console.log('API login response:', response.data);
     localStorage.setItem('token', response.data.access);
     
-    // Decodificar o token JWT para obter as informações do usuário
     const decodedToken = JSON.parse(atob(response.data.access.split('.')[1]));
     const user = {
       id: decodedToken.user_id,
@@ -104,38 +102,22 @@ export const getDashboardClinica = async () => {
   return response.data;
 };
 
-export const verifyPin = async (doctorId: number, pin: string) => {
+export const verifyPin = async (email: string, pin: string) => {
   try {
-    const response = await api.post('/verify-pin/', { medico_id: doctorId, pin });
-    console.log('Resposta da verificação do PIN:', response.data);
+    const response = await api.post('/users/verify_pin/', { email, pin });
     return response.data.valid;
   } catch (error) {
     console.error('Erro ao verificar PIN:', error);
-    throw error;
+    return false;
   }
 };
 
 export const getPipedrivePatients = async () => {
   try {
-    console.log('Chamando API:', `${API_URL}pipedrive/patients/`);
     const response = await api.get('pipedrive/patients/');
-    console.log('Resposta do Pipedrive:', response.data);
     return response.data;
   } catch (error) {
     console.error('Erro ao buscar pacientes do Pipedrive:', error);
-    if (axios.isAxiosError(error)) {
-      if (error.response) {
-        console.error('Dados do erro:', error.response.data);
-        console.error('Status do erro:', error.response.status);
-        console.error('Headers do erro:', error.response.headers);
-      } else if (error.request) {
-        console.error('Erro na requisição:', error.request);
-      } else {
-        console.error('Erro:', error.message);
-      }
-    } else {
-      console.error('Erro não-Axios:', error);
-    }
     throw error;
   }
 };
@@ -369,3 +351,4 @@ export interface User {
   email: string;
   role: string;
 }
+

@@ -9,14 +9,22 @@ interface HeaderProps {
   onLanguageChange: (lang: string) => void;
   currentLanguage: string;
   clinicName?: string;
+  showMenu?: boolean;
+  menuItems?: Array<{ title: string; link: string }>;
 }
 
-const Header: React.FC<HeaderProps> = ({ onLanguageChange, currentLanguage, clinicName }) => {
+const Header: React.FC<HeaderProps> = ({ 
+  onLanguageChange, 
+  currentLanguage, 
+  clinicName,
+  showMenu = false,
+  menuItems = []
+}) => {
   const { t } = useTranslation();
   const { logout, user } = useAuth();
   const navigate = useNavigate();
   const [showLanguageMenu, setShowLanguageMenu] = useState(false);
-  const [showMenu, setShowMenu] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showTwoFactorSettings, setShowTwoFactorSettings] = useState(false);
 
   const handleLogout = () => {
@@ -29,62 +37,45 @@ const Header: React.FC<HeaderProps> = ({ onLanguageChange, currentLanguage, clin
     { code: 'pt', name: 'Português' },
   ];
 
-  const superAdminMenuItems = [
-    { title: 'Dashboard', link: '/SA' },
-    { title: 'Database Overview', link: '/SA/database-overview' },
-    { title: 'Manage Users', link: '/SA/manage-users' },
-    { title: 'Manage Clinics', link: '/SA/manage-clinics' },
-    { title: 'View Reports', link: '/SA/view-reports' },
-  ];
-
   return (
     <header className="bg-white shadow-md">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-        {user?.role === 'SA' ? (
-          // Layout para SuperAdmin
-          <>
-            <div className="flex items-center">
-              <button
-                onClick={() => setShowMenu(!showMenu)}
-                className="p-2 rounded-full bg-gray-200 hover:bg-gray-300 transition-colors mr-4"
-                aria-label={t('menu')}
-              >
-                <FiMenu className="text-gray-600" />
-              </button>
-              <h1 className="text-xl font-bold">PatientFunnel</h1>
-            </div>
-            <div className="flex items-center space-x-2">
-              <LanguageMenu />
-              <button
-                onClick={() => setShowTwoFactorSettings(true)}
-                className="p-2 rounded-full bg-gray-200 hover:bg-gray-300 transition-colors"
-                aria-label={t('settings')}
-              >
-                <FiSettings className="text-gray-600" />
-              </button>
-              <LogoutButton />
-            </div>
-          </>
-        ) : (
-          <>
-            <h1 className="text-xl font-bold">{clinicName}</h1>
-            <div className="flex items-center space-x-2">
-              <LanguageMenu />
-              <LogoutButton />
-            </div>
-          </>
-        )}
+        <div className="flex items-center">
+          {showMenu && (
+            <button
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              className="p-2 rounded-full bg-gray-200 hover:bg-gray-300 transition-colors mr-4"
+              aria-label={t('menu')}
+            >
+              <FiMenu className="text-gray-600" />
+            </button>
+          )}
+          <h1 className="text-xl font-bold">{clinicName || 'PatientFunnel'}</h1>
+        </div>
+        <div className="flex items-center space-x-2">
+          <LanguageMenu />
+          {user?.role === 'SA' && (
+            <button
+              onClick={() => setShowTwoFactorSettings(true)}
+              className="p-2 rounded-full bg-gray-200 hover:bg-gray-300 transition-colors"
+              aria-label={t('settings')}
+            >
+              <FiSettings className="text-gray-600" />
+            </button>
+          )}
+          <LogoutButton />
+        </div>
       </div>
-      {showMenu && user?.role === 'SA' && (
+      {isMenuOpen && showMenu && (
         <nav className="bg-gray-100 py-2">
           <div className="container mx-auto px-4">
             <ul className="flex space-x-4">
-              {superAdminMenuItems.map((item, index) => (
+              {menuItems.map((item, index) => (
                 <li key={index}>
                   <Link
                     to={item.link}
                     className="text-gray-600 hover:text-gray-900 transition-colors"
-                    onClick={() => setShowMenu(false)}
+                    onClick={() => setIsMenuOpen(false)}
                   >
                     {t(item.title)}
                   </Link>

@@ -1,7 +1,15 @@
 {
   "changeLanguage": "Change Language",
   "logout": "Logout",
-  "login": "Login",
+  "login": {
+    "title": "Sign in to your account",
+    "email": "Email address",
+    "password": "Password",
+    "signIn": "Sign in",
+    "unknownUserType": "Unknown user type",
+    "incompleteUserInfo": "Incomplete user information",
+    "genericError": "Login failed. Please try again."
+  },
   "username": "Username",
   "password": "Password",
   "loginButton": "Login",

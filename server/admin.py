@@ -1,47 +1,84 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from .models import Clinica, Usuario, Medico, Paciente, Servico, Consulta
-from admin_interface.models import Theme
+from django import forms
 
 @admin.register(Usuario)
 class CustomUserAdmin(UserAdmin):
-    list_display = ('email', 'first_name', 'last_name', 'role', 'clinica', 'is_staff')
-    list_filter = ('role', 'clinica', 'is_staff')
+    list_display = ('email', 'first_name', 'last_name', 'role', 'is_active', 'is_staff', 'is_superuser')
+    list_filter = ('role', 'is_active', 'is_staff', 'is_superuser')
     fieldsets = (
         (None, {'fields': ('email', 'password')}),
         ('Informações Pessoais', {'fields': ('first_name', 'last_name')}),
         ('Permissões', {'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')}),
         ('Datas Importantes', {'fields': ('last_login', 'date_joined')}),
-        ('Informações adicionais', {'fields': ('role', 'clinica')}),
+        ('Informações adicionais', {'fields': ('role',)}),
     )
     add_fieldsets = (
         (None, {
             'classes': ('wide',),
-            'fields': ('email', 'password1', 'password2', 'role', 'clinica'),
+            'fields': ('email', 'password1', 'password2', 'role', 'is_active', 'is_staff', 'is_superuser'),
         }),
     )
     search_fields = ('email', 'first_name', 'last_name')
     ordering = ('email',)
+
+    def get_clinica(self, obj):
+        try:
+            return obj.medico.clinica if hasattr(obj, 'medico') else None
+        except Medico.DoesNotExist:
+            return None
+    get_clinica.short_description = 'Clínica'
 
 @admin.register(Clinica)
 class ClinicaAdmin(admin.ModelAdmin):
     list_display = ('nome', 'created_at', 'ativa')
     list_filter = ('ativa',)
     search_fields = ('nome',)
+    fields = ('nome', 'ativa', 'logo', 'pipedrive_api_token')
+
+class MedicoAdminForm(forms.ModelForm):
+    class Meta:
+        model = Medico
+        fields = ['usuario', 'especialidade', 'clinica']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if 'usuario' in self.fields:
+            self.fields['usuario'].queryset = Usuario.objects.filter(role__in=['ME', 'AC'])
+            self.fields['usuario'].label_from_instance = lambda obj: f"{obj.email} - {obj.get_full_name()}"
 
 @admin.register(Medico)
 class MedicoAdmin(admin.ModelAdmin):
-    list_display = ('get_nome', 'especialidade', 'get_clinica', 'pin')
-    list_filter = ('especialidade', 'usuario__clinica')
+    form = MedicoAdminForm
+    list_display = ('get_usuario_email', 'get_usuario_nome', 'especialidade', 'clinica')
+    list_filter = ('especialidade', 'clinica')
     search_fields = ('usuario__email', 'usuario__first_name', 'usuario__last_name', 'especialidade')
 
-    def get_nome(self, obj):
+    def get_usuario_nome(self, obj):
         return obj.usuario.get_full_name()
-    get_nome.short_description = 'Nome'
+    get_usuario_nome.short_description = 'Nome do Usuário'
 
-    def get_clinica(self, obj):
-        return obj.usuario.clinica
-    get_clinica.short_description = 'Clínica'
+    def get_usuario_email(self, obj):
+        return obj.usuario.email
+    get_usuario_email.short_description = 'Email do Usuário'
+
+    def get_readonly_fields(self, request, obj=None):
+        if obj:  # Editing an existing object
+            return ('usuario',)
+        return ()
+
+    def has_change_permission(self, request, obj=None):
+        return True
+
+    def has_delete_permission(self, request, obj=None):
+        return True
+
+    def save_model(self, request, obj, form, change):
+        if not change:  # Only when creating a new object
+            usuario = form.cleaned_data['usuario']
+            obj.usuario = usuario
+        super().save_model(request, obj, form, change)
 
 @admin.register(Paciente)
 class PacienteAdmin(admin.ModelAdmin):
@@ -59,24 +96,24 @@ class ServicoAdmin(admin.ModelAdmin):
 class ConsultaAdmin(admin.ModelAdmin):
     list_display = ('id', 'medico', 'paciente', 'servico', 'data', 'duracao', 'enviado')
     list_filter = ('enviado', 'data', 'medico__especialidade')
-    search_fields = ('medico__user__email', 'paciente__nome', 'servico__nome')
+    search_fields = ('medico__usuario__email', 'paciente__nome', 'servico__nome')
     date_hierarchy = 'data'
+# Comente ou remova esta função se não estiver mais usando
+# def create_custom_theme():
+#     theme = Theme.objects.get_or_create(name='PatientFunnel Theme')[0]
+#     theme.title = 'PatientFunnel Admin'
+#     theme.logo = 'path/to/your/logo.png'  # Adicione seu logo
+#     theme.css_header_background_color = '#4a4a4a'
+#     theme.css_header_text_color = '#ffffff'
+#     theme.css_header_link_color = '#ffffff'
+#     theme.css_module_background_color = '#efefef'
+#     theme.css_module_text_color = '#000000'
+#     theme.css_module_link_color = '#4a4a4a'
+#     theme.css_generic_link_color = '#4a4a4a'
+#     theme.save()
 
-def create_custom_theme():
-    theme = Theme.objects.get_or_create(name='PatientFunnel Theme')[0]
-    theme.title = 'PatientFunnel Admin'
-    theme.logo = 'path/to/your/logo.png'  # Adicione seu logo
-    theme.css_header_background_color = '#4a4a4a'
-    theme.css_header_text_color = '#ffffff'
-    theme.css_header_link_color = '#ffffff'
-    theme.css_module_background_color = '#efefef'
-    theme.css_module_text_color = '#000000'
-    theme.css_module_link_color = '#4a4a4a'
-    theme.css_generic_link_color = '#4a4a4a'
-    theme.save()
-
-# Chame esta função quando o servidor iniciar
-create_custom_theme()
+# Comente ou remova esta linha
+# create_custom_theme()
 
 # Remova ou comente esta parte
 # class MyAdminSite(admin.AdminSite):

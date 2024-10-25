@@ -5,8 +5,8 @@ import logging
 logger = logging.getLogger(__name__)
 
 class PipedriveConnector:
-    def __init__(self):
-        self.api_token = settings.PIPEDRIVE_API_TOKEN
+    def __init__(self, api_key):
+        self.api_token = api_key
         self.base_url = "https://api.pipedrive.com/v1/"
         logger.info(f"PipedriveConnector inicializado com token: {self.api_token[:5]}...")
 

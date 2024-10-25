@@ -1,23 +1,19 @@
 from django.db import models
-from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin, AbstractUser
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.core.validators import MinLengthValidator, MaxLengthValidator
-import random
 from django.db.models.signals import post_migrate
 from django.dispatch import receiver
 import pyotp
-import string
+from django.utils import timezone
+from django.core.exceptions import ValidationError
 
 class Clinica(models.Model):
+    id = models.BigAutoField(primary_key=True)
     nome = models.CharField(max_length=100)
-    endereco = models.CharField(max_length=200)
     created_at = models.DateTimeField(auto_now_add=True)
     ativa = models.BooleanField(default=True)
-    email = models.EmailField(unique=True)
-    password = models.CharField(max_length=255)  # Você deve usar um campo mais seguro para senhas
-    address = models.CharField(max_length=255, default='Endereço não especificado')
-    phone = models.CharField(max_length=20)
-    status = models.CharField(max_length=10, choices=[('active', 'Active'), ('inactive', 'Inactive')])
-    # outros campos relevantes
+    logo = models.ImageField(upload_to='clinica_logos/', null=True, blank=True)
+    pipedrive_api_token = models.CharField(max_length=255, blank=True, null=True)
 
     def __str__(self):
         return self.nome
@@ -27,18 +23,20 @@ class CustomUserManager(BaseUserManager):
         if not email:
             raise ValueError('O e-mail é obrigatório')
         email = self.normalize_email(email)
+        extra_fields.setdefault('date_joined', timezone.now())
         user = self.model(email=email, **extra_fields)
         user.set_password(password)
         user.save(using=self._db)
         return user
 
     def create_superuser(self, email, password=None, **extra_fields):
-        extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
-        extra_fields.setdefault('role', Usuario.SUPERADMIN)
+        extra_fields.setdefault('is_staff', True)  # Adicionado
+        extra_fields.setdefault('role', 'SA')
         return self.create_user(email, password, **extra_fields)
 
 class Usuario(AbstractBaseUser, PermissionsMixin):
+    id = models.BigAutoField(primary_key=True)
     SUPERADMIN = 'SA'
     ADMIN_CLINICA = 'AC'
     MEDICO = 'ME'
@@ -51,9 +49,9 @@ class Usuario(AbstractBaseUser, PermissionsMixin):
     first_name = models.CharField(max_length=30, blank=True)
     last_name = models.CharField(max_length=30, blank=True)
     is_active = models.BooleanField(default=True)
-    is_staff = models.BooleanField(default=False)
+    is_staff = models.BooleanField(default=False)  # Campo adicionado
     role = models.CharField(max_length=2, choices=ROLE_CHOICES, default=MEDICO)
-    clinica = models.ForeignKey('Clinica', on_delete=models.SET_NULL, null=True, blank=True)
+    date_joined = models.DateTimeField(default=timezone.now)
 
     objects = CustomUserManager()
 
@@ -68,6 +66,11 @@ class Usuario(AbstractBaseUser, PermissionsMixin):
 
     def get_short_name(self):
         return self.first_name
+
+    def save(self, *args, **kwargs):
+        if self.role == self.SUPERADMIN:
+            self.is_staff = True
+        super().save(*args, **kwargs)
 
 @receiver(post_migrate)
 def create_custom_permissions(sender, **kwargs):
@@ -92,38 +95,20 @@ def create_custom_permissions(sender, **kwargs):
     )
 
 class Medico(models.Model):
-    usuario = models.OneToOneField(Usuario, on_delete=models.CASCADE, related_name='medico')
-    nome = models.CharField(max_length=100)
+    usuario = models.OneToOneField(Usuario, on_delete=models.CASCADE, primary_key=True, related_name='medico')
     especialidade = models.CharField(max_length=100)
-    pin = models.CharField(max_length=6, blank=True)
+    clinica = models.ForeignKey(Clinica, on_delete=models.SET_NULL, null=True, blank=True, related_name='medicos')
 
     def __str__(self):
-        return self.nome
+        return f"{self.usuario.get_full_name()} - {self.especialidade}"
 
-    def enable_two_factor(self):
-        if not self.two_factor_enabled:
-            self.two_factor_secret = pyotp.random_base32()
-            self.two_factor_enabled = True
-            self.save()
+    def clean(self):
+        if self.usuario.role not in ['ME', 'AC']:
+            raise ValidationError("O usuário associado deve ter o papel de Médico ou Admin Clínica.")
 
-    def disable_two_factor(self):
-        self.two_factor_enabled = False
-        self.two_factor_secret = None
-        self.save()
-
-    def verify_two_factor(self, token):
-        if self.two_factor_enabled:
-            totp = pyotp.TOTP(self.two_factor_secret)
-            return totp.verify(token)
-        return False
-
-    def add_trusted_device(self, device_id):
-        if device_id not in self.trusted_devices:
-            self.trusted_devices.append(device_id)
-            self.save()
-
-    def is_trusted_device(self, device_id):
-        return device_id in self.trusted_devices
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)
 
 class Paciente(models.Model):
     nome = models.CharField(max_length=255)
@@ -166,9 +151,10 @@ class Consulta(models.Model):
 class ClinicRegistration(models.Model):
     name = models.CharField(max_length=255)
     email = models.EmailField()
-    address = models.TextField()
     status = models.CharField(max_length=20, choices=[('pending', 'Pending'), ('approved', 'Approved'), ('rejected', 'Rejected')], default='pending')
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
+        return self.name
+
         return self.name

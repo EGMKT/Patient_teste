@@ -6,6 +6,8 @@ from ..models import Clinica, Usuario, Paciente, Consulta, Medico
 from django.db.models import Count, Avg, F, ExpressionWrapper, fields
 from django.utils import timezone
 from django.db.models.functions import Now, TruncDay
+from django.http import JsonResponse
+from django.views.decorators.http import require_GET
 import logging
 
 logger = logging.getLogger(__name__)
@@ -146,3 +148,11 @@ class NewClinicsDataView(APIView):
         except Exception as e:
             logger.error(f"Erro ao obter dados de novas clínicas: {str(e)}")
             return Response({"error": "Erro interno do servidor"}, status=500)
+
+@require_GET
+def dashboard_clinica(request):
+    # Lógica para obter dados do dashboard da clínica
+    data = {
+        # Preencha com os dados necessários
+    }
+    return JsonResponse(data)

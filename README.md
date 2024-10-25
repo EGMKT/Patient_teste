@@ -141,7 +141,6 @@ PatientFunnel-test/
 │ │ ├── pages/
 │ │ │ ├── Login.tsx
 │ │ │ ├── SuperAdminAudios.tsx
-│ │ │ ├── DoctorSelection.tsx
 │ │ │ ├── ConsultationList.tsx
 │ │ │ ├── ConsultationSetup.tsx
 │ │ │ ├── AudioRecording.tsx
@@ -395,3 +394,31 @@ Instruções para contribuir com o projeto...
 
 ## Licença
 Especifique a licença do projeto aqui.
+
+## Correções Recentes e Próximos Passos
+
+### Correções
+- Adicionado campo `id` explicitamente ao modelo `Usuario` para maior clareza.
+- Verificado e confirmado que todos os modelos têm um campo `id` como chave primária.
+
+### Próximos Passos
+1. Após fazer essas alterações no `models.py`, crie uma nova migração:
+   ```
+   python manage.py makemigrations
+   ```
+
+2. Aplique a nova migração:
+   ```
+   python manage.py migrate
+   ```
+
+3. Se ainda houver problemas, pode ser necessário resetar as migrações:
+   - Faça backup do seu banco de dados.
+   - Remova todos os arquivos de migração (exceto `__init__.py`) da pasta `migrations/`.
+   - Execute:
+     ```
+     python manage.py makemigrations
+     python manage.py migrate --fake-initial
+     ```
+
+4. Verifique se o problema com a coluna `usuario_id` na tabela `server_medico` foi resolvido.
