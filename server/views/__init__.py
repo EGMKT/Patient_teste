@@ -1,10 +1,10 @@
 from .clinica_views import ClinicaViewSet, ServicoViewSet, ClinicaInfoView, ClinicaListView
-from .medico_views import MedicoViewSet, get_medicos, MedicoListView
+from .medico_views import MedicoViewSet, MedicoListView
 from .paciente_views import PacienteViewSet
 from .consulta_views import ConsultaViewSet, GravarConsultaView
 from .auth_views import CustomTokenObtainPairView, LoginView
 from .pipedrive_views import PipedrivePatientView
-from .dashboard_views import DashboardGeralView, DashboardView
+from .dashboard_views import DashboardView, DashboardGeralView, NewClinicsDataView, DashboardDataView
 from .user_views import RegistroUsuarioView, UserListView, UserViewSet
 from .audio_views import AudioUploadView
 from .two_factor_views import TrustedDeviceView
@@ -16,8 +16,8 @@ from django.views.decorators.cache import cache_page
 __all__ = [
     'ClinicaViewSet', 'MedicoViewSet', 'PacienteViewSet', 'ServicoViewSet',
     'ConsultaViewSet', 'CustomTokenObtainPairView', 'PipedrivePatientView',
-    'DashboardGeralView', 'DashboardView', 'GravarConsultaView', 
-    'RegistroUsuarioView', 'AudioUploadView', 'TrustedDeviceView',
+    'DashboardView', 'DashboardGeralView', 'NewClinicsDataView', 'DashboardDataView',
+    'GravarConsultaView', 'RegistroUsuarioView', 'AudioUploadView', 'TrustedDeviceView',
     'DatabaseOverviewView', 'home', 'ClinicaInfoView', 'LoginView',
     'ClinicaListView', 'MedicoListView', 'UserListView', 'UserViewSet'
 ]

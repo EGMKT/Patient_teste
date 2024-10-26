@@ -4,6 +4,8 @@ import { useTranslation } from 'react-i18next';
 import { login } from '../api';
 import { useAuth } from '../contexts/AuthContext';
 import { FiGlobe } from 'react-icons/fi';
+import { Menu, Transition } from '@headlessui/react';
+import { Fragment } from 'react';
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -44,16 +46,51 @@ const Login: React.FC = () => {
     i18n.changeLanguage(lang);
   };
 
+  const languages = [
+    { code: 'en', name: 'English' },
+    { code: 'pt', name: 'Português' },
+    { code: 'es', name: 'Español' },
+  ];
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="absolute top-0 right-0 mt-4 mr-4">
-        <button
-          onClick={() => changeLanguage(i18n.language === 'en' ? 'pt' : 'en')}
-          className="p-2 rounded-full bg-gray-200 hover:bg-gray-300 transition-colors"
-          aria-label={t('changeLanguage')}
-        >
-          <FiGlobe className="text-blue-500" />
-        </button>
+      <div className="absolute top-4 right-4">
+        <Menu as="div" className="relative inline-block text-left">
+          <div>
+            <Menu.Button className="inline-flex justify-center w-full rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-100 focus:ring-indigo-500">
+              <FiGlobe className="mr-2 h-5 w-5" aria-hidden="true" />
+              {t('changeLanguage')}
+            </Menu.Button>
+          </div>
+          <Transition
+            as={Fragment}
+            enter="transition ease-out duration-100"
+            enterFrom="transform opacity-0 scale-95"
+            enterTo="transform opacity-100 scale-100"
+            leave="transition ease-in duration-75"
+            leaveFrom="transform opacity-100 scale-100"
+            leaveTo="transform opacity-0 scale-95"
+          >
+            <Menu.Items className="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none">
+              <div className="py-1">
+                {languages.map((lang) => (
+                  <Menu.Item key={lang.code}>
+                    {({ active }) => (
+                      <button
+                        onClick={() => changeLanguage(lang.code)}
+                        className={`${
+                          active ? 'bg-gray-100 text-gray-900' : 'text-gray-700'
+                        } block px-4 py-2 text-sm w-full text-left`}
+                      >
+                        {lang.name}
+                      </button>
+                    )}
+                  </Menu.Item>
+                ))}
+              </div>
+            </Menu.Items>
+          </Transition>
+        </Menu>
       </div>
       <div className="max-w-md w-full space-y-8">
         <div>

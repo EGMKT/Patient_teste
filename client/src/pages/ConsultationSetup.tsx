@@ -5,7 +5,6 @@ import { getPipedrivePatients } from '../api';
 import { TextField, Button, Select, MenuItem, FormControl, InputLabel } from '@mui/material';
 import * as Yup from 'yup';
 import { useAuth } from '../contexts/AuthContext';
-import Header from '../components/Header';
 
 interface Patient {
   id: string;
@@ -96,11 +95,6 @@ const ConsultationSetup: React.FC = () => {
 
   return (
     <div className="flex flex-col h-screen">
-      <Header 
-        onLanguageChange={handleLanguageChange}
-        currentLanguage={i18n.language}
-        clinicName={clinicName}
-      />
       <div className="flex-grow flex flex-col items-center justify-center p-4">
         <h1 className="text-3xl font-bold mb-8 text-center">{t('consultationSetup')}</h1>
         {isLoading ? (

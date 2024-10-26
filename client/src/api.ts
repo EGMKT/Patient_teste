@@ -84,7 +84,7 @@ export const enviarAudio = async (audioBase64: string, metadata: any) => {
 
 export const getAdminDashboard = async () => {
   try {
-    const response = await api.get('/dashboard/geral/');
+    const response = await api.get('dashboard/data/');
     return response.data;
   } catch (error) {
     console.error('Erro ao buscar dados do dashboard:', error);
@@ -219,7 +219,7 @@ export const getReports = async () => {
 
 export const getNewClinicsData = async () => {
   try {
-    const response = await api.get('dashboard/clinica/');
+    const response = await api.get('dashboard/new-clinics/');
     return response.data;
   } catch (error) {
     console.error('Erro ao buscar dados de novas clínicas:', error);

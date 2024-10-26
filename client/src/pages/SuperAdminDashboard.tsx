@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { getAdminDashboard, getNewClinicsData } from '../api';
+import { getAdminDashboard } from '../api';
 import { Card, CardContent, Typography, Grid, CircularProgress } from '@mui/material';
-import SuperAdminHeader from '../components/SuperAdminHeader';
 import NewClinicsChart from '../components/NewClinicsChart';
 
 interface DashboardData {
@@ -10,6 +9,10 @@ interface DashboardData {
   total_medicos: number;
   total_pacientes: number;
   total_consultas: number;
+  new_clinics_data: {
+    month: string;
+    count: number;
+  }[];
 }
 
 const SuperAdminDashboard: React.FC = () => {
@@ -17,18 +20,13 @@ const SuperAdminDashboard: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { t, i18n } = useTranslation();
-  const [newClinicsData, setNewClinicsData] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
       try {
-        const [dashboard, clinics] = await Promise.all([
-          getAdminDashboard(),
-          getNewClinicsData()
-        ]);
-        setDashboardData(dashboard);
-        setNewClinicsData(clinics);
+        const data = await getAdminDashboard();
+        setDashboardData(data);
       } catch (err) {
         console.error('Erro ao buscar dados:', err);
         setError(t('errorFetchingData'));
@@ -50,34 +48,32 @@ const SuperAdminDashboard: React.FC = () => {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <SuperAdminHeader 
-        onLanguageChange={(lang) => i18n.changeLanguage(lang)} 
-        currentLanguage={i18n.language}
-      />
       <div className="container mx-auto px-4 py-8 flex-grow">
         <Typography variant="h4" component="h1" className="mb-8">
           {t('superAdminDashboard')}
         </Typography>
         {dashboardData && (
-          <Grid container spacing={3}>
-            <Grid item xs={12} sm={6} md={3}>
-              <DashboardCard title={t('totalClinics')} value={dashboardData.total_clinicas} />
+          <>
+            <Grid container spacing={3}>
+              <Grid item xs={12} sm={6} md={3}>
+                <DashboardCard title={t('totalClinics')} value={dashboardData.total_clinicas} />
+              </Grid>
+              <Grid item xs={12} sm={6} md={3}>
+                <DashboardCard title={t('totalDoctors')} value={dashboardData.total_medicos} />
+              </Grid>
+              <Grid item xs={12} sm={6} md={3}>
+                <DashboardCard title={t('totalPatients')} value={dashboardData.total_pacientes} />
+              </Grid>
+              <Grid item xs={12} sm={6} md={3}>
+                <DashboardCard title={t('totalConsultations')} value={dashboardData.total_consultas} />
+              </Grid>
             </Grid>
-            <Grid item xs={12} sm={6} md={3}>
-              <DashboardCard title={t('totalDoctors')} value={dashboardData.total_medicos} />
-            </Grid>
-            <Grid item xs={12} sm={6} md={3}>
-              <DashboardCard title={t('totalPatients')} value={dashboardData.total_pacientes} />
-            </Grid>
-            <Grid item xs={12} sm={6} md={3}>
-              <DashboardCard title={t('totalConsultations')} value={dashboardData.total_consultas} />
-            </Grid>
-          </Grid>
+            <Typography variant="h5" component="h2" className="mt-8 mb-4">
+              {t('newClinicsOverTime')}
+            </Typography>
+            <NewClinicsChart data={dashboardData.new_clinics_data} />
+          </>
         )}
-        <Typography variant="h5" component="h2" className="mt-8 mb-4">
-          {t('newClinicsOverTime')}
-        </Typography>
-        <NewClinicsChart data={newClinicsData} />
       </div>
     </div>
   );

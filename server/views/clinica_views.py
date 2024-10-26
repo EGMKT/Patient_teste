@@ -6,11 +6,12 @@ from django.db.models import Count
 from django.utils import timezone
 from dateutil.relativedelta import relativedelta
 from django.db.models.functions import TruncMonth
-from ..models import Clinica, Servico, ClinicRegistration
+from ..models import Clinica, Servico, ClinicRegistration, Usuario, Paciente, Consulta
 from ..serializers import ClinicaSerializer, ServicoSerializer, ClinicRegistrationSerializer
 import logging
 import traceback
 from django.core.paginator import Paginator
+from rest_framework.decorators import action
 
 logger = logging.getLogger(__name__)
 
@@ -20,7 +21,36 @@ class ClinicaViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        return Clinica.objects.filter(ativa=True)  # Filtra apenas clínicas ativas
+        return Clinica.objects.filter(ativa=True)
+
+    @action(detail=False, methods=['get'])
+    def dashboard_data(self, request):
+        end_date = timezone.now()
+        start_date = end_date - relativedelta(months=6)
+
+        new_clinics_data = Clinica.objects.filter(
+            created_at__range=(start_date, end_date)
+        ).annotate(
+            month=TruncMonth('created_at')
+        ).values('month').annotate(
+            count=Count('id')
+        ).order_by('month')
+
+        data = {
+            'total_clinicas': Clinica.objects.count(),
+            'total_medicos': Usuario.objects.filter(role='ME').count(),
+            'total_pacientes': Paciente.objects.count(),
+            'total_consultas': Consulta.objects.count(),
+            'new_clinics_data': [
+                {
+                    'date': entry['month'].strftime('%Y-%m'),
+                    'count': entry['count']
+                }
+                for entry in new_clinics_data
+            ]
+        }
+
+        return Response(data)
 
 class ServicoViewSet(viewsets.ModelViewSet):
     queryset = Servico.objects.all()

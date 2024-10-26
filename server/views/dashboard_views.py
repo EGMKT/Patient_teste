@@ -5,10 +5,12 @@ from ..models import Clinica, Usuario, Paciente, Consulta, Medico
 # Removida a importação de Procedimento
 from django.db.models import Count, Avg, F, ExpressionWrapper, fields
 from django.utils import timezone
-from django.db.models.functions import Now, TruncDay
+from django.db.models.functions import Now, TruncDay, TruncMonth
 from django.http import JsonResponse
 from django.views.decorators.http import require_GET
 import logging
+from dateutil.relativedelta import relativedelta
+import traceback
 
 logger = logging.getLogger(__name__)
 
@@ -125,28 +127,36 @@ class NewClinicsDataView(APIView):
 
     def get(self, request):
         try:
+            logger.info("Iniciando busca de dados de novas clínicas")
             end_date = timezone.now()
-            start_date = end_date - timezone.timedelta(days=30)
+            start_date = end_date - relativedelta(months=6)
+            
+            logger.info(f"Período de busca: de {start_date} até {end_date}")
             
             new_clinics_data = Clinica.objects.filter(
                 data_criacao__range=(start_date, end_date)
             ).annotate(
-                day=TruncDay('data_criacao')
-            ).values('day').annotate(
+                month=TruncMonth('data_criacao')
+            ).values('month').annotate(
                 count=Count('id')
-            ).order_by('day')
-
+            ).order_by('month')
+            
+            logger.info(f"Query executada: {new_clinics_data.query}")
+            
             data = [
                 {
-                    'date': entry['day'].strftime('%Y-%m-%d'),
+                    'date': entry['month'].strftime('%Y-%m'),
                     'count': entry['count']
                 }
                 for entry in new_clinics_data
             ]
-
+            
+            logger.info(f"Dados processados: {data}")
+            
             return Response(data)
         except Exception as e:
             logger.error(f"Erro ao obter dados de novas clínicas: {str(e)}")
+            logger.error(traceback.format_exc())
             return Response({"error": "Erro interno do servidor"}, status=500)
 
 @require_GET
@@ -156,3 +166,34 @@ def dashboard_clinica(request):
         # Preencha com os dados necessários
     }
     return JsonResponse(data)
+
+class DashboardDataView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        end_date = timezone.now()
+        start_date = end_date - relativedelta(months=6)
+
+        new_clinics_data = Clinica.objects.filter(
+            created_at__range=(start_date, end_date)
+        ).annotate(
+            month=TruncMonth('created_at')
+        ).values('month').annotate(
+            count=Count('id')
+        ).order_by('month')
+
+        data = {
+            'total_clinicas': Clinica.objects.count(),
+            'total_medicos': Usuario.objects.filter(role='ME').count(),
+            'total_pacientes': Paciente.objects.count(),
+            'total_consultas': Consulta.objects.count(),
+            'new_clinics_data': [
+                {
+                    'month': entry['month'].strftime('%Y-%m'),
+                    'count': entry['count']
+                }
+                for entry in new_clinics_data
+            ]
+        }
+
+        return Response(data)

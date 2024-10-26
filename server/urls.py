@@ -1,17 +1,8 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from django.contrib import admin
-from django.views.decorators.cache import cache_page
-from .views import (
-    ClinicaViewSet, MedicoViewSet, PacienteViewSet, ServicoViewSet,
-    ConsultaViewSet, CustomTokenObtainPairView, home,
-    GravarConsultaView, RegistroUsuarioView, AudioUploadView,
-    TrustedDeviceView, DatabaseOverviewView, ClinicaInfoView,
-    LoginView, ClinicaListView, UserListView, MedicoListView, UserViewSet
-)
 from rest_framework_simplejwt.views import TokenRefreshView
-from .views.pipedrive_views import PipedrivePatientView
-from .views.dashboard_views import DashboardView, DashboardGeralView
+from .views import *  # Importa todas as views do __init__.py
 
 router = DefaultRouter()
 router.register(r'clinicas', ClinicaViewSet)
@@ -47,4 +38,6 @@ urlpatterns = [
     path('api/users/', UserListView.as_view(), name='user_list'),
     path('api/medicos/', MedicoListView.as_view(), name='medico_list'),
     path('api/clinicas/', ClinicaListView.as_view(), name='clinica_list'),
+    path('api/dashboard/new-clinics/', NewClinicsDataView.as_view(), name='new-clinics-data'),
+    path('api/dashboard/data/', DashboardDataView.as_view(), name='dashboard_data'),
 ]
