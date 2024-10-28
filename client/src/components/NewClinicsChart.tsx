@@ -1,5 +1,5 @@
 import React from 'react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { useTranslation } from 'react-i18next';
 
 interface NewClinicsChartProps {
@@ -7,18 +7,37 @@ interface NewClinicsChartProps {
 }
 
 const NewClinicsChart: React.FC<NewClinicsChartProps> = ({ data }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+
+  const getMonthAbbreviation = (
+    month: string
+  ): string => {
+    const date = new Date(month);
+    return date.toLocaleString(i18n.language, { month: 'short' });
+  };
+
+  const formattedData = data.map(item => ({
+    ...item,
+    monthAbbr: getMonthAbbreviation(item.month)
+  }));
+
+  const maxCount = Math.max(...data.map(item => item.count));
+  const yAxisMax = Math.ceil(maxCount * 1.2); // 20% a mais que o valor máximo
 
   return (
     <ResponsiveContainer width="100%" height={300}>
-      <LineChart data={data}>
+      <BarChart data={formattedData}>
         <CartesianGrid strokeDasharray="3 3" />
-        <XAxis dataKey="month" />
-        <YAxis />
-        <Tooltip />
+        <XAxis dataKey="monthAbbr" />
+        <YAxis 
+          domain={[0, yAxisMax]} 
+          allowDecimals={false}
+          tickCount={6}
+        />
+        <Tooltip labelFormatter={(label) => t('month', { month: label })} />
         <Legend />
-        <Line type="monotone" dataKey="count" stroke="#8884d8" name={t('newClinics')} />
-      </LineChart>
+        <Bar dataKey="count" fill="#8884d8" name={t('newClinics')} />
+      </BarChart>
     </ResponsiveContainer>
   );
 };

@@ -5,7 +5,6 @@ import { enviarAudio } from '../api';
 import { saveAudioLocally } from '../audioStorage';
 import useTranslation from '../hooks/useTranslation';
 import { useAuth } from '../contexts/AuthContext';
-import Header from '../components/Header';
 
 // Adicione esta declaração no topo do arquivo
 declare global {
@@ -204,11 +203,6 @@ const AudioRecording: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-4">
-      <Header 
-        onLanguageChange={handleLanguageChange}
-        currentLanguage={i18n.language}
-        clinicName={clinicName}
-      />
       <div className="absolute top-4 left-0 right-0 flex justify-center items-center">
         <span className="text-xl font-semibold">{clinicName}</span>
       </div>

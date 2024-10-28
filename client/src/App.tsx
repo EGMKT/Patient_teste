@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
+import { useTranslation, I18nextProvider } from 'react-i18next';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import Header from './components/Header';
 import SuperAdminHeader from './components/SuperAdminHeader';
@@ -9,8 +9,6 @@ import ConsultationSetup from './pages/ConsultationSetup';
 import AudioRecording from './pages/AudioRecording';
 import ErrorPage from './pages/ErrorPage';
 import SuccessPage from './pages/SuccessPage';
-import ConsultationList from './pages/ConsultationList';
-import SuperAdminAudios from './pages/SuperAdminAudios';
 import DatabaseOverview from './pages/DatabaseOverview';
 import SuperAdminDashboard from './pages/SuperAdminDashboard';
 import ManageUsers from './pages/ManageUsers';
@@ -19,6 +17,7 @@ import ViewReports from './pages/ViewReports';
 import NotFound from './pages/NotFound';
 import ManageClinicRegistrations from './pages/ManageClinicRegistrations';
 import { getClinicaInfo } from './api';
+import i18n from './i18n';
 
 const AppRoutes: React.FC = () => {
   const { user, isAuthenticated } = useAuth();
@@ -66,7 +65,6 @@ const AppRoutes: React.FC = () => {
                 <Routes>
                   <Route path="/consultation-setup" element={<ConsultationSetup />} />
                   <Route path="/audio-recording" element={<AudioRecording />} />
-                  <Route path="/consultations" element={<ConsultationList />} />
                   <Route path="*" element={<Navigate to="/consultation-setup" replace />} />
                 </Routes>
               } />
@@ -82,9 +80,11 @@ const AppRoutes: React.FC = () => {
 
 const App: React.FC = () => {
   return (
-    <AuthProvider>
-      <AppRoutes />
-    </AuthProvider>
+    <I18nextProvider i18n={i18n}>
+      <AuthProvider>
+        <AppRoutes />
+      </AuthProvider>
+    </I18nextProvider>
   );
 };
 

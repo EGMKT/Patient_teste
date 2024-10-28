@@ -24,7 +24,7 @@ const ManageUsers: React.FC = () => {
   const fetchUsers = async () => {
     try {
       const response = await getUsers();
-      setUsers(response);
+      setUsers(response.users); // Ajuste aqui para acessar 'users' da resposta
     } catch (error) {
       console.error('Erro ao buscar usuários:', error);
     }

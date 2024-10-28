@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { getAdminDashboard } from '../api';
-import { Card, CardContent, Typography, Grid, CircularProgress } from '@mui/material';
+import { Card, CardContent, Typography, Grid, CircularProgress, Box } from '@mui/material';
 import NewClinicsChart from '../components/NewClinicsChart';
 
 interface DashboardData {
@@ -68,10 +68,12 @@ const SuperAdminDashboard: React.FC = () => {
                 <DashboardCard title={t('totalConsultations')} value={dashboardData.total_consultas} />
               </Grid>
             </Grid>
-            <Typography variant="h5" component="h2" className="mt-8 mb-4">
-              {t('newClinicsOverTime')}
-            </Typography>
-            <NewClinicsChart data={dashboardData.new_clinics_data} />
+            <Box mt={8}>
+              <Typography variant="h5" component="h2" className="mb-4">
+                {t('newClinicsOverTime')}
+              </Typography>
+              <NewClinicsChart data={dashboardData.new_clinics_data} />
+            </Box>
           </>
         )}
       </div>

@@ -1,16 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Table, TableHead, TableBody, TableRow, TableCell, Paper, TableContainer, Button, TextField, Dialog, DialogTitle, DialogContent, DialogActions, TableSortLabel } from '@mui/material';
 import { getClinics, createClinic, updateClinic, deleteClinic, Clinic } from '../api';
-import Header from '../components/Header';
 
 const ManageClinics: React.FC = () => {
   const [clinics, setClinics] = useState<Clinic[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [openDialog, setOpenDialog] = useState(false);
   const [currentClinic, setCurrentClinic] = useState<Clinic | null>(null);
-  const { t, i18n } = useTranslation();
-  const [orderBy, setOrderBy] = useState<keyof Clinic>('name');
+  const { t } = useTranslation();
+  const [orderBy, setOrderBy] = useState<keyof Clinic>('nome');
   const [order, setOrder] = useState<'asc' | 'desc'>('asc');
 
   useEffect(() => {
@@ -26,7 +25,7 @@ const ManageClinics: React.FC = () => {
     }
   };
 
-  const handleCreateClinic = async (clinicData: Omit<Clinic, 'id' | 'createdAt'>) => {
+  const handleCreateClinic = async (clinicData: Omit<Clinic, 'id' | 'created_at'>) => {
     try {
       await createClinic(clinicData);
       fetchClinics();
@@ -67,18 +66,19 @@ const ManageClinics: React.FC = () => {
     setOrderBy(property);
   };
 
-  const sortedClinics = filteredClinics.sort((a, b) => {
-    if (a[orderBy] < b[orderBy]) return order === 'asc' ? -1 : 1;
-    if (a[orderBy] > b[orderBy]) return order === 'asc' ? 1 : -1;
-    return 0;
-  });
+  const sortedClinics = React.useMemo(() => {
+    return [...filteredClinics].sort((a, b) => {
+      const aValue = String(a[orderBy] || '');
+      const bValue = String(b[orderBy] || '');
+      
+      return order === 'asc' 
+        ? aValue.localeCompare(bValue)
+        : bValue.localeCompare(aValue);
+    });
+  }, [filteredClinics, orderBy, order]);
 
   return (
     <div className="flex flex-col min-h-screen">
-      <Header 
-        onLanguageChange={(lang) => i18n.changeLanguage(lang)} 
-        currentLanguage={i18n.language}
-      />
       <div className="container mx-auto p-4">
         <h1 className="text-2xl font-bold mb-4">{t('manageClinics')}</h1>
         <Button onClick={() => { setCurrentClinic(null); setOpenDialog(true); }} variant="contained" color="primary" className="mb-4">
@@ -98,36 +98,24 @@ const ManageClinics: React.FC = () => {
               <TableRow>
                 <TableCell>
                   <TableSortLabel
-                    active={orderBy === 'name'}
-                    direction={orderBy === 'name' ? order : 'asc'}
-                    onClick={() => handleRequestSort('name')}
+                    active={orderBy === 'nome'}
+                    direction={orderBy === 'nome' ? order : 'asc'}
+                    onClick={() => handleRequestSort('nome')}
                   >
                     {t('name')}
                   </TableSortLabel>
                 </TableCell>
-                <TableCell>
-                  <TableSortLabel
-                    active={orderBy === 'email'}
-                    direction={orderBy === 'email' ? order : 'asc'}
-                    onClick={() => handleRequestSort('email')}
-                  >
-                    {t('email')}
-                  </TableSortLabel>
-                </TableCell>
-                <TableCell>{t('address')}</TableCell>
-                <TableCell>{t('phone')}</TableCell>
-                <TableCell>{t('status')}</TableCell>
+                <TableCell>{t('createdAt')}</TableCell>
+                <TableCell>{t('active')}</TableCell>
                 <TableCell>{t('actions')}</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {sortedClinics.map((clinic) => (
                 <TableRow key={clinic.id}>
-                  <TableCell>{clinic.name}</TableCell>
-                  <TableCell>{clinic.email}</TableCell>
-                  <TableCell>{clinic.address}</TableCell>
-                  <TableCell>{clinic.phone}</TableCell>
-                  <TableCell>{t(clinic.status)}</TableCell>
+                  <TableCell>{clinic.nome}</TableCell>
+                  <TableCell>{new Date(clinic.created_at).toLocaleDateString()}</TableCell>
+                  <TableCell>{clinic.ativa ? t('yes') : t('no')}</TableCell>
                   <TableCell>
                     <Button onClick={() => { setCurrentClinic(clinic); setOpenDialog(true); }}>
                       {t('edit')}
@@ -162,47 +150,34 @@ interface ClinicDialogProps {
   open: boolean;
   onClose: () => void;
   clinic: Clinic | null;
-  onSave: (clinicData: Omit<Clinic, 'id' | 'createdAt'>) => void;
+  onSave: (clinicData: Omit<Clinic, 'id' | 'created_at'>) => void;
 }
 
 const ClinicDialog: React.FC<ClinicDialogProps> = ({ open, onClose, clinic, onSave }) => {
-  const [name, setName] = useState(clinic?.name || '');
-  const [email, setEmail] = useState(clinic?.email || '');
-  const [password, setPassword] = useState('');
-  const [address, setAddress] = useState(clinic?.address || '');
-  const [phone, setPhone] = useState(clinic?.phone || '');
-  const [status, setStatus] = useState<'active' | 'inactive'>(clinic?.status || 'active');
+  const [nome, setNome] = useState(clinic?.nome || '');
+  const [ativa, setAtiva] = useState<boolean>(clinic?.ativa || true);
+  const [pipedrive_api_token, setPipedriveApiToken] = useState(clinic?.pipedrive_api_token || '');
   const { t } = useTranslation();
 
   useEffect(() => {
     if (clinic) {
-      setName(clinic.name);
-      setEmail(clinic.email);
-      setAddress(clinic.address);
-      setPhone(clinic.phone);
-      setStatus(clinic.status);
+      setNome(clinic.nome);
+      setAtiva(clinic.ativa);
+      setPipedriveApiToken(clinic.pipedrive_api_token || '');
     } else {
-      setName('');
-      setEmail('');
-      setAddress('');
-      setPhone('');
-      setStatus('active');
+      setNome('');
+      setAtiva(true);
+      setPipedriveApiToken('');
     }
   }, [clinic]);
 
   const handleSave = () => {
-    const clinicData: Omit<Clinic, 'id' | 'createdAt'> = {
-      name,
-      email,
-      password,
-      address,
-      phone,
-      status
+    const clinicData: Omit<Clinic, 'id' | 'created_at'> = {
+      nome,
+      ativa,
+      pipedrive_api_token,
+      logo: null // We're not handling logo upload in this example
     };
-
-    if (password) {
-      clinicData.password = password;
-    }
 
     onSave(clinicData);
     onClose();
@@ -218,54 +193,28 @@ const ClinicDialog: React.FC<ClinicDialogProps> = ({ open, onClose, clinic, onSa
           label={t('name')}
           type="text"
           fullWidth
-          value={name}
-          onChange={(e) => setName(e.target.value)}
+          value={nome}
+          onChange={(e) => setNome(e.target.value)}
         />
         <TextField
           margin="dense"
-          label={t('email')}
-          type="email"
-          fullWidth
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
-        <TextField
-          margin="dense"
-          label={t('address')}
+          label={t('pipedriveApiToken')}
           type="text"
           fullWidth
-          value={address}
-          onChange={(e) => setAddress(e.target.value)}
+          value={pipedrive_api_token}
+          onChange={(e) => setPipedriveApiToken(e.target.value)}
         />
         <TextField
           margin="dense"
-          label={t('phone')}
-          type="text"
-          fullWidth
-          value={phone}
-          onChange={(e) => setPhone(e.target.value)}
-        />
-        <TextField
-          margin="dense"
-          label={t('status')}
+          label={t('active')}
           select
           fullWidth
-          value={status}
-          onChange={(e) => setStatus(e.target.value as 'active' | 'inactive')}
+          value={ativa ? 'true' : 'false'}
+          onChange={(e) => setAtiva(e.target.value === 'true')}
         >
-          <option value="active">{t('active')}</option>
-          <option value="inactive">{t('inactive')}</option>
+          <option value="true">{t('yes')}</option>
+          <option value="false">{t('no')}</option>
         </TextField>
-        {!clinic && (
-          <TextField
-            margin="dense"
-            label={t('password')}
-            type="password"
-            fullWidth
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-        )}
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose}>{t('cancel')}</Button>

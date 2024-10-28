@@ -163,9 +163,18 @@ export const deleteUser = async (userId: number) => {
   }
 };
 
-export const getClinics = async () => {
+export interface Clinic {
+  id: number;
+  nome: string;
+  created_at: string;
+  ativa: boolean;
+  logo: string | null;
+  pipedrive_api_token: string | null;
+}
+
+export const getClinics = async (): Promise<Clinic[]> => {
   try {
-    const response = await api.get('/clinics/');
+    const response = await api.get('/clinicas/');
     return response.data;
   } catch (error) {
     console.error('Erro ao obter clínicas:', error);
@@ -173,9 +182,9 @@ export const getClinics = async () => {
   }
 };
 
-export const createClinic = async (clinicData: Omit<Clinic, 'id' | 'createdAt'>) => {
+export const createClinic = async (clinicData: Omit<Clinic, 'id' | 'created_at'>): Promise<Clinic> => {
   try {
-    const response = await api.post('/clinics/', clinicData);
+    const response = await api.post('/clinicas/', clinicData);
     return response.data;
   } catch (error) {
     console.error('Erro ao criar clínica:', error);
@@ -183,9 +192,9 @@ export const createClinic = async (clinicData: Omit<Clinic, 'id' | 'createdAt'>)
   }
 };
 
-export const updateClinic = async (id: number, clinicData: Partial<Clinic>) => {
+export const updateClinic = async (id: number, clinicData: Partial<Clinic>): Promise<Clinic> => {
   try {
-    const response = await api.put(`/clinics/${id}/`, clinicData);
+    const response = await api.put(`/clinicas/${id}/`, clinicData);
     return response.data;
   } catch (error) {
     console.error('Erro ao atualizar clínica:', error);
@@ -193,9 +202,9 @@ export const updateClinic = async (id: number, clinicData: Partial<Clinic>) => {
   }
 };
 
-export const deleteClinic = async (id: number) => {
+export const deleteClinic = async (id: number): Promise<void> => {
   try {
-    await api.delete(`/clinics/${id}/`);
+    await api.delete(`/clinicas/${id}/`);
   } catch (error) {
     console.error('Erro ao deletar clínica:', error);
     throw error;
@@ -333,17 +342,6 @@ export const updateUser = async (id: number, userData: Partial<User>) => {
     throw error;
   }
 };
-
-export interface Clinic {
-  id: number;
-  name: string;
-  email: string;
-  password: string;
-  address: string;
-  phone: string;
-  status: 'active' | 'inactive';
-  createdAt: Date;
-}
 
 export interface User {
   id: number;

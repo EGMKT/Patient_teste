@@ -140,8 +140,6 @@ PatientFunnel-test/
 │ │ │ └── pt.json
 │ │ ├── pages/
 │ │ │ ├── Login.tsx
-│ │ │ ├── SuperAdminAudios.tsx
-│ │ │ ├── ConsultationList.tsx
 │ │ │ ├── ConsultationSetup.tsx
 │ │ │ ├── AudioRecording.tsx
 │ │ │ ├── DatabaseOverview.tsx
@@ -150,10 +148,9 @@ PatientFunnel-test/
 │ │ │ ├── ManageClinics.tsx
 │ │ │ ├── ManageUsers.tsx
 │ │ │ ├── NotFound.tsx 
-│ │ │ ├── ClinicRegistration.tsx
 │ │ │ ├── ManageClinicRegistrations.tsx
+│ │ │ ├── ManageSuperAdmins.tsx
 │ │ │ ├── SuperAdminDashboard.tsx
-│ │ │ ├── DoctorSettings.tsx
 │ │ │ ├── ViewReports.tsx
 │ │ ├── types/
 │ │ │ └── wavesurfer.d.ts

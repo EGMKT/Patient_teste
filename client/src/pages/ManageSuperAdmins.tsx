@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Table, TableHead, TableBody, TableRow, TableCell, Paper, TableContainer, Button, TextField, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
 import { getSuperAdmins, createSuperAdmin, updateSuperAdmin, deleteSuperAdmin } from '../api';
-import Header from '../components/Header';
 
 interface SuperAdmin {
   id: number;
@@ -67,10 +66,6 @@ const ManageSuperAdmins: React.FC = () => {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <Header 
-        onLanguageChange={(lang) => i18n.changeLanguage(lang)} 
-        currentLanguage={i18n.language}
-      />
       <div className="container mx-auto p-4">
         <h1 className="text-2xl font-bold mb-4">{t('manageSuperAdmins')}</h1>
         <Button onClick={() => { setCurrentSuperAdmin(null); setOpenDialog(true); }} variant="contained" color="primary" className="mb-4">
