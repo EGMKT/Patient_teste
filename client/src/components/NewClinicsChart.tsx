@@ -1,5 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import React from 'react';
+import { 
+  BarChart, 
+  Bar, 
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Tooltip, 
+  Legend, 
+  ResponsiveContainer 
+} from 'recharts';
 import { useTranslation } from 'react-i18next';
 
 interface NewClinicsChartProps {
@@ -20,41 +29,70 @@ const NewClinicsChart: React.FC<NewClinicsChartProps> = ({ data }) => {
     }
   };
 
-  const formattedData = data.map(item => ({
-    ...item,
-    monthAbbr: getMonthAbbreviation(item.month)
-  })).sort((a, b) => {
-    // Garante que os meses sejam exibidos em ordem cronológica
-    const [yearA, monthA] = a.month.split('-');
-    const [yearB, monthB] = b.month.split('-');
-    const dateA = new Date(parseInt(yearA), parseInt(monthA) - 1);
-    const dateB = new Date(parseInt(yearB), parseInt(monthB) - 1);
-    return dateA.getTime() - dateB.getTime();
-  });
+  const formattedData = data
+    .map(item => ({
+      ...item,
+      monthAbbr: getMonthAbbreviation(item.month)
+    }))
+    .sort((a, b) => {
+      const [yearA, monthA] = a.month.split('-');
+      const [yearB, monthB] = b.month.split('-');
+      const dateA = new Date(parseInt(yearA), parseInt(monthA) - 1);
+      const dateB = new Date(parseInt(yearB), parseInt(monthB) - 1);
+      return dateA.getTime() - dateB.getTime();
+    });
 
   const maxCount = Math.max(...data.map(item => item.count));
-  const yAxisMax = Math.ceil(maxCount * 1.2); // 20% a mais que o valor máximo
+  const yAxisMax = Math.ceil(maxCount * 1.2);
 
-  useEffect(() => {
-    // Força atualização do gráfico quando os dados mudam
-    if (data) {
-      console.log('Dados do gráfico:', data); // Debug
+  const CustomTooltip = ({ active, payload, label }: any) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="bg-white p-2 border border-gray-200 shadow-lg">
+          <p>{t('dashboard.newClinics.tooltip', {
+            month: label,
+            count: payload[0].value
+          })}</p>
+        </div>
+      );
     }
-  }, [data]);
+    return null;
+  };
 
   return (
-    <ResponsiveContainer width="100%" height={300}>
-      <BarChart data={formattedData}>
+    <ResponsiveContainer width="100%" height={400}>
+      <BarChart data={formattedData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
         <CartesianGrid strokeDasharray="3 3" />
-        <XAxis dataKey="monthAbbr" />
+        <XAxis 
+          dataKey="monthAbbr" 
+          label={{ 
+            value: t('dashboard.newClinics.month'), 
+            position: 'insideBottomRight',
+            offset: -10 
+          }}
+        />
         <YAxis 
           domain={[0, yAxisMax]} 
           allowDecimals={false}
-          tickCount={6}
+          label={{ 
+            value: t('dashboard.newClinics.count'), 
+            angle: -90, 
+            position: 'insideLeft' 
+          }}
         />
-        <Tooltip labelFormatter={(label) => t('month', { month: label })} />
-        <Legend />
-        <Bar dataKey="count" fill="#8884d8" name={t('newClinics')} />
+        <Tooltip content={<CustomTooltip />} />
+        <Legend verticalAlign="bottom" 
+          height={36} // Altura específica para a legenda
+          wrapperStyle={{ 
+            paddingTop: '20px',
+            bottom: 0
+          }}/>
+        <Bar 
+          dataKey="count" 
+          fill="#8884d8" 
+          name={t('dashboard.newClinics.title')}
+          radius={[4, 4, 0, 0]}
+        />
       </BarChart>
     </ResponsiveContainer>
   );

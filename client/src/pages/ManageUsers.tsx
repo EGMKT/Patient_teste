@@ -126,18 +126,18 @@ const ManageUsers: React.FC = () => {
       <div className="container mx-auto p-4">
         <div className="bg-white rounded-lg shadow p-6">
           <div className="flex justify-between items-center mb-6">
-            <h1 className="text-2xl font-bold">{t('manageUsers')}</h1>
+            <h1 className="text-2xl font-bold">{t('manageUsers.title')}</h1>
             <Button 
               onClick={() => { setCurrentUser(null); setOpenDialog(true); }} 
               variant="contained" 
               color="primary"
             >
-              {t('createUser')}
+              {t('manageUsers.createUser')}
             </Button>
           </div>
 
           <TextField
-            label={t('search')}
+            label={t('manageUsers.search')}
             variant="outlined"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -150,13 +150,13 @@ const ManageUsers: React.FC = () => {
             <Table>
               <TableHead>
                 <TableRow>
-                  <TableCell>{t('email')}</TableCell>
-                  <TableCell>{t('firstName')}</TableCell>
-                  <TableCell>{t('lastName')}</TableCell>
-                  <TableCell>{t('role')}</TableCell>
-                  <TableCell>{t('clinic')}</TableCell>
-                  <TableCell>{t('specialty')}</TableCell>
-                  <TableCell>{t('actions')}</TableCell>
+                  <TableCell>{t('manageUsers.email')}</TableCell>
+                  <TableCell>{t('manageUsers.firstName')}</TableCell>
+                  <TableCell>{t('manageUsers.lastName')}</TableCell>
+                  <TableCell>{t('manageUsers.role')}</TableCell>
+                  <TableCell>{t('manageUsers.clinic')}</TableCell>
+                  <TableCell>{t('manageUsers.specialty')}</TableCell>
+                  <TableCell>{t('manageUsers.actions')}</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -165,15 +165,15 @@ const ManageUsers: React.FC = () => {
                     <TableCell>{user.email}</TableCell>
                     <TableCell>{user.first_name}</TableCell>
                     <TableCell>{user.last_name}</TableCell>
-                    <TableCell>{t(user.role)}</TableCell>
+                    <TableCell>{t(`manageUsers.roles.${user.role}`)}</TableCell>
                     <TableCell>{user.medico?.clinica?.nome || '-'}</TableCell>
                     <TableCell>{user.medico?.especialidade || '-'}</TableCell>
                     <TableCell>
                       <Button onClick={() => { setCurrentUser(user); setOpenDialog(true); }}>
-                        {t('edit')}
+                        {t('manageUsers.edit')}
                       </Button>
                       <Button onClick={() => handleDeleteUser(user.id)}>
-                        {t('delete')}
+                        {t('manageUsers.delete')}
                       </Button>
                     </TableCell>
                   </TableRow>
@@ -192,26 +192,26 @@ const ManageUsers: React.FC = () => {
         }}
       >
         <ConfirmDialogTitle>
-          {pendingAction?.type === 'delete' ? t('confirmDelete') : t('confirmUpdate')}
+          {pendingAction?.type === 'delete' 
+            ? t('manageUsers.confirmDelete') 
+            : t('manageUsers.confirmUpdate')}
         </ConfirmDialogTitle>
         <ConfirmDialogContent>
           <DialogContentText>
             {pendingAction?.type === 'delete' 
-              ? t('deleteUserConfirmation') 
-              : t('updateUserConfirmation')}
+              ? t('manageUsers.deleteUserConfirmation') 
+              : t('manageUsers.updateUserConfirmation')}
           </DialogContentText>
         </ConfirmDialogContent>
         <DialogActions>
-          <Button 
-            onClick={() => {
-              setConfirmDialogOpen(false);
-              setPendingAction(null);
-            }}
-          >
-            {t('cancel')}
+          <Button onClick={() => {
+            setConfirmDialogOpen(false);
+            setPendingAction(null);
+          }}>
+            {t('manageUsers.cancel')}
           </Button>
           <Button onClick={handleConfirmAction} color="primary">
-            {t('confirm')}
+            {t('manageUsers.confirm')}
           </Button>
         </DialogActions>
       </ConfirmDialog>
@@ -301,12 +301,14 @@ const UserDialog: React.FC<UserDialogProps> = ({ open, onClose, user, clinics, o
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-      <DialogTitle>{user ? t('editUser') : t('createUser')}</DialogTitle>
+      <DialogTitle>
+        {user ? t('manageUsers.editUser') : t('manageUsers.createNewUser')}
+      </DialogTitle>
       <DialogContent>
         <TextField
           autoFocus
           margin="dense"
-          label={t('email')}
+          label={t('manageUsers.email')}
           type="email"
           fullWidth
           value={email}
@@ -315,7 +317,7 @@ const UserDialog: React.FC<UserDialogProps> = ({ open, onClose, user, clinics, o
         {!user && (
           <TextField
             margin="dense"
-            label={t('password')}
+            label={t('manageUsers.password')}
             type="password"
             fullWidth
             value={password}
@@ -324,39 +326,39 @@ const UserDialog: React.FC<UserDialogProps> = ({ open, onClose, user, clinics, o
         )}
         <TextField
           margin="dense"
-          label={t('firstName')}
+          label={t('manageUsers.firstName')}
           fullWidth
           value={firstName}
           onChange={(e) => setFirstName(e.target.value)}
         />
         <TextField
           margin="dense"
-          label={t('lastName')}
+          label={t('manageUsers.lastName')}
           fullWidth
           value={lastName}
           onChange={(e) => setLastName(e.target.value)}
         />
         <FormControl fullWidth margin="dense">
-          <InputLabel>{t('role')}</InputLabel>
+          <InputLabel>{t('manageUsers.role')}</InputLabel>
           <Select<UserRole>
             value={role}
             onChange={(e) => setRole(e.target.value as UserRole)}
           >
-            <MenuItem value="SA">{t('superAdmin')}</MenuItem>
-            <MenuItem value="AC">{t('clinicAdmin')}</MenuItem>
-            <MenuItem value="ME">{t('doctor')}</MenuItem>
+            <MenuItem value="SA">{t('manageUsers.roles.SA')}</MenuItem>
+            <MenuItem value="AC">{t('manageUsers.roles.AC')}</MenuItem>
+            <MenuItem value="ME">{t('manageUsers.roles.ME')}</MenuItem>
           </Select>
         </FormControl>
         
         {role === 'ME' && (
           <>
             <FormControl fullWidth margin="dense">
-              <InputLabel>{t('clinic')}</InputLabel>
+              <InputLabel>{t('manageUsers.clinic')}</InputLabel>
               <Select
                 value={clinicId || ''}
                 onChange={(e) => setClinicId(e.target.value ? Number(e.target.value) : null)}
               >
-                <MenuItem value="">{t('selectClinic')}</MenuItem>
+                <MenuItem value="">{t('manageUsers.selectClinic')}</MenuItem>
                 {clinics.map((clinic) => (
                   <MenuItem key={clinic.id} value={clinic.id}>
                     {clinic.nome}
@@ -366,7 +368,7 @@ const UserDialog: React.FC<UserDialogProps> = ({ open, onClose, user, clinics, o
             </FormControl>
             <TextField
               margin="dense"
-              label={t('specialty')}
+              label={t('manageUsers.specialty')}
               fullWidth
               value={especialidade}
               onChange={(e) => setEspecialidade(e.target.value)}
@@ -375,8 +377,8 @@ const UserDialog: React.FC<UserDialogProps> = ({ open, onClose, user, clinics, o
         )}
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>{t('cancel')}</Button>
-        <Button onClick={handleSave}>{t('save')}</Button>
+        <Button onClick={onClose}>{t('manageUsers.cancel')}</Button>
+        <Button onClick={handleSave}>{t('manageUsers.save')}</Button>
       </DialogActions>
     </Dialog>
   );
