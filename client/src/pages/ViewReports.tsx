@@ -1,17 +1,18 @@
 // ... imports anteriores
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { getReports } from '../api';
+import { getReports, getAdminDashboard } from '../api';
 import { 
   Card, CardContent, Typography, Grid, 
   Table, TableBody, TableCell, TableHead, TableRow,
-  Paper, CircularProgress, Alert
+  Paper, CircularProgress, Alert, Box
 } from '@mui/material';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
   PieChart, Pie, Cell
 } from 'recharts';
 import { useNavigate } from 'react-router-dom';
+import NewClinicsChart from '../components/NewClinicsChart';
 
 interface ReportData {
   totalPatientsAttended: number;
@@ -20,8 +21,6 @@ interface ReportData {
   returningPatientsAttended: number;
   patientRetentionRate: number;
   averageConsultationTime: number;
-  totalProceduresPerformed: number;
-  totalIncidentsReported: number;
   overallPatientSatisfaction: number;
   doctorQualityIndex: { [key: string]: number };
   patientDemographics: {
@@ -32,34 +31,57 @@ interface ReportData {
   };
 }
 
+interface DashboardData {
+  total_clinicas: number;
+  total_medicos: number;
+  total_pacientes: number;
+  total_consultas: number;
+  new_clinics_data: {
+    month: string;
+    count: number;
+  }[];
+}
+
 const ViewReports: React.FC = () => {
   const [reportData, setReportData] = useState<ReportData | null>(null);
+  const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { t } = useTranslation();
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetchReports();
+    fetchData();
   }, []);
 
-  const fetchReports = async () => {
+  const fetchData = async () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await getReports();
-      setReportData(response);
+      const [reportsResponse, dashboardResponse] = await Promise.all([
+        getReports(),
+        getAdminDashboard()
+      ]);
+      setReportData(reportsResponse);
+      setDashboardData(dashboardResponse);
     } catch (error: any) {
-      console.error('Erro ao buscar relatórios:', error);
+      console.error('Erro ao buscar dados:', error);
       if (error.response?.status === 401) {
         localStorage.removeItem('token');
         navigate('/login');
       } else {
-        setError('Erro ao carregar relatórios. Tente novamente mais tarde.');
+        setError(t('errorFetchingData'));
       }
     } finally {
       setLoading(false);
     }
+  };
+
+  const formatValue = (value: number | undefined, format: 'percentage' | 'decimal' = 'decimal'): string => {
+    if (value === undefined) return '-';
+    return format === 'percentage' 
+      ? `${(value * 100).toFixed(1)}%`
+      : value.toFixed(1);
   };
 
   if (loading) {
@@ -78,31 +100,61 @@ const ViewReports: React.FC = () => {
     );
   }
 
-  if (!reportData) return null;
+  if (!reportData || !dashboardData) return null;
 
   return (
     <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">{t('viewReports')}</h1>
+      <Typography variant="h4" component="h1" className="mb-8">
+        {t('reports.title')}
+      </Typography>
       
-      {/* Métricas Principais */}
+      {/* Primeira linha de cards - Dashboard Geral */}
       <Grid container spacing={3} className="mb-8">
-        <MetricCard
-          title={t('totalPatientsAttended')}
-          value={reportData.totalPatientsAttended}
+        <DashboardCard
+          title={t('dashboard.totalClinics')}
+          value={dashboardData.total_clinicas}
         />
-        <MetricCard
-          title={t('patientRetentionRate')}
-          value={`${(reportData.patientRetentionRate * 100).toFixed(1)}%`}
+        <DashboardCard
+          title={t('dashboard.totalDoctors')}
+          value={dashboardData.total_medicos}
         />
-        <MetricCard
-          title={t('averageConsultationTime')}
-          value={formatDuration(reportData.averageConsultationTime)}
+        <DashboardCard
+          title={t('dashboard.totalPatients')}
+          value={dashboardData.total_pacientes}
         />
-        <MetricCard
-          title={t('overallPatientSatisfaction')}
-          value={`${reportData.overallPatientSatisfaction.toFixed(1)}/5`}
+        <DashboardCard
+          title={t('dashboard.totalConsultations')}
+          value={dashboardData.total_consultas}
         />
       </Grid>
+
+      {/* Segunda linha de cards - Métricas Detalhadas */}
+      <Grid container spacing={3} className="mb-8">
+        <MetricCard
+          title={t('reports.totalPatientsAttended')}
+          value={reportData.totalPatientsAttended || 0}
+        />
+        <MetricCard
+          title={t('reports.patientRetentionRate')}
+          value={formatValue(reportData.patientRetentionRate, 'percentage')}
+        />
+        <MetricCard
+          title={t('reports.averageConsultationTime')}
+          value={formatDuration(reportData.averageConsultationTime || 0)}
+        />
+        <MetricCard
+          title={t('reports.overallPatientSatisfaction')}
+          value={`${formatValue(reportData.overallPatientSatisfaction)}/5`}
+        />
+      </Grid>
+
+      {/* Gráfico de Novas Clínicas */}
+      <Box className="mb-8">
+        <Typography variant="h5" component="h2" className="mb-4">
+          {t('reports.newClinicsOverTime')}
+        </Typography>
+        <NewClinicsChart data={dashboardData.new_clinics_data} />
+      </Box>
 
       {/* Gráficos Demográficos */}
       <Grid container spacing={3} className="mb-8">
@@ -219,6 +271,21 @@ const ViewReports: React.FC = () => {
 };
 
 // Componentes auxiliares
+const DashboardCard: React.FC<{ title: string; value: number }> = ({ title, value }) => (
+  <Grid item xs={12} sm={6} md={3}>
+    <Card>
+      <CardContent>
+        <Typography color="textSecondary" gutterBottom>
+          {title}
+        </Typography>
+        <Typography variant="h5" component="h2">
+          {value}
+        </Typography>
+      </CardContent>
+    </Card>
+  </Grid>
+);
+
 const MetricCard: React.FC<{ title: string; value: string | number }> = ({ title, value }) => (
   <Grid item xs={12} sm={6} md={3}>
     <Card>

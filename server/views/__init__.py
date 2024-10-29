@@ -9,6 +9,7 @@ from .user_views import RegistroUsuarioView, UserListView, UserViewSet
 from .audio_views import AudioUploadView
 from .two_factor_views import TrustedDeviceView
 from .database_views import DatabaseOverviewView
+from .webhook_views import ProcessedConsultationDataView
 from .home_views import home
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
@@ -19,5 +20,5 @@ __all__ = [
     'DashboardView', 'DashboardGeralView', 'NewClinicsDataView', 'DashboardDataView',
     'GravarConsultaView', 'RegistroUsuarioView', 'AudioUploadView', 'TrustedDeviceView',
     'DatabaseOverviewView', 'home', 'ClinicaInfoView', 'LoginView',
-    'ClinicaListView', 'MedicoListView', 'UserListView', 'UserViewSet', 'ReportsView'
+    'ClinicaListView', 'MedicoListView', 'UserListView', 'UserViewSet', 'ReportsView', 'ProcessedConsultationDataView'
 ]

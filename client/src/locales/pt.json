@@ -94,5 +94,24 @@
   "loading": "Carregando...",
   "error": "Erro ao carregar dados",
   "pauseRecording": "Pausar Gravação",
-  "resumeRecording": "Continuar Gravação"
+  "resumeRecording": "Continuar Gravação",
+  "reports": {
+    "title": "Relatórios e Análises",
+    "totalPatientsAttended": "Total de Pacientes Atendidos",
+    "patientRetentionRate": "Taxa de Retenção",
+    "averageConsultationTime": "Tempo Médio de Consulta",
+    "overallPatientSatisfaction": "Satisfação Geral",
+    "newClinicsOverTime": "Novas Clínicas ao Longo do Tempo",
+    "ageDistribution": "Distribuição por Idade",
+    "genderDistribution": "Distribuição por Gênero",
+    "occupationDistribution": "Distribuição por Ocupação",
+    "locationDistribution": "Distribuição por Localização",
+    "doctorsPerformance": "Desempenho dos Médicos"
+  },
+  "dashboard": {
+    "totalClinics": "Total de Clínicas",
+    "totalDoctors": "Total de Médicos",
+    "totalPatients": "Total de Pacientes",
+    "totalConsultations": "Total de Consultas"
+  }
 }

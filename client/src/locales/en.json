@@ -82,5 +82,18 @@
   "selectPatient": "Select Patient",
   "audiosNaoEnviados": "Unsent Audios",
   "pauseRecording": "Pause Recording",
-  "resumeRecording": "Resume Recording"
+  "resumeRecording": "Resume Recording",
+  "reports": {
+    "title": "Reports and Analytics",
+    "totalPatientsAttended": "Total Patients Attended",
+    "patientRetentionRate": "Retention Rate",
+    "averageConsultationTime": "Average Consultation Time",
+    "overallPatientSatisfaction": "Overall Satisfaction",
+    "newClinicsOverTime": "New Clinics Over Time",
+    "ageDistribution": "Age Distribution",
+    "genderDistribution": "Gender Distribution",
+    "occupationDistribution": "Occupation Distribution",
+    "locationDistribution": "Location Distribution",
+    "doctorsPerformance": "Doctors Performance"
+  }
 }

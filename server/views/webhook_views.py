@@ -8,7 +8,7 @@ from django.core.files.base import ContentFile
 import base64
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from .models import Consulta
+from ..models import Consulta
 
 def validate_webhook_signature(request):
     signature = request.headers.get('X-Webhook-Signature')
@@ -82,12 +82,13 @@ class ProcessedConsultationDataView(APIView):
             consultation_id = request.data.get('consultation_id')
             consultation = Consulta.objects.get(id=consultation_id)
             
-            # Atualizar dados da consulta
+            # Atualizar dados da consulta com os insights da IA
             consultation.summary = request.data.get('summary')
             consultation.satisfaction_score = request.data.get('satisfaction_score')
             consultation.quality_index = request.data.get('quality_index')
             consultation.key_topics = request.data.get('key_topics', [])
             consultation.marketing_opportunities = request.data.get('marketing_opportunities', [])
+            consultation.ai_processed = True
             consultation.save()
             
             return Response({'status': 'success'})
