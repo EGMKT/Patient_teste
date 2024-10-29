@@ -144,6 +144,22 @@ class Consulta(models.Model):
     comentario = models.TextField(blank=True)
     enviado = models.BooleanField(default=False)
     valor = models.DecimalField(max_digits=10, decimal_places=2)
+    summary = models.TextField(null=True, blank=True)
+    satisfaction_score = models.FloatField(null=True)
+    quality_index = models.FloatField(null=True)
+    key_topics = models.JSONField(default=list)
+    marketing_opportunities = models.JSONField(default=list)
+    ai_processed = models.BooleanField(default=False)
+    transcription_file = models.FileField(
+        upload_to='transcriptions/%Y/%m/%d/', 
+        null=True, 
+        blank=True
+    )
+    summary_file = models.FileField(
+        upload_to='summaries/%Y/%m/%d/', 
+        null=True, 
+        blank=True
+    )
 
     def __str__(self):
         return f"Consulta {self.id} - {self.medico} - {self.paciente}"

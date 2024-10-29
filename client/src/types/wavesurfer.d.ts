@@ -3,13 +3,29 @@ declare module 'wavesurfer.js' {
     container: string | HTMLElement;
     waveColor?: string;
     progressColor?: string;
+    backgroundColor?: string;
     cursorWidth?: number;
     cursorColor?: string;
     barWidth?: number;
     barRadius?: number;
+    barGap?: number;
     responsive?: boolean;
     height?: number;
-    // Adicione outras opções conforme necessário
+    normalize?: boolean;
+    partialRender?: boolean;
+    interact?: boolean;
+    hideScrollbar?: boolean;
+    autoCenter?: boolean;
+    mediaControls?: boolean;
+    backend?: string;
+    plugins?: any[];
+    smoothingTimeConstant?: number;
+    minPxPerSec?: number;
+    fillParent?: boolean;
+    scrollParent?: boolean;
+    audioContext?: AudioContext;
+    mediaType?: string;
+    renderFunction?: (peaks: number[][], width: number) => void;
   }
 
   interface WaveSurferBackend {
@@ -23,7 +39,15 @@ declare module 'wavesurfer.js' {
     destroy(): void;
     drawBuffer(): void;
     backend: WaveSurferBackend;
-    // Adicione outros métodos conforme necessário
+    on(event: string, callback: Function): void;
+    play(): void;
+    pause(): void;
+    stop(): void;
+    seekTo(progress: number): void;
+    setVolume(newVolume: number): void;
+    getVolume(): number;
+    exportPCM(): Float32Array;
+    exportImage(format: string, quality: number): string;
   }
 
   export default WaveSurfer;

@@ -40,4 +40,5 @@ urlpatterns = [
     path('api/clinicas/', ClinicaListView.as_view(), name='clinica_list'),
     path('api/dashboard/new-clinics/', NewClinicsDataView.as_view(), name='new-clinics-data'),
     path('api/dashboard/data/', DashboardDataView.as_view(), name='dashboard_data'),
+    path('api/reports/', ReportsView.as_view(), name='reports'),
 ]

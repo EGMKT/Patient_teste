@@ -1,6 +1,6 @@
 import axios, { AxiosError } from 'axios';
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000/api/';
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000/api';
 
 const api = axios.create({
   baseURL: API_URL,
@@ -9,12 +9,24 @@ const api = axios.create({
 
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
-  console.log('API interceptor: token =', token);
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
+    console.log('Token sendo enviado:', token);
   }
   return config;
 });
+
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      // Handle unauthorized access
+      localStorage.removeItem('token');
+      window.location.href = '/login';
+    }
+    return Promise.reject(error);
+  }
+);
 
 export const login = async (email: string, password: string) => {
   try {
@@ -140,14 +152,23 @@ export const getDatabaseOverview = async () => {
 };
 
 export const getClinicaInfo = async () => {
-  const response = await api.get('clinica-info/');
-  return response.data;
+  try {
+    const response = await api.get('clinica-info/');
+    return response.data;
+  } catch (error) {
+    console.error('Erro ao buscar informações da clínica:', error);
+    throw error;
+  }
 };
 
 export const getUsers = async () => {
   try {
-    const response = await axios.get('/api/users/');
-    return response.data;
+    const response = await api.get('/users/');
+    return {
+      users: Array.isArray(response.data) ? response.data : response.data.users || [],
+      total_pages: response.data.total_pages,
+      current_page: response.data.current_page
+    };
   } catch (error) {
     console.error('Erro ao obter usuários:', error);
     throw error;
@@ -156,7 +177,7 @@ export const getUsers = async () => {
 
 export const deleteUser = async (userId: number) => {
   try {
-    await axios.delete(`/api/users/${userId}/`);
+    await api.delete(`/users/${userId}/`);
   } catch (error) {
     console.error('Erro ao deletar usuário:', error);
     throw error;
@@ -218,10 +239,19 @@ export const getDoctorSettings = async () => {
 
 export const getReports = async () => {
   try {
-    const response = await axios.get('/api/reports/');
+    console.log('Fazendo requisição para:', `${API_URL}/reports/`);
+    const response = await api.get('reports/');
+    console.log('Resposta:', response.data);
     return response.data;
   } catch (error) {
     console.error('Erro ao obter relatórios:', error);
+    if (axios.isAxiosError(error)) {
+      console.error('Detalhes do erro:', {
+        status: error.response?.status,
+        data: error.response?.data,
+        headers: error.response?.headers
+      });
+    }
     throw error;
   }
 };
@@ -343,10 +373,20 @@ export const updateUser = async (id: number, userData: Partial<User>) => {
   }
 };
 
+export type UserRole = 'SA' | 'AC' | 'ME';
+
 export interface User {
   id: number;
-  username: string;
   email: string;
-  role: string;
+  first_name: string;
+  last_name: string;
+  role: UserRole;
+  is_active: boolean;
+  medico?: {
+    especialidade: string;
+    clinica?: {
+      id: number;
+      nome: string;
+    };
+  };
 }
-

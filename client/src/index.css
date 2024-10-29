@@ -49,3 +49,19 @@ body {
   align-items: center;
   overflow: hidden;
 }
+
+.overflow-hidden {
+  overflow: hidden;
+}
+
+.overflow-auto {
+  overflow: auto;
+}
+
+.flex-1 {
+  flex: 1;
+}
+
+.min-h-screen {
+  min-height: 100vh;
+}

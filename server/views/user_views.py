@@ -20,7 +20,7 @@ class RegistroUsuarioView(APIView):
         return Response({"message": "User registered"})
 
 class UserListView(APIView):
-    @method_decorator(cache_page(60 * 15))  # Cache por 15 minutos
+    @method_decorator(cache_page(60 * 15))
 
     def get(self, request):
         users = User.objects.all().order_by('-date_joined')

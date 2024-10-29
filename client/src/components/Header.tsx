@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { FiGlobe, FiLogOut, FiSettings, FiMenu } from 'react-icons/fi';
 import { useAuth } from '../contexts/AuthContext';
+import { getClinicaInfo } from '../api';
 import TwoFactorSettingsModal from './TwoFactorSettingsModal';
 
 interface HeaderProps {
@@ -26,6 +27,24 @@ const Header: React.FC<HeaderProps> = ({
   const [showLanguageMenu, setShowLanguageMenu] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showTwoFactorSettings, setShowTwoFactorSettings] = useState(false);
+  const [clinicInfo, setClinicInfo] = useState<{nome: string} | null>(null);
+
+  useEffect(() => {
+    const fetchClinicInfo = async () => {
+      if (user) {
+        try {
+          console.log('Buscando informações da clínica...');
+          const response = await getClinicaInfo();
+          console.log('Resposta da clínica:', response);
+          setClinicInfo(response);
+        } catch (error) {
+          console.error('Erro ao buscar informações da clínica:', error);
+        }
+      }
+    };
+
+    fetchClinicInfo();
+  }, [user]);
 
   const handleLogout = () => {
     logout();
@@ -39,7 +58,7 @@ const Header: React.FC<HeaderProps> = ({
 
   return (
     <header className="bg-white shadow-md">
-      <div className="container mx-auto px-4 h-16 flex items-center justify-between">
+      <div className="container mx-auto px-4 h-16 flex items-center justify-between relative">
         <div className="flex items-center">
           {showMenu && (
             <button
@@ -50,8 +69,14 @@ const Header: React.FC<HeaderProps> = ({
               <FiMenu className="text-gray-600" />
             </button>
           )}
-          <h1 className="text-xl font-bold">{clinicName || 'PatientFunnel'}</h1>
+          <h1 className="text-xl font-bold">PatientFunnel</h1>
         </div>
+        
+        {/* Nome da clínica centralizado */}
+        <div className="absolute left-1/2 transform -translate-x-1/2">
+          <span className="text-xl font-semibold">{clinicInfo?.nome || ''}</span>
+        </div>
+
         <div className="flex items-center space-x-2">
           <LanguageMenu />
           {user?.role === 'SA' && (

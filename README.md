@@ -130,6 +130,7 @@ PatientFunnel-test/
 │ │ │ ├── ProtectedRoute.tsx
 │ │ │ ├── SuperAdminHeader.tsx
 │ │ │ ├── TwoFactorSettingsModal.tsx
+│ │ │ ├── DocumentViewer.tsx
 │ │ │ └── Sidebar.tsx
 │ │ ├── contexts/
 │ │ │ └── AuthContext.tsx
@@ -152,6 +153,7 @@ PatientFunnel-test/
 │ │ │ ├── ManageSuperAdmins.tsx
 │ │ │ ├── SuperAdminDashboard.tsx
 │ │ │ ├── ViewReports.tsx
+│ │ │ └── ConsultationDetails.tsx
 │ │ ├── types/
 │ │ │ └── wavesurfer.d.ts
 │ │ ├── api.ts
@@ -194,6 +196,7 @@ PatientFunnel-test/
 │ │ ├── two_factor_views.py
 │ │ ├── servico_views.py
 │ │ ├── user_views.py
+│ │ ├── webhook_views.py
 │ │ ├── __init__.py
 │ │ ├── __pycache__/
 │ │ │ └── (...)
@@ -256,8 +259,7 @@ PatientFunnel-test/
   - Autenticação por PIN, com permissões adicionais.
 
 ## Relatórios e Dados
-
-- [ ] Implementar geração e visualização dos seguintes relatórios:
+### INSIGHTS COLETIVOS QUE DEVERÃO SER EXTRAÍDOS PARA COLOCAÇÃO NOS RELATÓRIOS:
   - [ ] Quantidade total de pacientes atendidos.
   - [ ] Quantidade de pacientes atendidos por profissional.
   - [ ] Quantidade total de pacientes novos atendidos.
@@ -270,8 +272,37 @@ PatientFunnel-test/
   - [ ] Índice de qualidade do atendimento de cada profissional (análise semântica).
   - [ ] Dados gerais (Faixa de Idade, gênero, ocupação e localização dos pacientes).
 
-## Fluxo n8n
+### EXEMPLOS DE INSIGHTS INDIVIDUAIS QUE DEVERÃO SER EXTRAÍDOS A PARTIR DA TRANSCRIÇÃO – NÃO SE LIMITANDO A APENAS ESSES:
+#### Categoria - Sobre os procedimentos:
+- Tipos de procedimentos mais desejados pelo paciente.
+- Expectativas dos pacientes em relação aos resultados dos procedimentos.
+- Problemas específicos que gostariam de resolver.
+- Experiência relatada com resultados e profissionais anteriores.
+- Interesse em tratamentos inovadores ou emergentes.
 
+#### Categoria - Aspectos pessoais e emocionais:
+- Motivações por trás da escolha de certos tratamentos (ex. estético, funcional, reparador).
+- Razões emocionais ou psicológicas para buscar procedimentos estéticos.
+- Autoestima e imagem corporal.
+- Aspectos pessoais e emocionais relatados pelo paciente ao profissional durante a consulta.
+- Comentários e feedbacks sobre o que mais gostaram na clínica e no profissional.
+
+#### Categoria - Preocupações sobre a saúde:
+- Principais preocupações e desafios que os pacientes enfrentam em relação à estética e saúde.
+- Estilo de vida e hábitos que podem influenciar as necessidades de saúde estética.
+- Interesse em produtos adicionais como cosméticos, suplementos ou cuidados pós-procedimento.
+- Remédios, cosméticos e tipos de produtos que utilizam e como utilizam, quando começou o uso e quem indicou o uso desses.
+
+- Ranking: Top 5 problemas mais comuns relatados pelos pacientes.
+- Ranking: Top 5 procedimentos mais realizados.
+- Ranking: Top 3 motivações por trás da escolha dos tratamentos (estético, funcional, reparador).
+- Ranking: Top 5 razões emocionais ou psicológicas para buscar o tratamento.
+- Ranking: Top 3 expectativas dos pacientes em relação ao tratamento.
+- Nível médio de Auto estima e imagem corporal dos pacientes (classificado de 0 à 5 estrelas)
+- Porcentagem de pacientes que relataram insegurança/medo com os procedimentos.
+- Porcentagem de pacientes que mostraram interesse em tratamentos inovadores ou emergentes.
+
+## Fluxo n8n
 O fluxo atual do n8n é:
 
 1. Recebimento do webhook do aplicativo.

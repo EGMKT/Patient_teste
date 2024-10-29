@@ -89,5 +89,10 @@
   },
   "newClinics": "Novas Clínicas",
   "newClinicsOverTime": "Novas Clínicas ao Longo do Tempo",
-  "errorFetchingData": "Erro ao buscar dados"
+  "errorFetchingData": "Erro ao buscar dados",
+  "noUsersFound": "Nenhum usuário encontrado",
+  "loading": "Carregando...",
+  "error": "Erro ao carregar dados",
+  "pauseRecording": "Pausar Gravação",
+  "resumeRecording": "Continuar Gravação"
 }

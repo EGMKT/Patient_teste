@@ -22,6 +22,7 @@ const ConsultationSetup: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [clinicName, setClinicName] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [language, setLanguage] = useState('pt');
 
   const services = [
     t('generalConsultation'),
@@ -81,6 +82,7 @@ const ConsultationSetup: React.FC = () => {
           patientId: selectedPatient,
           service: service,
           participants: participants,
+          language: language,
           startTime: currentDate
         } 
       });
@@ -142,6 +144,26 @@ const ConsultationSetup: React.FC = () => {
                     }`}
                   >
                     {num}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div>
+              <p className="mb-2">{t('language')}:</p>
+              <div className="flex justify-center gap-4">
+                {[
+                  { code: 'pt', label: 'Português' },
+                  { code: 'en', label: 'English' }
+                ].map((lang) => (
+                  <button
+                    key={lang.code}
+                    type="button"
+                    onClick={() => setLanguage(lang.code)}
+                    className={`px-4 py-2 rounded-full ${
+                      language === lang.code ? 'bg-blue-500 text-white' : 'bg-gray-200'
+                    }`}
+                  >
+                    {lang.label}
                   </button>
                 ))}
               </div>

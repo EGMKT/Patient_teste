@@ -64,13 +64,25 @@ class ClinicaInfoView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        clinica = request.user.clinica
-        if clinica:
-            return Response({
-                'nome': clinica.nome,
-                'logo': clinica.logo.url if clinica.logo else None
-            })
-        return Response({'error': 'Clínica não encontrada'}, status=404)
+        try:
+            # Verifica se o usuário tem uma clínica associada através do médico
+            if hasattr(request.user, 'medico') and request.user.medico.clinica:
+                clinica = request.user.medico.clinica
+                return Response({
+                    'nome': clinica.nome,
+                    'logo': clinica.logo.url if clinica.logo else None
+                })
+            # Verifica se o usuário tem uma clínica diretamente associada (caso de admin de clínica)
+            elif hasattr(request.user, 'clinica'):
+                clinica = request.user.clinica
+                return Response({
+                    'nome': clinica.nome,
+                    'logo': clinica.logo.url if clinica.logo else None
+                })
+            return Response({'nome': None, 'logo': None})
+        except Exception as e:
+            logger.error(f"Erro ao buscar informações da clínica: {str(e)}")
+            return Response({'error': 'Erro ao buscar informações da clínica'}, status=500)
 
 class DashboardClinicaView(APIView):
     permission_classes = [IsAuthenticated]

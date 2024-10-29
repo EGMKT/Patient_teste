@@ -80,5 +80,7 @@
   "newClinicsOverTime": "New Clinics Over Time",
   "errorFetchingData": "Error fetching data",
   "selectPatient": "Select Patient",
-  "audiosNaoEnviados": "Unsent Audios"
+  "audiosNaoEnviados": "Unsent Audios",
+  "pauseRecording": "Pause Recording",
+  "resumeRecording": "Resume Recording"
 }

@@ -2,7 +2,6 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from ..models import Clinica, Usuario, Paciente, Consulta, Medico
-# Removida a importação de Procedimento
 from django.db.models import Count, Avg, F, ExpressionWrapper, fields
 from django.utils import timezone
 from django.db.models.functions import Now, TruncDay, TruncMonth
@@ -11,6 +10,9 @@ from django.views.decorators.http import require_GET
 import logging
 from dateutil.relativedelta import relativedelta
 import traceback
+from django.db import models
+from django.db.models import Case, Value, CharField
+from rest_framework.decorators import api_view, permission_classes
 
 logger = logging.getLogger(__name__)
 
@@ -197,3 +199,102 @@ class DashboardDataView(APIView):
         }
 
         return Response(data)
+
+class ReportsView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        logger.info(f"Requisição recebida - User: {request.user}, Auth: {request.auth}")
+        try:
+            # Cálculos para todos os relatórios solicitados
+            total_patients = Paciente.objects.count()
+            
+            # Pacientes por médico
+            patients_per_doctor = Consulta.objects.values(
+                'medico__usuario__first_name',
+                'medico__usuario__last_name'
+            ).annotate(
+                total_patients=Count('paciente', distinct=True)
+            )
+            
+            # Novos vs. antigos pacientes
+            new_patients = Paciente.objects.filter(is_novo=True).count()
+            returning_patients = Paciente.objects.filter(is_novo=False).count()
+            
+            # Índice de fidelização (pacientes que retornaram nos últimos 6 meses)
+            six_months_ago = timezone.now() - timedelta(days=180)
+            retained_patients = Paciente.objects.filter(
+                consulta__data__gte=six_months_ago
+            ).distinct().count()
+            retention_rate = (retained_patients / total_patients) if total_patients > 0 else 0
+            
+            # Tempo médio de atendimento
+            avg_consultation_time = Consulta.objects.aggregate(
+                avg_time=Avg('duracao')
+            )['avg_time']
+            
+            # Incidentes
+            total_incidents = Consulta.objects.filter(incidente=True).count()
+            
+            # Satisfação média
+            avg_satisfaction = Consulta.objects.aggregate(
+                avg_satisfaction=Avg('satisfacao')
+            )['avg_satisfaction']
+            
+            # Dados demográficos
+            demographics = {
+                'age_groups': dict(Paciente.objects.annotate(
+                    age_group=Case(
+                        When(idade__lt=18, then=Value('0-17')),
+                        When(idade__lt=30, then=Value('18-29')),
+                        When(idade__lt=50, then=Value('30-49')),
+                        default=Value('50+'),
+                        output_field=CharField(),
+                    )
+                ).values('age_group').annotate(count=Count('id')).values_list('age_group', 'count')),
+                'gender': dict(Paciente.objects.values('genero').annotate(
+                    count=Count('id')
+                ).values_list('genero', 'count')),
+                'occupation': dict(Paciente.objects.values('ocupacao').annotate(
+                    count=Count('id')
+                ).values_list('ocupacao', 'count')),
+                'location': dict(Paciente.objects.values('localizacao').annotate(
+                    count=Count('id')
+                ).values_list('localizacao', 'count'))
+            }
+
+            return Response({
+                'message': 'API funcionando',
+                'user': request.user.email,
+                'total_patients_attended': total_patients,
+                'patients_per_doctor': patients_per_doctor,
+                'new_patients_attended': new_patients,
+                'returning_patients_attended': returning_patients,
+                'patient_retention_rate': retention_rate,
+                'average_consultation_time': avg_consultation_time,
+                'total_incidents': total_incidents,
+                'overall_satisfaction': avg_satisfaction,
+                'demographics': demographics
+            })
+            
+        except Exception as e:
+            logger.error(f"Erro ao gerar relatórios: {str(e)}")
+            return Response(
+                {"error": "Erro ao gerar relatórios"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_reports(request):
+    try:
+        # Lógica para gerar relatórios
+        reports_data = {
+            'totalPatientsAttended': 0,
+            'patientsPerDoctor': {},
+            # ... outros dados
+        }
+        return Response(reports_data)
+    except Exception as e:
+        return Response({'error': str(e)}, status=500)
+
