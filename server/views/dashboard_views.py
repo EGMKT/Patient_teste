@@ -136,9 +136,9 @@ class NewClinicsDataView(APIView):
             logger.info(f"Período de busca: de {start_date} até {end_date}")
             
             new_clinics_data = Clinica.objects.filter(
-                data_criacao__range=(start_date, end_date)
+                created_at__range=(start_date, end_date)
             ).annotate(
-                month=TruncMonth('data_criacao')
+                month=TruncMonth('created_at')
             ).values('month').annotate(
                 count=Count('id')
             ).order_by('month')
@@ -176,13 +176,21 @@ class DashboardDataView(APIView):
         end_date = timezone.now()
         start_date = end_date - relativedelta(months=6)
 
-        new_clinics_data = Clinica.objects.filter(
-            created_at__range=(start_date, end_date)
-        ).annotate(
-            month=TruncMonth('created_at')
-        ).values('month').annotate(
-            count=Count('id')
-        ).order_by('month')
+        # Ajuste na query para garantir dados corretos por mês
+        new_clinics_data = (
+            Clinica.objects
+            .filter(created_at__range=(start_date, end_date))
+            .annotate(
+                month=TruncMonth('created_at')
+            )
+            .values('month')
+            .annotate(count=Count('id'))
+            .order_by('month')
+        )
+
+        # Adiciona log para debug
+        logger.info(f"Query de novas clínicas: {new_clinics_data.query}")
+        logger.info(f"Dados encontrados: {list(new_clinics_data)}")
 
         data = {
             'total_clinicas': Clinica.objects.count(),

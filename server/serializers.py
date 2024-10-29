@@ -14,10 +14,11 @@ class UsuarioSerializer(serializers.ModelSerializer):
 
 class MedicoSerializer(serializers.ModelSerializer):
     usuario_email = serializers.EmailField(source='usuario.email', read_only=True)
+    clinica_nome = serializers.CharField(source='clinica.nome', read_only=True)
     
     class Meta:
         model = Medico
-        fields = ['usuario', 'usuario_email', 'especialidade', 'clinica']
+        fields = ['usuario', 'usuario_email', 'especialidade', 'clinica', 'clinica_nome']
 
     def create(self, validated_data):
         usuario_email = self.context['request'].data.get('usuario_email')
@@ -79,3 +80,38 @@ class ClinicRegistrationSerializer(serializers.ModelSerializer):
     class Meta:
         model = ClinicRegistration
         fields = '__all__'
+
+class MedicoNestedSerializer(serializers.ModelSerializer):
+    clinica = ClinicaSerializer(read_only=True)
+    clinica_id = serializers.IntegerField(write_only=True, required=False)
+    
+    class Meta:
+        model = Medico
+        fields = ['especialidade', 'clinica', 'clinica_id']
+
+class UsuarioSerializer(serializers.ModelSerializer):
+    medico = MedicoNestedSerializer(required=False)
+    
+    class Meta:
+        model = Usuario
+        fields = ['id', 'email', 'first_name', 'last_name', 'role', 'medico']
+
+    def update(self, instance, validated_data):
+        medico_data = validated_data.pop('medico', None)
+        
+        # Atualiza dados do usuário
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+
+        # Atualiza dados do médico se existirem
+        if medico_data and hasattr(instance, 'medico'):
+            medico = instance.medico
+            clinica_id = medico_data.get('clinica_id')
+            if clinica_id:
+                medico.clinica_id = clinica_id
+            if 'especialidade' in medico_data:
+                medico.especialidade = medico_data['especialidade']
+            medico.save()
+
+        return instance

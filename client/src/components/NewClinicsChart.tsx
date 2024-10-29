@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { useTranslation } from 'react-i18next';
 
@@ -23,6 +23,13 @@ const NewClinicsChart: React.FC<NewClinicsChartProps> = ({ data }) => {
 
   const maxCount = Math.max(...data.map(item => item.count));
   const yAxisMax = Math.ceil(maxCount * 1.2); // 20% a mais que o valor máximo
+
+  useEffect(() => {
+    // Força atualização do gráfico quando os dados mudam
+    if (data) {
+      console.log('Dados do gráfico:', data); // Debug
+    }
+  }, [data]);
 
   return (
     <ResponsiveContainer width="100%" height={300}>

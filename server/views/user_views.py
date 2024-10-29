@@ -1,7 +1,7 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from ..models import Medico
+from ..models import Medico, Usuario, Clinica
 from django.core.paginator import Paginator
 from django.views.decorators.cache import cache_page
 from django.utils.decorators import method_decorator
@@ -23,7 +23,7 @@ class UserListView(APIView):
     @method_decorator(cache_page(60 * 15))
 
     def get(self, request):
-        users = User.objects.all().order_by('-date_joined')
+        users = Usuario.objects.select_related('medico__clinica').all().order_by('email')
         paginator = Paginator(users, 20)
         page_number = request.GET.get('page')
         page_obj = paginator.get_page(page_number)
@@ -35,7 +35,7 @@ class UserListView(APIView):
         })
 
 class UserViewSet(viewsets.ModelViewSet):
-    queryset = User.objects.all()
+    queryset = Usuario.objects.select_related('medico__clinica').all()
     serializer_class = UsuarioSerializer
     permission_classes = [IsAuthenticated]
 
