@@ -9,17 +9,28 @@ interface NewClinicsChartProps {
 const NewClinicsChart: React.FC<NewClinicsChartProps> = ({ data }) => {
   const { t, i18n } = useTranslation();
 
-  const getMonthAbbreviation = (
-    month: string
-  ): string => {
-    const date = new Date(month);
-    return date.toLocaleString(i18n.language, { month: 'short' });
+  const getMonthAbbreviation = (month: string): string => {
+    try {
+      const [year, monthStr] = month.split('-');
+      const date = new Date(parseInt(year), parseInt(monthStr) - 1);
+      return new Intl.DateTimeFormat(i18n.language, { month: 'short' }).format(date);
+    } catch (error) {
+      console.error('Erro ao formatar mês:', error);
+      return month;
+    }
   };
 
   const formattedData = data.map(item => ({
     ...item,
     monthAbbr: getMonthAbbreviation(item.month)
-  }));
+  })).sort((a, b) => {
+    // Garante que os meses sejam exibidos em ordem cronológica
+    const [yearA, monthA] = a.month.split('-');
+    const [yearB, monthB] = b.month.split('-');
+    const dateA = new Date(parseInt(yearA), parseInt(monthA) - 1);
+    const dateB = new Date(parseInt(yearB), parseInt(monthB) - 1);
+    return dateA.getTime() - dateB.getTime();
+  });
 
   const maxCount = Math.max(...data.map(item => item.count));
   const yAxisMax = Math.ceil(maxCount * 1.2); // 20% a mais que o valor máximo

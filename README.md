@@ -260,21 +260,22 @@ PatientFunnel-test/
 
 ## Relatórios e Dados
 ### INSIGHTS COLETIVOS QUE DEVERÃO SER EXTRAÍDOS PARA COLOCAÇÃO NOS RELATÓRIOS:
-  - [ ] Quantidade total de pacientes atendidos.
-  - [ ] Quantidade de pacientes atendidos por profissional.
-  - [ ] Quantidade total de pacientes novos atendidos.
-  - [ ] Quantidade total de pacientes antigos atendidos.
-  - [ ] Índice de fidelização de pacientes.
-  - [ ] Tempo médio de cada atendimento.
-  - [ ] Quantidade de procedimentos realizados.
-  - [ ] Quantidade de incidentes ocorridos.
-  - [ ] Índice de satisfação geral dos pacientes (análise semântica).
-  - [ ] Índice de qualidade do atendimento de cada profissional (análise semântica).
-  - [ ] Dados gerais (Faixa de Idade, gênero, ocupação e localização dos pacientes).
+  - [ ] Quantidade total de pacientes atendidos. (extraído por código)
+  - [ ] Quantidade de pacientes atendidos por profissional. (extraído por código)
+  - [ ] Quantidade total de pacientes novos atendidos. (extraído por código)
+  - [ ] Quantidade total de pacientes antigos atendidos. (extraído por código)
+  - [ ] Índice de fidelização de pacientes. (extraído por código)
+  - [ ] Tempo médio de cada atendimento. (extraído por código)
+  ~~- [ ] Quantidade de procedimentos realizados.~~
+  ~~- [ ] Quantidade de incidentes ocorridos.~~
+  - [ ] Índice de satisfação geral dos pacientes (análise semântica/IA).
+  - [ ] Índice de satisfação geral dos pacientes e qualidade do atendimento de cada profissional(extraído por código - na aba de SuccessPage). Da até para fazer uma comparação entre real e teórico.
+  - [ ] Índice de qualidade do atendimento de cada profissional (análise semântica/IA).
+  - [ ] Dados gerais (Faixa de Idade, gênero, ocupação e localização dos pacientes). (extraído por código - com integração do pipedrive)
 
 ### EXEMPLOS DE INSIGHTS INDIVIDUAIS QUE DEVERÃO SER EXTRAÍDOS A PARTIR DA TRANSCRIÇÃO – NÃO SE LIMITANDO A APENAS ESSES:
 #### Categoria - Sobre os procedimentos:
-- Tipos de procedimentos mais desejados pelo paciente.
+- Tipos de procedimentos mais desejados pelo paciente. 
 - Expectativas dos pacientes em relação aos resultados dos procedimentos.
 - Problemas específicos que gostariam de resolver.
 - Experiência relatada com resultados e profissionais anteriores.
@@ -283,7 +284,7 @@ PatientFunnel-test/
 #### Categoria - Aspectos pessoais e emocionais:
 - Motivações por trás da escolha de certos tratamentos (ex. estético, funcional, reparador).
 - Razões emocionais ou psicológicas para buscar procedimentos estéticos.
-- Autoestima e imagem corporal.
+- Autoestima e imagem corporal. 
 - Aspectos pessoais e emocionais relatados pelo paciente ao profissional durante a consulta.
 - Comentários e feedbacks sobre o que mais gostaram na clínica e no profissional.
 

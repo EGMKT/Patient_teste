@@ -13,6 +13,8 @@ import traceback
 from django.db import models
 from django.db.models import Case, Value, CharField
 from rest_framework.decorators import api_view, permission_classes
+from rest_framework import status
+from datetime import timedelta, datetime
 
 logger = logging.getLogger(__name__)
 
@@ -133,29 +135,36 @@ class NewClinicsDataView(APIView):
             end_date = timezone.now()
             start_date = end_date - relativedelta(months=6)
             
-            logger.info(f"Período de busca: de {start_date} até {end_date}")
+            new_clinics_data = (
+                Clinica.objects
+                .filter(created_at__range=(start_date, end_date))
+                .annotate(month=TruncMonth('created_at'))
+                .values('month')
+                .annotate(count=Count('id'))
+                .order_by('month')
+            )
             
-            new_clinics_data = Clinica.objects.filter(
-                created_at__range=(start_date, end_date)
-            ).annotate(
-                month=TruncMonth('created_at')
-            ).values('month').annotate(
-                count=Count('id')
-            ).order_by('month')
+            # Garantir que todos os meses estejam presentes
+            months_data = {}
+            current_date = start_date
+            while current_date <= end_date:
+                months_data[current_date.strftime('%Y-%m')] = 0
+                current_date += relativedelta(months=1)
             
-            logger.info(f"Query executada: {new_clinics_data.query}")
+            # Preencher com dados reais
+            for entry in new_clinics_data:
+                month_key = entry['month'].strftime('%Y-%m')
+                months_data[month_key] = entry['count']
             
-            data = [
-                {
-                    'date': entry['month'].strftime('%Y-%m'),
-                    'count': entry['count']
-                }
-                for entry in new_clinics_data
+            # Converter para o formato esperado pelo frontend
+            formatted_data = [
+                {'month': month, 'count': count}
+                for month, count in months_data.items()
             ]
             
-            logger.info(f"Dados processados: {data}")
+            logger.info(f"Dados processados: {formatted_data}")
+            return Response(formatted_data)
             
-            return Response(data)
         except Exception as e:
             logger.error(f"Erro ao obter dados de novas clínicas: {str(e)}")
             logger.error(traceback.format_exc())
