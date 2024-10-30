@@ -32,7 +32,6 @@ const SuperAdminHeader: React.FC<SuperAdminHeaderProps> = ({ onLanguageChange, c
 
   const menuItems = [
     { title: 'Dashboard', link: '/SA' },
-    { title: 'Database Overview', link: '/SA/database-overview' },
     { title: 'Manage Users', link: '/SA/manage-users' },
     { title: 'Manage Clinics', link: '/SA/manage-clinics' },
     { title: 'View Reports', link: '/SA/view-reports' },

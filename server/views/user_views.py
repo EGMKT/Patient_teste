@@ -45,24 +45,9 @@ class UserViewSet(viewsets.ModelViewSet):
     def create(self, request, *args, **kwargs):
         try:
             with transaction.atomic():
-                # Extrair dados do médico se existirem
-                medico_data = None
-                if request.data.get('role') == 'ME':
-                    medico_data = request.data.pop('medico', None)
-
-                # Criar usuário
                 serializer = self.get_serializer(data=request.data)
                 serializer.is_valid(raise_exception=True)
-                user = serializer.save()
-
-                # Se for médico, criar o registro de médico
-                if medico_data and user.role == 'ME':
-                    Medico.objects.create(
-                        usuario=user,
-                        especialidade=medico_data.get('especialidade', ''),
-                        clinica_id=medico_data.get('clinica')
-                    )
-
+                self.perform_create(serializer)
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
         except Exception as e:
             logger.error(f"Erro ao criar usuário: {str(e)}")
@@ -71,26 +56,13 @@ class UserViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-    def update(self, request, *args, **kwargs):
-        partial = kwargs.pop('partial', False)
-        instance = self.get_object()
-        serializer = self.get_serializer(instance, data=request.data, partial=partial)
-        serializer.is_valid(raise_exception=True)
-        self.perform_update(serializer)
-        return Response(serializer.data)
-
     @transaction.atomic
     def destroy(self, request, *args, **kwargs):
         try:
             instance = self.get_object()
             logger.info(f"Iniciando exclusão do usuário {instance.id}")
             
-            # Verifica se é um médico
-            if hasattr(instance, 'medico'):
-                instance.medico.delete()
-                logger.info(f"Médico associado ao usuário {instance.id} excluído")
-            
-            # Remove o usuário
+            # Usa o método delete customizado do modelo
             instance.delete()
             logger.info(f"Usuário {instance.id} excluído com sucesso")
             
@@ -98,7 +70,6 @@ class UserViewSet(viewsets.ModelViewSet):
             
         except Exception as e:
             logger.error(f"Erro ao excluir usuário: {str(e)}")
-            transaction.set_rollback(True)
             return Response(
                 {"error": f"Erro ao excluir usuário: {str(e)}"},
                 status=status.HTTP_400_BAD_REQUEST

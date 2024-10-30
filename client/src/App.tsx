@@ -9,7 +9,6 @@ import ConsultationSetup from './pages/ConsultationSetup';
 import AudioRecording from './pages/AudioRecording';
 import ErrorPage from './pages/ErrorPage';
 import SuccessPage from './pages/SuccessPage';
-import DatabaseOverview from './pages/DatabaseOverview';
 import SuperAdminDashboard from './pages/SuperAdminDashboard';
 import ManageUsers from './pages/ManageUsers';
 import ManageClinics from './pages/ManageClinics';
@@ -50,7 +49,6 @@ const AppRoutes: React.FC = () => {
               <Route path="/SA/*" element={
                 <Routes>
                   <Route path="/" element={<SuperAdminDashboard />} />
-                  <Route path="/database-overview" element={<DatabaseOverview />} />
                   <Route path="/manage-users" element={<ManageUsers />} />
                   <Route path="/manage-clinics" element={<ManageClinics />} />
                   <Route path="/manage-registrations" element={<ManageClinicRegistrations />} />
