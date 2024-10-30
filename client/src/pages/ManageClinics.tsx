@@ -5,9 +5,13 @@ import {
   Paper, TableContainer, Button, TextField, Dialog, 
   DialogTitle, DialogContent, DialogActions, TableSortLabel,
   CircularProgress, Alert, FormControl, InputLabel, Select,
-  MenuItem, Typography
+  MenuItem, Typography, DialogContentText
 } from '@mui/material';
-import { getClinics, createClinic, updateClinic, deleteClinic, Clinic } from '../api';
+import { 
+  getClinics, createClinic, updateClinic, deleteClinic, 
+  Clinic, verifyPassword 
+} from '../api';
+import ConfirmActionDialog from '../components/ConfirmActionDialog';
 
 interface ClinicDialogProps {
   open: boolean;
@@ -25,6 +29,16 @@ const ManageClinics: React.FC = () => {
   const [currentClinic, setCurrentClinic] = useState<Clinic | null>(null);
   const [orderBy, setOrderBy] = useState<keyof Clinic>('nome');
   const [order, setOrder] = useState<'asc' | 'desc'>('asc');
+  const [confirmActionDialogOpen, setConfirmActionDialogOpen] = useState(false);
+  const [pendingAction, setPendingAction] = useState<{
+    type: 'delete';
+    clinicId?: number;
+  } | null>(null);
+  const [skipPasswordUntil, setSkipPasswordUntil] = useState<number | null>(
+    Number(localStorage.getItem('skipPasswordUntil')) || null
+  );
+  const [confirmDeleteDialogOpen, setConfirmDeleteDialogOpen] = useState(false);
+  const [selectedClinicId, setSelectedClinicId] = useState<number | null>(null);
   const { t } = useTranslation();
 
   useEffect(() => {
@@ -64,12 +78,58 @@ const ManageClinics: React.FC = () => {
     }
   };
 
-  const handleDeleteClinic = async (id: number) => {
+  const shouldAskPassword = () => {
+    if (!skipPasswordUntil) return true;
+    return new Date().getTime() > skipPasswordUntil;
+  };
+
+  const handleDeleteClick = (id: number) => {
+    setSelectedClinicId(id);
+    setConfirmDeleteDialogOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!selectedClinicId) return;
+
+    if (shouldAskPassword()) {
+      setPendingAction({ type: 'delete', clinicId: selectedClinicId });
+      setConfirmActionDialogOpen(true);
+    } else {
+      try {
+        await deleteClinic(selectedClinicId);
+        fetchClinics();
+      } catch (error) {
+        console.error('Erro ao excluir clínica:', error);
+        // Adicione tratamento de erro apropriado aqui
+      }
+    }
+    setConfirmDeleteDialogOpen(false);
+  };
+
+  const handleConfirmAction = async (password: string, dontAskToday: boolean) => {
     try {
-      await deleteClinic(id);
+      if (!pendingAction) return;
+
+      const verified = await verifyPassword(password);
+      if (!verified) {
+        return;
+      }
+
+      if (dontAskToday) {
+        const until = new Date().setHours(23, 59, 59, 999);
+        setSkipPasswordUntil(until);
+        localStorage.setItem('skipPasswordUntil', until.toString());
+      }
+
+      if (pendingAction.type === 'delete' && pendingAction.clinicId) {
+        await deleteClinic(pendingAction.clinicId);
+      }
+
       fetchClinics();
+      setConfirmActionDialogOpen(false);
+      setPendingAction(null);
     } catch (error) {
-      console.error('Erro ao deletar clínica:', error);
+      console.error('Erro ao executar ação:', error);
     }
   };
 
@@ -170,7 +230,7 @@ const ManageClinics: React.FC = () => {
                       <Button onClick={() => { setCurrentClinic(clinic); setOpenDialog(true); }}>
                         {t('manageClinics.edit')}
                       </Button>
-                      <Button onClick={() => handleDeleteClinic(clinic.id)}>
+                      <Button onClick={() => handleDeleteClick(clinic.id)}>
                         {t('manageClinics.delete')}
                       </Button>
                     </TableCell>
@@ -190,6 +250,34 @@ const ManageClinics: React.FC = () => {
                 : handleCreateClinic(clinicData)
             }
           />
+
+          <ConfirmActionDialog
+            open={confirmActionDialogOpen}
+            onClose={() => setConfirmActionDialogOpen(false)}
+            onConfirm={handleConfirmAction}
+            title={t('manageClinics.confirmDelete')}
+            message={t('manageClinics.deleteConfirmMessage')}
+          />
+
+          <Dialog
+            open={confirmDeleteDialogOpen}
+            onClose={() => setConfirmDeleteDialogOpen(false)}
+          >
+            <DialogTitle>{t('manageClinics.confirmDeleteTitle')}</DialogTitle>
+            <DialogContent>
+              <DialogContentText>
+                {t('manageClinics.confirmDeleteMessage')}
+              </DialogContentText>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={() => setConfirmDeleteDialogOpen(false)}>
+                {t('common.cancel')}
+              </Button>
+              <Button onClick={handleConfirmDelete} color="primary">
+                {t('common.confirm')}
+              </Button>
+            </DialogActions>
+          </Dialog>
         </div>
       </div>
     </div>

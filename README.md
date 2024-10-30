@@ -131,6 +131,7 @@ PatientFunnel-test/
 │ │ │ ├── SuperAdminHeader.tsx
 │ │ │ ├── TwoFactorSettingsModal.tsx
 │ │ │ ├── DocumentViewer.tsx
+│ │ │ ├── ConfirmActionDialog.tsx
 │ │ │ └── Sidebar.tsx
 │ │ ├── contexts/
 │ │ │ └── AuthContext.tsx
@@ -150,7 +151,6 @@ PatientFunnel-test/
 │ │ │ ├── ManageUsers.tsx
 │ │ │ ├── NotFound.tsx 
 │ │ │ ├── ManageClinicRegistrations.tsx
-│ │ │ ├── ManageSuperAdmins.tsx
 │ │ │ ├── SuperAdminDashboard.tsx
 │ │ │ ├── ViewReports.tsx
 │ │ │ └── ConsultationDetails.tsx

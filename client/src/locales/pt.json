@@ -82,6 +82,10 @@
     "confirmUpdate": "Confirmar Atualização",
     "deleteUserConfirmation": "Tem certeza que deseja excluir este usuário?",
     "updateUserConfirmation": "Confirmar alterações no usuário?",
+    "confirmDeleteTitle": "Confirmar Exclusão",
+    "confirmDeleteMessage": "Tem certeza que deseja excluir este usuário? Esta ação não pode ser desfeita.",
+    "enterPassword": "Digite sua Senha",
+    "passwordRequired": "Por favor, digite sua senha para confirmar a exclusão",
     "confirm": "Confirmar",
     "roles": {
       "SA": "Super Admin",
@@ -95,7 +99,9 @@
     "error": "Erro ao carregar usuários",
     "superAdmin": "Super Admin",
     "clinicAdmin": "Admin Clínica",
-    "doctor": "Médico"
+    "doctor": "Médico",
+    "deleteError": "Não foi possível excluir o usuário. Verifique se não há dependências.",
+    "invalidPassword": "Senha incorreta"
   },
   "manageClinics": {
     "title": "Gerenciar Clínicas",
@@ -134,7 +140,11 @@
       "name": "Ordenar por nome",
       "createdAt": "Ordenar por data de criação",
       "status": "Ordenar por status"
-    }
+    },
+    "confirmDeleteTitle": "Confirmar Exclusão",
+    "confirmDeleteMessage": "Tem certeza que deseja excluir esta clínica? Esta ação não pode ser desfeita.",
+    "enterPassword": "Digite sua Senha",
+    "passwordRequired": "Por favor, digite sua senha para confirmar a exclusão"
   },
   "viewReports": "Ver Relatórios",
   "id": "ID",
@@ -145,6 +155,7 @@
   "edit": "Editar",
   "delete": "Excluir",
   "selectPatient": "Selecionar Paciente",
+  "language": "Língua",
   "audiosNaoEnviados": "Áudios Não Enviados",
   "month": {
     "short": {
@@ -196,5 +207,16 @@
     "occupationDistribution": "Distribuição por Ocupação",
     "locationDistribution": "Distribuição por Localização",
     "doctorsPerformance": "Desempenho dos Médicos"
+  },
+  "common": {
+    "password": "Senha",
+    "passwordRequired": "Senha é obrigatória",
+    "dontAskToday": "Não pedir senha novamente hoje",
+    "confirmAction": "Confirmar Ação",
+    "confirmDeleteMessage": "Digite sua senha para confirmar a exclusão",
+    "cancel": "Cancelar",
+    "confirm": "Confirmar",
+    "deleting": "Excluindo...",
+    "processing": "Processando..."
   }
 }

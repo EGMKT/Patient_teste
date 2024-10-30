@@ -4,12 +4,11 @@ import {
   Table, TableHead, TableBody, TableRow, TableCell, Paper, 
   TableContainer, Button, TextField, Dialog, DialogTitle, 
   DialogContent, DialogActions, Select, MenuItem, FormControl,
-  InputLabel, CircularProgress, Dialog as ConfirmDialog,
-  DialogTitle as ConfirmDialogTitle,
-  DialogContent as ConfirmDialogContent,
-  DialogContentText,
+  InputLabel, CircularProgress, DialogContentText,
+  Alert,
 } from '@mui/material';
-import { getUsers, createUser, updateUser, deleteUser, User, getClinics, Clinic } from '../api';
+import { getUsers, createUser, updateUser, deleteUser, User, getClinics, Clinic, verifyPassword } from '../api';
+import ConfirmActionDialog from '../components/ConfirmActionDialog';
 
 // Adicione esta definição de tipo no início do arquivo
 type UserRole = 'SA' | 'AC' | 'ME';
@@ -24,10 +23,17 @@ const ManageUsers: React.FC = () => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
   const [pendingAction, setPendingAction] = useState<{
-    type: 'update' | 'delete';
+    type: 'delete' | 'update';
     userId?: number;
     userData?: any;
   } | null>(null);
+  const [confirmActionDialogOpen, setConfirmActionDialogOpen] = useState(false);
+  const [skipPasswordUntil, setSkipPasswordUntil] = useState<number | null>(
+    Number(localStorage.getItem('skipPasswordUntil')) || null
+  );
+  const [confirmDeleteDialogOpen, setConfirmDeleteDialogOpen] = useState(false);
+  const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const { t } = useTranslation();
 
   useEffect(() => {
@@ -74,27 +80,77 @@ const ManageUsers: React.FC = () => {
     setConfirmDialogOpen(true);
   };
 
-  const handleDeleteUser = async (id: number) => {
-    setPendingAction({ type: 'delete', userId: id });
-    setConfirmDialogOpen(true);
+  const shouldAskPassword = () => {
+    if (!skipPasswordUntil) return true;
+    return new Date().getTime() > skipPasswordUntil;
   };
 
-  const handleConfirmAction = async () => {
-    try {
-      if (!pendingAction) return;
+  const handleDeleteClick = (id: number) => {
+    setSelectedUserId(id);
+    setConfirmDeleteDialogOpen(true);
+  };
 
-      if (pendingAction.type === 'update' && pendingAction.userId && pendingAction.userData) {
-        await updateUser(pendingAction.userId, pendingAction.userData);
-      } else if (pendingAction.type === 'delete' && pendingAction.userId) {
-        await deleteUser(pendingAction.userId);
+  const handleConfirmDelete = async () => {
+    if (!selectedUserId || isDeleting) return;
+
+    try {
+      setIsDeleting(true);
+      setError(null);
+      
+      if (shouldAskPassword()) {
+        setPendingAction({ type: 'delete', userId: selectedUserId });
+        setConfirmActionDialogOpen(true);
+      } else {
+        console.log(`Iniciando exclusão do usuário ${selectedUserId}`);
+        await deleteUser(selectedUserId);
+        console.log('Usuário excluído com sucesso');
+        await fetchUsers();
+        setConfirmDeleteDialogOpen(false);
+      }
+    } catch (error) {
+      console.error('Erro na exclusão:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Erro ao excluir usuário';
+      setError(errorMessage);
+    } finally {
+      setIsDeleting(false);
+      setSelectedUserId(null);
+    }
+  };
+
+  const handleConfirmAction = async (password: string, dontAskToday: boolean) => {
+    if (!pendingAction || isDeleting) return;
+
+    try {
+      setIsDeleting(true);
+      setError(null);
+      
+      const verified = await verifyPassword(password);
+      if (!verified) {
+        setError(t('manageUsers.invalidPassword'));
+        return;
       }
 
-      await fetchUsers();
-      setConfirmDialogOpen(false);
+      if (dontAskToday) {
+        const until = new Date().setHours(23, 59, 59, 999);
+        setSkipPasswordUntil(until);
+        localStorage.setItem('skipPasswordUntil', until.toString());
+      }
+
+      if (pendingAction.type === 'delete' && pendingAction.userId) {
+        await deleteUser(pendingAction.userId);
+        await fetchUsers();
+        setConfirmActionDialogOpen(false);
+        setConfirmDeleteDialogOpen(false);
+      }
+
       setPendingAction(null);
-      setOpenDialog(false);
     } catch (error) {
-      console.error('Erro ao executar ação:', error);
+      console.error('Erro na ação:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Erro ao executar ação';
+      setError(errorMessage);
+    } finally {
+      setIsDeleting(false);
+      setSelectedUserId(null);
     }
   };
 
@@ -124,6 +180,16 @@ const ManageUsers: React.FC = () => {
   return (
     <div className="flex flex-col min-h-screen bg-gray-100">
       <div className="container mx-auto p-4">
+        {error && (
+          <Alert 
+            severity="error" 
+            onClose={() => setError(null)}
+            className="mb-4"
+          >
+            {error}
+          </Alert>
+        )}
+        
         <div className="bg-white rounded-lg shadow p-6">
           <div className="flex justify-between items-center mb-6">
             <h1 className="text-2xl font-bold">{t('manageUsers.title')}</h1>
@@ -172,7 +238,7 @@ const ManageUsers: React.FC = () => {
                       <Button onClick={() => { setCurrentUser(user); setOpenDialog(true); }}>
                         {t('manageUsers.edit')}
                       </Button>
-                      <Button onClick={() => handleDeleteUser(user.id)}>
+                      <Button onClick={() => handleDeleteClick(user.id)}>
                         {t('manageUsers.delete')}
                       </Button>
                     </TableCell>
@@ -184,37 +250,41 @@ const ManageUsers: React.FC = () => {
         </div>
       </div>
 
-      <ConfirmDialog
-        open={confirmDialogOpen}
-        onClose={() => {
-          setConfirmDialogOpen(false);
-          setPendingAction(null);
-        }}
+      <Dialog
+        open={confirmDeleteDialogOpen}
+        onClose={() => !isDeleting && setConfirmDeleteDialogOpen(false)}
       >
-        <ConfirmDialogTitle>
-          {pendingAction?.type === 'delete' 
-            ? t('manageUsers.confirmDelete') 
-            : t('manageUsers.confirmUpdate')}
-        </ConfirmDialogTitle>
-        <ConfirmDialogContent>
+        <DialogTitle>{t('manageUsers.confirmDeleteTitle')}</DialogTitle>
+        <DialogContent>
           <DialogContentText>
-            {pendingAction?.type === 'delete' 
-              ? t('manageUsers.deleteUserConfirmation') 
-              : t('manageUsers.updateUserConfirmation')}
+            {t('manageUsers.confirmDeleteMessage')}
           </DialogContentText>
-        </ConfirmDialogContent>
+        </DialogContent>
         <DialogActions>
-          <Button onClick={() => {
-            setConfirmDialogOpen(false);
-            setPendingAction(null);
-          }}>
-            {t('manageUsers.cancel')}
+          <Button 
+            onClick={() => setConfirmDeleteDialogOpen(false)}
+            disabled={isDeleting}
+          >
+            {t('common.cancel')}
           </Button>
-          <Button onClick={handleConfirmAction} color="primary">
-            {t('manageUsers.confirm')}
+          <Button 
+            onClick={handleConfirmDelete}
+            color="primary"
+            disabled={isDeleting}
+          >
+            {isDeleting ? t('common.deleting') : t('common.confirm')}
           </Button>
         </DialogActions>
-      </ConfirmDialog>
+      </Dialog>
+
+      <ConfirmActionDialog
+        open={confirmActionDialogOpen}
+        onClose={() => !isDeleting && setConfirmActionDialogOpen(false)}
+        onConfirm={handleConfirmAction}
+        title={t('manageUsers.enterPassword')}
+        message={t('manageUsers.passwordRequired')}
+        disabled={isDeleting}
+      />
 
       <UserDialog
         open={openDialog}
@@ -236,7 +306,7 @@ interface UserDialogProps {
   onClose: () => void;
   user: User | null;
   clinics: Clinic[];
-  onSave: (userData: Omit<User, 'id'>) => void;
+  onSave: (userData: Omit<User, 'id'> & { password?: string }) => void;
 }
 
 const UserDialog: React.FC<UserDialogProps> = ({ open, onClose, user, clinics, onSave }) => {
@@ -290,11 +360,12 @@ const UserDialog: React.FC<UserDialogProps> = ({ open, onClose, user, clinics, o
 
     if (role === 'ME') {
       userData.medico = {
-        clinica_id: clinicId, // Ajuste para usar clinica_id
         especialidade,
+        clinica: clinicId
       };
     }
 
+    console.log('Dados sendo salvos:', userData); // Para debug
     onSave(userData);
     onClose();
   };
@@ -385,3 +456,4 @@ const UserDialog: React.FC<UserDialogProps> = ({ open, onClose, user, clinics, o
 };
 
 export default ManageUsers;
+

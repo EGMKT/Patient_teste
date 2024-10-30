@@ -6,6 +6,11 @@ from django.dispatch import receiver
 import pyotp
 from django.utils import timezone
 from django.core.exceptions import ValidationError
+import logging
+from django.db import transaction
+from django.db import connection
+
+logger = logging.getLogger(__name__)
 
 class Clinica(models.Model):
     id = models.BigAutoField(primary_key=True)
@@ -58,6 +63,14 @@ class Usuario(AbstractBaseUser, PermissionsMixin):
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
 
+    class Meta:
+        db_table = 'server_usuario'
+        permissions = [
+            ("view_dashboard_geral", "Can view dashboard geral"),
+            ("view_dashboard_clinica", "Can view dashboard clínica"),
+            ("gravar_consulta", "Can gravar consulta"),
+        ]
+
     def __str__(self):
         return self.email
 
@@ -71,6 +84,35 @@ class Usuario(AbstractBaseUser, PermissionsMixin):
         if self.role == self.SUPERADMIN:
             self.is_staff = True
         super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        try:
+            with transaction.atomic():
+                # Remove diretamente da tabela de grupos
+                cursor = connection.cursor()
+                cursor.execute(
+                    "DELETE FROM server_usuario_groups WHERE usuario_id = %s",
+                    [self.id]
+                )
+                
+                if hasattr(self, 'medico'):
+                    self.medico.delete()
+                
+                # Remove o usuário
+                cursor.execute(
+                    "DELETE FROM server_usuario WHERE id = %s",
+                    [self.id]
+                )
+                
+        except Exception as e:
+            logger.error(f"Erro ao deletar usuário: {str(e)}")
+            raise
+
+    def has_perm(self, perm, obj=None):
+        return self.is_staff
+
+    def has_module_perms(self, app_label):
+        return self.is_staff
 
 @receiver(post_migrate)
 def create_custom_permissions(sender, **kwargs):
@@ -109,6 +151,14 @@ class Medico(models.Model):
     def save(self, *args, **kwargs):
         self.full_clean()
         super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        try:
+            with transaction.atomic():
+                super().delete(*args, **kwargs)
+        except Exception as e:
+            logger.error(f"Erro ao deletar médico: {str(e)}")
+            raise
 
 class Paciente(models.Model):
     nome = models.CharField(max_length=255)

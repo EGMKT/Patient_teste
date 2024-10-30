@@ -7,10 +7,6 @@ class ClinicaSerializer(serializers.ModelSerializer):
         model = Clinica
         fields = ['id', 'nome', 'created_at', 'ativa', 'pipedrive_api_token']
 
-class UsuarioSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Usuario
-        fields = ['id', 'email', 'first_name', 'last_name', 'role']
 
 class MedicoSerializer(serializers.ModelSerializer):
     usuario_email = serializers.EmailField(source='usuario.email', read_only=True)
@@ -91,27 +87,60 @@ class MedicoNestedSerializer(serializers.ModelSerializer):
 
 class UsuarioSerializer(serializers.ModelSerializer):
     medico = MedicoNestedSerializer(required=False)
+    password = serializers.CharField(write_only=True, required=False)
     
     class Meta:
         model = Usuario
-        fields = ['id', 'email', 'first_name', 'last_name', 'role', 'medico']
+        fields = ['id', 'email', 'first_name', 'last_name', 'role', 'password', 'medico']
+        extra_kwargs = {'password': {'write_only': True}}
+
+    def create(self, validated_data):
+        medico_data = validated_data.pop('medico', None)
+        password = validated_data.pop('password', None)
+        
+        # Cria o usuário
+        user = Usuario.objects.create(**validated_data)
+        if password:
+            user.set_password(password)
+            user.save()
+
+        # Se for médico, cria o registro de médico
+        if medico_data and user.role in ['ME', 'AC']:
+            clinica_id = medico_data.pop('clinica_id', None)
+            Medico.objects.create(
+                usuario=user,
+                clinica_id=clinica_id,
+                **medico_data
+            )
+
+        return user
 
     def update(self, instance, validated_data):
         medico_data = validated_data.pop('medico', None)
+        password = validated_data.pop('password', None)
         
         # Atualiza dados do usuário
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
+        
+        if password:
+            instance.set_password(password)
+        
         instance.save()
 
-        # Atualiza dados do médico se existirem
-        if medico_data and hasattr(instance, 'medico'):
-            medico = instance.medico
-            clinica_id = medico_data.get('clinica_id')
+        # Atualiza ou cria dados do médico
+        if medico_data and instance.role in ['ME', 'AC']:
+            medico, created = Medico.objects.get_or_create(usuario=instance)
+            clinica_id = medico_data.pop('clinica_id', None)
             if clinica_id:
                 medico.clinica_id = clinica_id
-            if 'especialidade' in medico_data:
-                medico.especialidade = medico_data['especialidade']
+            
+            for attr, value in medico_data.items():
+                setattr(medico, attr, value)
+            
             medico.save()
+        elif instance.role not in ['ME', 'AC'] and hasattr(instance, 'medico'):
+            # Se não é mais médico, remove o registro de médico
+            instance.medico.delete()
 
         return instance

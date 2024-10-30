@@ -163,7 +163,7 @@ export const getClinicaInfo = async () => {
 
 export const getUsers = async () => {
   try {
-    const response = await api.get('/users/');
+    const response = await api.get('users/');
     return {
       users: Array.isArray(response.data) ? response.data : response.data.users || [],
       total_pages: response.data.total_pages,
@@ -175,11 +175,23 @@ export const getUsers = async () => {
   }
 };
 
-export const deleteUser = async (userId: number) => {
+export const deleteUser = async (userId: number): Promise<void> => {
   try {
-    await api.delete(`/users/${userId}/`);
+    console.log(`Iniciando requisição para excluir usuário ${userId}`);
+    
+    const response = await api.delete(`users/${userId}/`);
+    
+    console.log('Resposta da exclusão:', response);
+    
+    if (response.status !== 204) {
+      throw new Error('Erro ao excluir usuário');
+    }
   } catch (error) {
-    console.error('Erro ao deletar usuário:', error);
+    console.error('Erro completo:', error);
+    if (axios.isAxiosError(error)) {
+      const errorMessage = error.response?.data?.error || 'Erro ao excluir usuário';
+      throw new Error(errorMessage);
+    }
     throw error;
   }
 };
@@ -225,9 +237,15 @@ export const updateClinic = async (id: number, clinicData: Partial<Clinic>): Pro
 
 export const deleteClinic = async (id: number): Promise<void> => {
   try {
-    await api.delete(`/clinicas/${id}/`);
+    const response = await api.delete(`/clinicas/${id}/`);
+    if (response.status !== 204) {
+      throw new Error('Erro ao excluir clínica');
+    }
   } catch (error) {
-    console.error('Erro ao deletar clínica:', error);
+    if (axios.isAxiosError(error)) {
+      console.error('Erro ao deletar clínica:', error.response?.data);
+      throw new Error(error.response?.data?.error || 'Erro ao excluir clínica');
+    }
     throw error;
   }
 };
@@ -353,12 +371,28 @@ export interface SuperAdmin {
 
 export default api;
 
-export const createUser = async (userData: Omit<User, 'id'>) => {
+export const createUser = async (userData: Omit<User, 'id'> & { password?: string }) => {
   try {
-    const response = await api.post('/users/', userData);
+    console.log('Dados sendo enviados:', userData);
+    const response = await api.post('/users/', {
+      email: userData.email,
+      first_name: userData.first_name,
+      last_name: userData.last_name,
+      password: userData.password,
+      role: userData.role,
+      ...(userData.role === 'ME' && {
+        medico: {
+          especialidade: userData.medico?.especialidade,
+          clinica: userData.medico?.clinica?.id
+        }
+      })
+    });
     return response.data;
   } catch (error) {
     console.error('Erro ao criar usuário:', error);
+    if (axios.isAxiosError(error) && error.response) {
+      console.error('Resposta do servidor:', error.response.data);
+    }
     throw error;
   }
 };
@@ -382,6 +416,7 @@ export interface User {
   last_name: string;
   role: UserRole;
   is_active: boolean;
+  password?: string;
   medico?: {
     especialidade: string;
     clinica?: {
@@ -390,3 +425,30 @@ export interface User {
     };
   };
 }
+
+export const verifyPassword = async (password: string) => {
+  try {
+    const response = await api.post('/verify-password/', { password });
+    return response.data.valid;
+  } catch (error) {
+    console.error('Erro ao verificar senha:', error);
+    return false;
+  }
+};
+
+export const toggleUserStatus = async (userId: number, isActive: boolean): Promise<void> => {
+  try {
+    const response = await api.patch(`/api/users/${userId}/`, {
+      is_active: isActive
+    });
+    if (response.status !== 200) {
+      throw new Error('Erro ao atualizar status do usuário');
+    }
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      const errorMessage = error.response?.data?.error || 'Erro ao atualizar status do usuário';
+      throw new Error(errorMessage);
+    }
+    throw new Error('Erro ao atualizar status do usuário');
+  }
+};
