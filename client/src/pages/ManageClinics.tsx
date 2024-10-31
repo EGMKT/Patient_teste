@@ -5,13 +5,14 @@ import {
   Paper, TableContainer, Button, TextField, Dialog, 
   DialogTitle, DialogContent, DialogActions, TableSortLabel,
   CircularProgress, Alert, FormControl, InputLabel, Select,
-  MenuItem, Typography, DialogContentText
+  MenuItem, Typography, DialogContentText, Checkbox
 } from '@mui/material';
 import { 
   getClinics, createClinic, updateClinic, deleteClinic, 
-  Clinic, verifyPassword 
+  Clinic, verifyPassword, bulkUpdateClinics 
 } from '../api';
 import ConfirmActionDialog from '../components/ConfirmActionDialog';
+import axios from 'axios';
 
 interface ClinicDialogProps {
   open: boolean;
@@ -31,14 +32,17 @@ const ManageClinics: React.FC = () => {
   const [order, setOrder] = useState<'asc' | 'desc'>('asc');
   const [confirmActionDialogOpen, setConfirmActionDialogOpen] = useState(false);
   const [pendingAction, setPendingAction] = useState<{
-    type: 'delete';
+    type: 'delete' | 'bulk';
     clinicId?: number;
+    action?: 'activate' | 'deactivate';
+    clinicIds?: number[];
   } | null>(null);
   const [skipPasswordUntil, setSkipPasswordUntil] = useState<number | null>(
     Number(localStorage.getItem('skipPasswordUntil')) || null
   );
   const [confirmDeleteDialogOpen, setConfirmDeleteDialogOpen] = useState(false);
   const [selectedClinicId, setSelectedClinicId] = useState<number | null>(null);
+  const [selectedClinics, setSelectedClinics] = useState<number[]>([]);
   const { t } = useTranslation();
 
   useEffect(() => {
@@ -112,6 +116,7 @@ const ManageClinics: React.FC = () => {
 
       const verified = await verifyPassword(password);
       if (!verified) {
+        setError(t('manageClinics.invalidPassword'));
         return;
       }
 
@@ -123,13 +128,18 @@ const ManageClinics: React.FC = () => {
 
       if (pendingAction.type === 'delete' && pendingAction.clinicId) {
         await deleteClinic(pendingAction.clinicId);
+      } else if (pendingAction.type === 'bulk' && pendingAction.action && pendingAction.clinicIds) {
+        await bulkUpdateClinics(pendingAction.clinicIds, pendingAction.action);
       }
 
-      fetchClinics();
+      await fetchClinics();
       setConfirmActionDialogOpen(false);
       setPendingAction(null);
+      setSelectedClinics([]);
+      setError(null);
     } catch (error) {
       console.error('Erro ao executar ação:', error);
+      setError(error instanceof Error ? error.message : 'Erro ao executar ação');
     }
   };
 
@@ -155,6 +165,53 @@ const ManageClinics: React.FC = () => {
         : bValue.localeCompare(aValue);
     });
   }, [filteredClinics, orderBy, order]);
+
+  const handleSelectAll = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.checked) {
+      setSelectedClinics(sortedClinics.map(clinic => clinic.id));
+    } else {
+      setSelectedClinics([]);
+    }
+  };
+
+  const handleSelectClinic = (clinicId: number) => {
+    setSelectedClinics(prev => 
+      prev.includes(clinicId) 
+        ? prev.filter(id => id !== clinicId)
+        : [...prev, clinicId]
+    );
+  };
+
+  const handleBulkAction = async (action: 'activate' | 'deactivate') => {
+    if (selectedClinics.length === 0) return;
+
+    try {
+      if (shouldAskPassword()) {
+        setPendingAction({ 
+          type: 'bulk',
+          action: action,
+          clinicIds: selectedClinics 
+        });
+        setConfirmActionDialogOpen(true);
+      } else {
+        console.log('Enviando requisição bulk update:', {
+          clinicIds: selectedClinics,
+          action: action
+        });
+        await bulkUpdateClinics(selectedClinics, action);
+        await fetchClinics();
+        setSelectedClinics([]);
+        setError(null);
+      }
+    } catch (error) {
+      console.error('Erro detalhado na ação em massa:', error);
+      if (axios.isAxiosError(error)) {
+        setError(`Erro: ${error.response?.status} - ${error.response?.data?.error || error.message}`);
+      } else {
+        setError(t('manageClinics.bulkActionError'));
+      }
+    }
+  };
 
   if (loading) {
     return (
@@ -198,10 +255,36 @@ const ManageClinics: React.FC = () => {
             className="mb-4"
           />
 
+          <div className="mb-4 flex gap-2">
+            <Button
+              variant="contained"
+              color="primary"
+              disabled={selectedClinics.length === 0}
+              onClick={() => handleBulkAction('activate')}
+            >
+              {t('manageClinics.activateSelected')}
+            </Button>
+            <Button
+              variant="contained"
+              color="secondary"
+              disabled={selectedClinics.length === 0}
+              onClick={() => handleBulkAction('deactivate')}
+            >
+              {t('manageClinics.deactivateSelected')}
+            </Button>
+          </div>
+
           <TableContainer component={Paper}>
             <Table>
               <TableHead>
                 <TableRow>
+                  <TableCell padding="checkbox">
+                    <Checkbox
+                      indeterminate={selectedClinics.length > 0 && selectedClinics.length < sortedClinics.length}
+                      checked={selectedClinics.length === sortedClinics.length}
+                      onChange={handleSelectAll}
+                    />
+                  </TableCell>
                   <TableCell>
                     <TableSortLabel
                       active={orderBy === 'nome'}
@@ -218,7 +301,20 @@ const ManageClinics: React.FC = () => {
               </TableHead>
               <TableBody>
                 {sortedClinics.map((clinic) => (
-                  <TableRow key={clinic.id}>
+                  <TableRow 
+                    key={clinic.id}
+                    selected={selectedClinics.includes(clinic.id)}
+                    sx={{ 
+                      opacity: clinic.ativa ? 1 : 0.6,
+                      backgroundColor: clinic.ativa ? 'inherit' : 'rgba(0, 0, 0, 0.04)'
+                    }}
+                  >
+                    <TableCell padding="checkbox">
+                      <Checkbox
+                        checked={selectedClinics.includes(clinic.id)}
+                        onChange={() => handleSelectClinic(clinic.id)}
+                      />
+                    </TableCell>
                     <TableCell>{clinic.nome}</TableCell>
                     <TableCell>
                       {new Date(clinic.created_at).toLocaleDateString()}

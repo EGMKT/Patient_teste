@@ -101,7 +101,11 @@
     "clinicAdmin": "Admin Clínica",
     "doctor": "Médico",
     "deleteError": "Não foi possível excluir o usuário. Verifique se não há dependências.",
-    "invalidPassword": "Senha incorreta"
+    "invalidPassword": "Senha incorreta",
+    "status": {
+      "active": "Ativo",
+      "inactive": "Inativo"
+    }
   },
   "manageClinics": {
     "title": "Gerenciar Clínicas",
@@ -144,7 +148,12 @@
     "confirmDeleteTitle": "Confirmar Exclusão",
     "confirmDeleteMessage": "Tem certeza que deseja excluir esta clínica? Esta ação não pode ser desfeita.",
     "enterPassword": "Digite sua Senha",
-    "passwordRequired": "Por favor, digite sua senha para confirmar a exclusão"
+    "passwordRequired": "Por favor, digite sua senha para confirmar a exclusão",
+    "activateSelected": "Ativar Selecionadas",
+    "deactivateSelected": "Desativar Selecionadas",
+    "bulkActionError": "Erro ao executar ação em massa",
+    "confirmBulkAction": "Confirmar Ação em Massa",
+    "confirmBulkMessage": "Isso afetará todas as clínicas selecionadas e seus médicos vinculados. Deseja continuar?"
   },
   "viewReports": "Ver Relatórios",
   "id": "ID",

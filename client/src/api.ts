@@ -19,8 +19,8 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => response,
   (error) => {
+    console.error('Erro na requisição:', error.response?.status, error.response?.data);
     if (error.response?.status === 401) {
-      // Handle unauthorized access
       localStorage.removeItem('token');
       window.location.href = '/login';
     }
@@ -371,22 +371,10 @@ export interface SuperAdmin {
 
 export default api;
 
-export const createUser = async (userData: Omit<User, 'id'> & { password?: string }) => {
+export const createUser = async (userData: CreateUserData) => {
   try {
     console.log('Dados sendo enviados:', userData);
-    const response = await api.post('/users/', {
-      email: userData.email,
-      first_name: userData.first_name,
-      last_name: userData.last_name,
-      password: userData.password,
-      role: userData.role,
-      ...(userData.role === 'ME' && {
-        medico: {
-          especialidade: userData.medico?.especialidade,
-          clinica: userData.medico?.clinica?.id
-        }
-      })
-    });
+    const response = await api.post('/users/', userData);
     return response.data;
   } catch (error) {
     console.error('Erro ao criar usuário:', error);
@@ -397,17 +385,27 @@ export const createUser = async (userData: Omit<User, 'id'> & { password?: strin
   }
 };
 
-export const updateUser = async (id: number, userData: Partial<User>) => {
+export const updateUser = async (id: number, userData: UpdateUserData) => {
   try {
+    console.log('Dados sendo enviados para atualização:', userData);
     const response = await api.put(`/users/${id}/`, userData);
     return response.data;
   } catch (error) {
     console.error('Erro ao atualizar usuário:', error);
+    if (axios.isAxiosError(error) && error.response) {
+      console.error('Resposta do servidor:', error.response.data);
+    }
     throw error;
   }
 };
 
 export type UserRole = 'SA' | 'AC' | 'ME';
+
+export interface MedicoData {
+  especialidade: string;
+  clinica_id?: number;
+  clinica?: Clinic;
+}
 
 export interface User {
   id: number;
@@ -417,13 +415,22 @@ export interface User {
   role: UserRole;
   is_active: boolean;
   password?: string;
-  medico?: {
-    especialidade: string;
-    clinica?: {
-      id: number;
-      nome: string;
-    };
-  };
+  medico?: MedicoData;
+}
+
+// Removendo a extensão de Omit<User, 'id'> para evitar conflitos
+export interface CreateUserData {
+  email: string;
+  first_name: string;
+  last_name: string;
+  role: UserRole;
+  is_active: boolean;
+  password?: string;
+  medico?: MedicoData;
+}
+
+export interface UpdateUserData extends Partial<CreateUserData> {
+  medico?: MedicoData;
 }
 
 export const verifyPassword = async (password: string) => {
@@ -450,5 +457,18 @@ export const toggleUserStatus = async (userId: number, isActive: boolean): Promi
       throw new Error(errorMessage);
     }
     throw new Error('Erro ao atualizar status do usuário');
+  }
+};
+
+export const bulkUpdateClinics = async (clinicIds: number[], action: 'activate' | 'deactivate'): Promise<void> => {
+  try {
+    const response = await api.post('/clinicas/bulk_update/', {
+      clinic_ids: clinicIds,
+      action: action
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Erro ao atualizar clínicas em massa:', error);
+    throw error;
   }
 };

@@ -64,6 +64,20 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         token['role'] = user.role
         return token
 
+    def validate(self, attrs):
+        data = super().validate(attrs)
+        user = self.user
+
+        # Verifica se o usuário é médico e se sua clínica está ativa
+        if user.role in ['ME', 'AC'] and hasattr(user, 'medico'):
+            clinica = user.medico.clinica
+            if not clinica or not clinica.ativa:
+                raise serializers.ValidationError({
+                    "detail": "Acesso negado. A clínica está desativada."
+                })
+
+        return data
+
 class ConsultaListSerializer(serializers.ModelSerializer):
     paciente = serializers.StringRelatedField()
     medico = serializers.StringRelatedField()
@@ -88,10 +102,11 @@ class MedicoNestedSerializer(serializers.ModelSerializer):
 class UsuarioSerializer(serializers.ModelSerializer):
     medico = MedicoNestedSerializer(required=False)
     password = serializers.CharField(write_only=True, required=False)
+    is_active = serializers.BooleanField(read_only=True)
     
     class Meta:
         model = Usuario
-        fields = ['id', 'email', 'first_name', 'last_name', 'role', 'password', 'medico']
+        fields = ['id', 'email', 'first_name', 'last_name', 'role', 'password', 'medico', 'is_active']
         extra_kwargs = {'password': {'write_only': True}}
 
     def create(self, validated_data):

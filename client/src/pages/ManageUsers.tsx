@@ -7,7 +7,7 @@ import {
   InputLabel, CircularProgress, DialogContentText,
   Alert,
 } from '@mui/material';
-import { getUsers, createUser, updateUser, deleteUser, User, getClinics, Clinic, verifyPassword } from '../api';
+import { getUsers, createUser, updateUser, deleteUser, User, getClinics, Clinic, verifyPassword, MedicoData, UpdateUserData, CreateUserData } from '../api';
 import ConfirmActionDialog from '../components/ConfirmActionDialog';
 
 // Adicione esta definição de tipo no início do arquivo
@@ -45,6 +45,7 @@ const ManageUsers: React.FC = () => {
     try {
       setLoading(true);
       const response = await getUsers();
+      console.log('Usuários recebidos:', response.users);
       setUsers(response.users || []);
     } catch (error) {
       console.error('Erro ao buscar usuários:', error);
@@ -75,9 +76,26 @@ const ManageUsers: React.FC = () => {
     }
   };
 
-  const handleUpdateUser = async (id: number, userData: Partial<User>) => {
-    setPendingAction({ type: 'update', userId: id, userData });
-    setConfirmDialogOpen(true);
+  const handleUpdateUser = async (id: number, userData: UpdateUserData) => {
+    try {
+      console.log('Dados antes da atualização:', userData);
+      
+      if (userData.role === 'ME' && userData.medico) {
+        const updatedMedico: MedicoData = {
+          especialidade: userData.medico.especialidade,
+          clinica_id: userData.medico.clinica?.id
+        };
+        userData.medico = updatedMedico;
+      }
+      
+      console.log('Dados sendo enviados para atualização:', userData);
+      await updateUser(id, userData);
+      await fetchUsers();
+      setOpenDialog(false);
+    } catch (error) {
+      console.error('Erro ao atualizar usuário:', error);
+      setError(error instanceof Error ? error.message : 'Erro ao atualizar usuário');
+    }
   };
 
   const shouldAskPassword = () => {
@@ -222,18 +240,39 @@ const ManageUsers: React.FC = () => {
                   <TableCell>{t('manageUsers.role')}</TableCell>
                   <TableCell>{t('manageUsers.clinic')}</TableCell>
                   <TableCell>{t('manageUsers.specialty')}</TableCell>
+                  <TableCell>{t('manageUsers.status')}</TableCell>
                   <TableCell>{t('manageUsers.actions')}</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
                 {filteredUsers.map((user) => (
-                  <TableRow key={user.id}>
+                  <TableRow 
+                    key={user.id}
+                    sx={{ 
+                      opacity: user.is_active ? 1 : 0.6,
+                      backgroundColor: user.is_active ? 'inherit' : 'rgba(0, 0, 0, 0.04)'
+                    }}
+                  >
                     <TableCell>{user.email}</TableCell>
                     <TableCell>{user.first_name}</TableCell>
                     <TableCell>{user.last_name}</TableCell>
                     <TableCell>{t(`manageUsers.roles.${user.role}`)}</TableCell>
                     <TableCell>{user.medico?.clinica?.nome || '-'}</TableCell>
                     <TableCell>{user.medico?.especialidade || '-'}</TableCell>
+                    <TableCell>
+                      <span 
+                        className={`px-2 py-1 rounded-full text-sm ${
+                          user.is_active 
+                            ? 'bg-green-100 text-green-800' 
+                            : 'bg-red-100 text-red-800'
+                        }`}
+                      >
+                        {user.is_active ? 
+                          t('manageUsers.status.active') : 
+                          t('manageUsers.status.inactive')
+                        }
+                      </span>
+                    </TableCell>
                     <TableCell>
                       <Button onClick={() => { setCurrentUser(user); setOpenDialog(true); }}>
                         {t('manageUsers.edit')}
@@ -306,7 +345,7 @@ interface UserDialogProps {
   onClose: () => void;
   user: User | null;
   clinics: Clinic[];
-  onSave: (userData: Omit<User, 'id'> & { password?: string }) => void;
+  onSave: (userData: CreateUserData) => void;
 }
 
 const UserDialog: React.FC<UserDialogProps> = ({ open, onClose, user, clinics, onSave }) => {
@@ -350,22 +389,23 @@ const UserDialog: React.FC<UserDialogProps> = ({ open, onClose, user, clinics, o
   };
 
   const handleSave = () => {
-    const userData: any = {
+    const userData: CreateUserData = {
       email,
       first_name: firstName,
       last_name: lastName,
       role,
+      is_active: true,
       password: password || undefined,
     };
 
     if (role === 'ME') {
       userData.medico = {
         especialidade,
-        clinica: clinicId
+        clinica_id: clinicId || undefined
       };
     }
 
-    console.log('Dados sendo salvos:', userData); // Para debug
+    console.log('Dados sendo salvos:', userData);
     onSave(userData);
     onClose();
   };

@@ -6,12 +6,13 @@ from django.db.models import Count
 from django.utils import timezone
 from dateutil.relativedelta import relativedelta
 from django.db.models.functions import TruncMonth
-from ..models import Clinica, Servico, ClinicRegistration, Usuario, Paciente, Consulta
+from ..models import Clinica, Servico, ClinicRegistration, Usuario, Paciente, Consulta, Medico
 from ..serializers import ClinicaSerializer, ServicoSerializer, ClinicRegistrationSerializer
 import logging
 import traceback
 from django.core.paginator import Paginator
 from rest_framework.decorators import action
+from django.db import transaction
 
 logger = logging.getLogger(__name__)
 
@@ -19,9 +20,6 @@ class ClinicaViewSet(viewsets.ModelViewSet):
     queryset = Clinica.objects.all()
     serializer_class = ClinicaSerializer
     permission_classes = [IsAuthenticated]
-
-    def get_queryset(self):
-        return Clinica.objects.filter(ativa=True)
 
     @action(detail=False, methods=['get'])
     def dashboard_data(self, request):
@@ -51,6 +49,33 @@ class ClinicaViewSet(viewsets.ModelViewSet):
         }
 
         return Response(data)
+
+    @action(detail=False, methods=['post'])
+    def bulk_update(self, request):
+        clinic_ids = request.data.get('clinic_ids', [])
+        action = request.data.get('action')
+        
+        if not clinic_ids or action not in ['activate', 'deactivate']:
+            return Response({"error": "Dados inválidos"}, status=400)
+            
+        try:
+            with transaction.atomic():
+                # Atualiza as clínicas
+                ativa = action == 'activate'
+                Clinica.objects.filter(id__in=clinic_ids).update(ativa=ativa)
+                    
+                # Atualiza apenas os usuários médicos e admin de clínica
+                medicos = Medico.objects.filter(clinica_id__in=clinic_ids)
+                Usuario.objects.filter(
+                    medico__in=medicos,
+                    role__in=['ME', 'AC']  # Apenas médicos e admin de clínica
+                ).update(is_active=ativa)
+                    
+                return Response({"message": "Atualização realizada com sucesso"}, status=200)
+                    
+        except Exception as e:
+            logger.error(f"Erro ao atualizar clínicas em massa: {str(e)}")
+            return Response({"error": str(e)}, status=400)
 
 class ServicoViewSet(viewsets.ModelViewSet):
     queryset = Servico.objects.all()
