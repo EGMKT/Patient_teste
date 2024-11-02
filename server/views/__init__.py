@@ -1,10 +1,11 @@
-from .clinica_views import ClinicaViewSet, ServicoViewSet, ClinicaInfoView, ClinicaListView
+from .clinica_views import ClinicaViewSet, ClinicaInfoView, ClinicaListView
 from .medico_views import MedicoViewSet, MedicoListView
 from .paciente_views import PacienteViewSet
 from .consulta_views import ConsultaViewSet, GravarConsultaView
 from .auth_views import CustomTokenObtainPairView, LoginView, VerifyPasswordView
 from .pipedrive_views import PipedrivePatientView
 from .dashboard_views import DashboardView, DashboardGeralView, NewClinicsDataView, DashboardDataView, ReportsView
+from .servico_views import ServicoViewSet
 from .user_views import RegistroUsuarioView, UserListView, UserViewSet
 from .audio_views import AudioUploadView
 from .two_factor_views import TrustedDeviceView

@@ -105,7 +105,9 @@
     "status": {
       "active": "Ativo",
       "inactive": "Inativo"
-    }
+    },
+    "services": "Serviços",
+    "selectServices": "Selecione os serviços"
   },
   "manageClinics": {
     "title": "Gerenciar Clínicas",
@@ -227,5 +229,22 @@
     "confirm": "Confirmar",
     "deleting": "Excluindo...",
     "processing": "Processando..."
+  },
+  "manageServices": {
+    "title": "Gerenciar Serviços",
+    "createService": "Criar Serviço",
+    "editService": "Editar Serviço",
+    "name": "Nome",
+    "doctor": "Médico",
+    "currency": "Moeda",
+    "price": "Preço (opcional)",
+    "duration": "Duração",
+    "description": "Descrição",
+    "status": "Status",
+    "active": "Ativo",
+    "createError": "Erro ao criar serviço",
+    "updateError": "Erro ao atualizar serviço",
+    "deleteError": "Erro ao excluir serviço",
+    "confirmDelete": "Tem certeza que deseja excluir este serviço?"
   }
 }

@@ -6,8 +6,8 @@ from django.db.models import Count
 from django.utils import timezone
 from dateutil.relativedelta import relativedelta
 from django.db.models.functions import TruncMonth
-from ..models import Clinica, Servico, ClinicRegistration, Usuario, Paciente, Consulta, Medico
-from ..serializers import ClinicaSerializer, ServicoSerializer, ClinicRegistrationSerializer
+from ..models import Clinica, ClinicRegistration, Usuario, Paciente, Consulta, Medico
+from ..serializers import ClinicaSerializer, ClinicRegistrationSerializer
 import logging
 import traceback
 from django.core.paginator import Paginator
@@ -76,10 +76,6 @@ class ClinicaViewSet(viewsets.ModelViewSet):
         except Exception as e:
             logger.error(f"Erro ao atualizar clínicas em massa: {str(e)}")
             return Response({"error": str(e)}, status=400)
-
-class ServicoViewSet(viewsets.ModelViewSet):
-    queryset = Servico.objects.all()
-    serializer_class = ServicoSerializer
 
 class ClinicRegistrationViewSet(viewsets.ModelViewSet):
     queryset = ClinicRegistration.objects.all()
@@ -160,3 +156,59 @@ class ClinicaListView(APIView):
             'total_pages': paginator.num_pages,
             'current_page': page_obj.number
         })
+
+class ClinicRegistrationView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        try:
+            registrations = ClinicRegistration.objects.all().order_by('-created_at')
+            serializer = ClinicRegistrationSerializer(registrations, many=True)
+            return Response(serializer.data)
+        except Exception as e:
+            logger.error(f"Erro ao buscar registros: {str(e)}")
+            return Response({'error': 'Erro ao buscar registros'}, status=500)
+
+    def put(self, request, registration_id):
+        try:
+            registration = ClinicRegistration.objects.get(id=registration_id)
+            status = request.data.get('status')
+            notes = request.data.get('notes', '')
+
+            with transaction.atomic():
+                registration.status = status
+                registration.processed_at = timezone.now()
+                registration.processed_by = request.user
+                registration.notes = notes
+                registration.save()
+
+                if status == 'approved':
+                    # Criar clínica e usuários necessários
+                    clinica = Clinica.objects.create(
+                        nome=registration.name,
+                        ativa=True
+                    )
+                    
+                    # Criar usuário admin da clínica
+                    admin_user = Usuario.objects.create_user(
+                        email=registration.email,
+                        password=User.objects.make_random_password(),
+                        first_name=registration.owner_name.split()[0],
+                        last_name=' '.join(registration.owner_name.split()[1:]),
+                        role='AC'
+                    )
+                    
+                    # Criar médico admin
+                    Medico.objects.create(
+                        usuario=admin_user,
+                        clinica=clinica,
+                        especialidade='Administrador'
+                    )
+
+                    # Enviar email com credenciais
+                    # TODO: Implementar envio de email
+
+            return Response({'message': 'Registro processado com sucesso'})
+        except Exception as e:
+            logger.error(f"Erro ao processar registro: {str(e)}")
+            return Response({'error': 'Erro ao processar registro'}, status=500)

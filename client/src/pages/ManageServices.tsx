@@ -22,29 +22,11 @@ import {
   Switch,
   Alert,
 } from '@mui/material';
-import api from '../api';
+import api, { getServices, createService, updateService, deleteService, Service } from '../api';
 
-interface Service {
-  id: number;
-  nome: string;
-  preco: number | null;
-  moeda: 'BRL' | 'USD';
-  descricao: string;
-  duracao_padrao: string;
-  ativo: boolean;
-}
-
-interface Doctor {
-  id: number;
-  usuario: {
-    first_name: string;
-    last_name: string;
-  };
-}
 
 const ManageServices: React.FC = () => {
   const [services, setServices] = useState<Service[]>([]);
-  const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [openDialog, setOpenDialog] = useState(false);
@@ -53,25 +35,16 @@ const ManageServices: React.FC = () => {
 
   useEffect(() => {
     fetchServices();
-    fetchDoctors();
   }, []);
 
   const fetchServices = async () => {
     try {
-      const response = await api.get('/servicos/');
-      setServices(response.data);
+      setLoading(true);
+      const response = await getServices();
+      setServices(response);
     } catch (error) {
       console.error('Erro ao buscar serviços:', error);
       setError(t('manageServices.error'));
-    }
-  };
-
-  const fetchDoctors = async () => {
-    try {
-      const response = await api.get('/medicos/');
-      setDoctors(response.data);
-    } catch (error) {
-      console.error('Erro ao buscar médicos:', error);
     } finally {
       setLoading(false);
     }
@@ -79,7 +52,7 @@ const ManageServices: React.FC = () => {
 
   const handleCreateService = async (serviceData: Omit<Service, 'id'>) => {
     try {
-      await api.post('/servicos/', serviceData);
+      await createService(serviceData);
       fetchServices();
       setOpenDialog(false);
     } catch (error) {
@@ -90,7 +63,7 @@ const ManageServices: React.FC = () => {
 
   const handleUpdateService = async (id: number, serviceData: Partial<Service>) => {
     try {
-      await api.put(`/servicos/${id}/`, serviceData);
+      await updateService(id, serviceData);
       fetchServices();
       setOpenDialog(false);
     } catch (error) {
@@ -102,7 +75,7 @@ const ManageServices: React.FC = () => {
   const handleDeleteService = async (id: number) => {
     if (window.confirm(t('manageServices.confirmDelete'))) {
       try {
-        await api.delete(`/servicos/${id}/`);
+        await deleteService(id);
         fetchServices();
       } catch (error) {
         console.error('Erro ao excluir serviço:', error);
@@ -114,14 +87,6 @@ const ManageServices: React.FC = () => {
   const formatDuration = (duration: string) => {
     const [hours, minutes] = duration.split(':');
     return `${hours}h${minutes}min`;
-  };
-
-  const formatPrice = (price: number | null) => {
-    if (!price) return '-';
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL'
-    }).format(price);
   };
 
   if (loading) {
@@ -155,8 +120,7 @@ const ManageServices: React.FC = () => {
           <TableHead>
             <TableRow>
               <TableCell>{t('manageServices.name')}</TableCell>
-              <TableCell>{t('manageServices.price')}</TableCell>
-              <TableCell>{t('manageServices.duration')}</TableCell>
+              <TableCell>{t('manageServices.description')}</TableCell>
               <TableCell>{t('manageServices.status')}</TableCell>
               <TableCell>{t('common.actions')}</TableCell>
             </TableRow>
@@ -165,8 +129,7 @@ const ManageServices: React.FC = () => {
             {services.map((service) => (
               <TableRow key={service.id}>
                 <TableCell>{service.nome}</TableCell>
-                <TableCell>{formatPrice(service.preco)}</TableCell>
-                <TableCell>{formatDuration(service.duracao_padrao)}</TableCell>
+                <TableCell>{service.descricao}</TableCell>
                 <TableCell>
                   <Switch
                     checked={service.ativo}
@@ -179,12 +142,10 @@ const ManageServices: React.FC = () => {
                   />
                 </TableCell>
                 <TableCell>
-                  <Button
-                    onClick={() => {
-                      setCurrentService(service);
-                      setOpenDialog(true);
-                    }}
-                  >
+                  <Button onClick={() => {
+                    setCurrentService(service);
+                    setOpenDialog(true);
+                  }}>
                     {t('common.edit')}
                   </Button>
                   <Button
@@ -228,27 +189,18 @@ const ServiceDialog: React.FC<ServiceDialogProps> = ({
   onSave,
 }) => {
   const [nome, setNome] = useState(service?.nome || '');
-  const [preco, setPreco] = useState(service?.preco?.toString() || '');
-  const [moeda, setMoeda] = useState<'BRL' | 'USD'>(service?.moeda || 'BRL');
   const [descricao, setDescricao] = useState(service?.descricao || '');
-  const [duracaoPadrao, setDuracaoPadrao] = useState(service?.duracao_padrao || '01:00');
   const [ativo, setAtivo] = useState(service?.ativo ?? true);
   const { t } = useTranslation();
 
   useEffect(() => {
     if (service) {
       setNome(service.nome);
-      setPreco(service.preco?.toString() || '');
-      setMoeda(service.moeda);
-      setDescricao(service.descricao);
-      setDuracaoPadrao(service.duracao_padrao);
+      setDescricao(service.descricao || '');
       setAtivo(service.ativo);
     } else {
       setNome('');
-      setPreco('');
-      setMoeda('BRL');
       setDescricao('');
-      setDuracaoPadrao('01:00');
       setAtivo(true);
     }
   }, [service]);
@@ -256,10 +208,7 @@ const ServiceDialog: React.FC<ServiceDialogProps> = ({
   const handleSubmit = () => {
     const serviceData = {
       nome,
-      preco: parseFloat(preco),
-      moeda,
       descricao,
-      duracao_padrao: duracaoPadrao,
       ativo,
     };
 
@@ -279,27 +228,8 @@ const ServiceDialog: React.FC<ServiceDialogProps> = ({
           fullWidth
           value={nome}
           onChange={(e) => setNome(e.target.value)}
+          required
         />
-        <div className="flex gap-4">
-          <TextField
-            margin="dense"
-            label={t('manageServices.price')}
-            type="number"
-            fullWidth
-            value={preco}
-            onChange={(e) => setPreco(e.target.value)}
-          />
-          <FormControl margin="dense" style={{ minWidth: 120 }}>
-            <InputLabel>{t('manageServices.currency')}</InputLabel>
-            <Select
-              value={moeda}
-              onChange={(e) => setMoeda(e.target.value as 'BRL' | 'USD')}
-            >
-              <MenuItem value="BRL">BRL</MenuItem>
-              <MenuItem value="USD">USD</MenuItem>
-            </Select>
-          </FormControl>
-        </div>
         <TextField
           margin="dense"
           label={t('manageServices.description')}
@@ -308,20 +238,6 @@ const ServiceDialog: React.FC<ServiceDialogProps> = ({
           rows={4}
           value={descricao}
           onChange={(e) => setDescricao(e.target.value)}
-        />
-        <TextField
-          margin="dense"
-          label={t('manageServices.duration')}
-          type="time"
-          fullWidth
-          value={duracaoPadrao}
-          onChange={(e) => setDuracaoPadrao(e.target.value)}
-          InputLabelProps={{
-            shrink: true,
-          }}
-          inputProps={{
-            step: 300, // 5 min
-          }}
         />
         <FormControl fullWidth margin="dense">
           <Typography component="div">
@@ -335,7 +251,7 @@ const ServiceDialog: React.FC<ServiceDialogProps> = ({
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose}>{t('common.cancel')}</Button>
-        <Button onClick={handleSubmit} color="primary">
+        <Button onClick={handleSubmit} color="primary" disabled={!nome}>
           {t('common.save')}
         </Button>
       </DialogActions>

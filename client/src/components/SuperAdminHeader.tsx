@@ -34,6 +34,8 @@ const SuperAdminHeader: React.FC<SuperAdminHeaderProps> = ({ onLanguageChange, c
     { title: 'Dashboard', link: '/SA' },
     { title: 'Manage Users', link: '/SA/manage-users' },
     { title: 'Manage Clinics', link: '/SA/manage-clinics' },
+    { title: 'Manage Services', link: '/SA/manage-services' },
+    { title: 'Manage Registrations', link: '/SA/manage-registrations' },
     { title: 'View Reports', link: '/SA/view-reports' },
   ];
 

@@ -47,7 +47,14 @@ class UserViewSet(viewsets.ModelViewSet):
             with transaction.atomic():
                 serializer = self.get_serializer(data=request.data)
                 serializer.is_valid(raise_exception=True)
-                self.perform_create(serializer)
+                instance = self.perform_create(serializer)
+                
+                # Se for médico e tiver serviços selecionados
+                if instance.role == 'ME' and 'medico' in request.data:
+                    medico_data = request.data['medico']
+                    if 'servicos' in medico_data:
+                        instance.medico.servicos.set(medico_data['servicos'])
+                
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
         except Exception as e:
             logger.error(f"Erro ao criar usuário: {str(e)}")
@@ -87,3 +94,38 @@ class UserViewSet(viewsets.ModelViewSet):
         medico_serializer.save(usuario=user)
         
         return Response(user_serializer.data, status=status.HTTP_201_CREATED)
+
+    def update(self, instance, validated_data):
+        medico_data = validated_data.pop('medico', None)
+        password = validated_data.pop('password', None)
+        
+        # Atualiza dados do usuário
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        
+        if password:
+            instance.set_password(password)
+        
+        instance.save()
+
+        # Atualiza ou cria dados do médico
+        if medico_data and instance.role in ['ME', 'AC']:
+            medico, created = Medico.objects.get_or_create(usuario=instance)
+            clinica_id = medico_data.pop('clinica_id', None)
+            servicos = medico_data.pop('servicos', None)
+            
+            if clinica_id:
+                medico.clinica_id = clinica_id
+            
+            for attr, value in medico_data.items():
+                setattr(medico, attr, value)
+            
+            medico.save()
+            
+            if servicos is not None:
+                medico.servicos.set(servicos)
+                
+        elif instance.role not in ['ME', 'AC'] and hasattr(instance, 'medico'):
+            instance.medico.delete()
+
+        return instance

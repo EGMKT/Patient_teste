@@ -1,5 +1,6 @@
 from rest_framework import serializers
-from .models import Clinica, Usuario, Medico, Paciente, Servico, Consulta, ClinicRegistration
+from datetime import timedelta
+from .models import Clinica, Usuario, Medico, Paciente, Servico, Consulta, ClinicRegistration, MedicoServico, ClinicRegistration 
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 class ClinicaSerializer(serializers.ModelSerializer):
@@ -52,9 +53,15 @@ class ConsultaSerializer(serializers.ModelSerializer):
 # Adicione serializers similares para Servico
 
 class ServicoSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = Servico
-        fields = '__all__'
+        fields = ['id', 'nome', 'descricao', 'ativo']
+
+class MedicoServicoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MedicoServico
+        fields = ['medico', 'servico']
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     @classmethod
@@ -94,10 +101,11 @@ class ClinicRegistrationSerializer(serializers.ModelSerializer):
 class MedicoNestedSerializer(serializers.ModelSerializer):
     clinica = ClinicaSerializer(read_only=True)
     clinica_id = serializers.IntegerField(write_only=True, required=False)
-    
+    servicos = serializers.PrimaryKeyRelatedField(many=True, queryset=Servico.objects.all(), required=False)
+
     class Meta:
         model = Medico
-        fields = ['especialidade', 'clinica', 'clinica_id']
+        fields = ['especialidade', 'clinica', 'clinica_id', 'servicos']
 
 class UsuarioSerializer(serializers.ModelSerializer):
     medico = MedicoNestedSerializer(required=False)
@@ -122,6 +130,7 @@ class UsuarioSerializer(serializers.ModelSerializer):
         # Se for médico, cria o registro de médico
         if medico_data and user.role in ['ME', 'AC']:
             clinica_id = medico_data.pop('clinica_id', None)
+            servicos = medico_data.pop('servicos', [])
             Medico.objects.create(
                 usuario=user,
                 clinica_id=clinica_id,
@@ -147,6 +156,7 @@ class UsuarioSerializer(serializers.ModelSerializer):
         if medico_data and instance.role in ['ME', 'AC']:
             medico, created = Medico.objects.get_or_create(usuario=instance)
             clinica_id = medico_data.pop('clinica_id', None)
+            servicos = medico_data.pop('servicos', None)
             if clinica_id:
                 medico.clinica_id = clinica_id
             

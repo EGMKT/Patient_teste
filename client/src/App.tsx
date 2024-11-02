@@ -13,6 +13,8 @@ import SuperAdminDashboard from './pages/SuperAdminDashboard';
 import ManageUsers from './pages/ManageUsers';
 import ManageClinics from './pages/ManageClinics';
 import ViewReports from './pages/ViewReports';
+import ManageServices from './pages/ManageServices';
+import ManageRegistrations from './pages/ManageRegistrations';
 import NotFound from './pages/NotFound';
 import { getClinicaInfo } from './api';
 import i18n from './i18n';
@@ -50,6 +52,8 @@ const AppRoutes: React.FC = () => {
                   <Route path="/" element={<SuperAdminDashboard />} />
                   <Route path="/manage-users" element={<ManageUsers />} />
                   <Route path="/manage-clinics" element={<ManageClinics />} />
+                  <Route path="/manage-services" element={<ManageServices />} />
+                  <Route path="/manage-registrations" element={<ManageRegistrations />} />
                   <Route path="/view-reports" element={<ViewReports />} />
                 </Routes>
               } />

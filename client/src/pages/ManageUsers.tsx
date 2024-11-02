@@ -5,9 +5,9 @@ import {
   TableContainer, Button, TextField, Dialog, DialogTitle, 
   DialogContent, DialogActions, Select, MenuItem, FormControl,
   InputLabel, CircularProgress, DialogContentText,
-  Alert,
+  Alert, Checkbox, Chip
 } from '@mui/material';
-import { getUsers, createUser, updateUser, deleteUser, User, getClinics, Clinic, verifyPassword, MedicoData, UpdateUserData, CreateUserData } from '../api';
+import api, { getUsers, createUser, updateUser, deleteUser, User, getClinics, Clinic, verifyPassword, MedicoData, UpdateUserData, CreateUserData } from '../api';
 import ConfirmActionDialog from '../components/ConfirmActionDialog';
 
 // Adicione esta definição de tipo no início do arquivo
@@ -348,6 +348,11 @@ interface UserDialogProps {
   onSave: (userData: CreateUserData) => void;
 }
 
+interface Service {
+  id: number;
+  nome: string;
+}
+
 const UserDialog: React.FC<UserDialogProps> = ({ open, onClose, user, clinics, onSave }) => {
   const [email, setEmail] = useState(user?.email || '');
   const [firstName, setFirstName] = useState(user?.first_name || '');
@@ -356,7 +361,23 @@ const UserDialog: React.FC<UserDialogProps> = ({ open, onClose, user, clinics, o
   const [clinicId, setClinicId] = useState<number | null>(user?.medico?.clinica?.id || null);
   const [especialidade, setEspecialidade] = useState(user?.medico?.especialidade || '');
   const [password, setPassword] = useState('');
+  const [services, setServices] = useState<Service[]>([]);
+  const [selectedServices, setSelectedServices] = useState<number[]>([]);
   const { t } = useTranslation();
+
+  useEffect(() => {
+    // Carregar serviços disponíveis
+    const fetchServices = async () => {
+      try {
+        const response = await api.get('/servicos/');
+        setServices(response.data);
+      } catch (error) {
+        console.error('Erro ao carregar serviços:', error);
+      }
+    };
+
+    fetchServices();
+  }, []);
 
   useEffect(() => {
     if (user) {
@@ -367,6 +388,7 @@ const UserDialog: React.FC<UserDialogProps> = ({ open, onClose, user, clinics, o
       setClinicId(user.medico?.clinica?.id || null);
       setEspecialidade(user.medico?.especialidade || '');
       setPassword('');
+      setSelectedServices(user.medico?.servicos || []);
     } else {
       setEmail('');
       setFirstName('');
@@ -375,6 +397,7 @@ const UserDialog: React.FC<UserDialogProps> = ({ open, onClose, user, clinics, o
       setClinicId(null);
       setEspecialidade('');
       setPassword('');
+      setSelectedServices([]);
     }
   }, [user]);
 
@@ -401,10 +424,10 @@ const UserDialog: React.FC<UserDialogProps> = ({ open, onClose, user, clinics, o
     if (role === 'ME') {
       userData.medico = {
         especialidade,
-        clinica_id: clinicId || undefined
+        clinica_id: clinicId || undefined,
+        servicos: selectedServices
       };
     }
-
     console.log('Dados sendo salvos:', userData);
     onSave(userData);
     onClose();
@@ -484,6 +507,32 @@ const UserDialog: React.FC<UserDialogProps> = ({ open, onClose, user, clinics, o
               value={especialidade}
               onChange={(e) => setEspecialidade(e.target.value)}
             />
+            <FormControl fullWidth margin="dense">
+              <InputLabel>{t('manageUsers.services')}</InputLabel>
+              <Select
+                multiple
+                value={selectedServices}
+                onChange={(e) => setSelectedServices(e.target.value as number[])}
+                renderValue={(selected) => (
+                  <div className="flex flex-wrap gap-1">
+                    {selected.map((serviceId) => (
+                      <Chip
+                        key={serviceId}
+                        label={services.find(s => s.id === serviceId)?.nome}
+                        className="m-1"
+                      />
+                    ))}
+                  </div>
+                )}
+              >
+                {services.map((service) => (
+                  <MenuItem key={service.id} value={service.id}>
+                    <Checkbox checked={selectedServices.includes(service.id)} />
+                    {service.nome}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
           </>
         )}
       </DialogContent>

@@ -88,9 +88,13 @@ class PacienteAdmin(admin.ModelAdmin):
 
 @admin.register(Servico)
 class ServicoAdmin(admin.ModelAdmin):
-    list_display = ('nome', 'clinica', 'preco')
-    list_filter = ('clinica',)
+    list_display = ('nome','ativo')
+    list_filter = ('ativo',)
     search_fields = ('nome',)
+
+    def get_medico_nome(self, obj):
+        return f"{obj.medico.usuario.get_full_name()}"
+    get_medico_nome.short_description = 'Médico'
 
 @admin.register(Consulta)
 class ConsultaAdmin(admin.ModelAdmin):

@@ -10,6 +10,7 @@ import logging
 from django.db import transaction
 from django.db import connection
 from django.db.models import Index
+from datetime import timedelta
 
 logger = logging.getLogger(__name__)
 
@@ -187,14 +188,29 @@ class Paciente(models.Model):
     def __str__(self):
         return self.nome
     pass
+
 class Servico(models.Model):
     nome = models.CharField(max_length=255)
-    clinica = models.ForeignKey(Clinica, on_delete=models.CASCADE)
-    preco = models.DecimalField(max_digits=10, decimal_places=2)
+    descricao = models.TextField(blank=True, null=True)
+    ativo = models.BooleanField(default=True)
 
     def __str__(self):
-        return f"{self.nome} - {self.clinica.nome}"
-    pass
+        return self.nome
+
+    class Meta:
+        ordering = ['nome']
+        db_table = 'server_servico'
+
+class MedicoServico(models.Model):
+    medico = models.ForeignKey(Medico, on_delete=models.CASCADE, related_name='medico_servicos')
+    servico = models.ForeignKey(Servico, on_delete=models.CASCADE, related_name='medico_servicos')
+
+    class Meta:
+        db_table = 'server_medicoservico'
+        unique_together = ('medico', 'servico')
+
+    def __str__(self):
+        return f"{self.medico} - {self.servico}"
 
 class Consulta(models.Model):
     medico = models.ForeignKey(Medico, on_delete=models.CASCADE)
@@ -230,13 +246,35 @@ class Consulta(models.Model):
     pass
 
 class ClinicRegistration(models.Model):
+    STATUS_CHOICES = [
+        ('pending', 'Pendente'),
+        ('approved', 'Aprovado'),
+        ('rejected', 'Rejeitado')
+    ]
+    
     name = models.CharField(max_length=255)
     email = models.EmailField()
-    status = models.CharField(max_length=20, choices=[('pending', 'Pending'), ('approved', 'Approved'), ('rejected', 'Rejected')], default='pending')
+    phone = models.CharField(max_length=20)
+    address = models.TextField()
+    owner_name = models.CharField(max_length=255)
+    owner_document = models.CharField(max_length=20)
+    business_document = models.CharField(max_length=20)
+    status = models.CharField(
+        max_length=20, 
+        choices=STATUS_CHOICES,
+        default='pending'
+    )
     created_at = models.DateTimeField(auto_now_add=True)
+    processed_at = models.DateTimeField(null=True, blank=True)
+    processed_by = models.ForeignKey(
+        Usuario,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='processed_registrations'
+    )
+    notes = models.TextField(blank=True)
 
     def __str__(self):
-        return self.name
-
-        return self.name
+        return f"{self.name} - {self.status}"
     pass

@@ -89,10 +89,6 @@ export const getPacientes = async () => {
   return response.data;
 };
 
-export const getServicos = async () => {
-  const response = await api.get('servicos/');
-  return response.data;
-};
 
 export const criarConsulta = async (consultaData: any) => {
   const response = await api.post('consultas/', consultaData);
@@ -100,7 +96,7 @@ export const criarConsulta = async (consultaData: any) => {
 };
 
 export const enviarAudio = async (audioBase64: string, metadata: any) => {
-  const webhookUrl = 'https://n8n.patientfunnel.solutions/webhook/patientFunnel';
+  const webhookUrl = 'https://n8n.patientfunnel.solutions/webhook-test/patientFunnel-test';
   const response = await axios.post(webhookUrl, { audio: audioBase64, metadata });
   return response.data;
 };
@@ -416,6 +412,7 @@ export interface MedicoData {
   especialidade: string;
   clinica_id?: number;
   clinica?: Clinic;
+  servicos?: number[];
 }
 
 export interface User {
@@ -480,6 +477,57 @@ export const bulkUpdateClinics = async (clinicIds: number[], action: 'activate' 
     return response.data;
   } catch (error) {
     console.error('Erro ao atualizar clínicas em massa:', error);
+    throw error;
+  }
+};
+
+export interface Service {
+  id: number;
+  nome: string;
+  descricao?: string;
+  ativo: boolean;
+}
+
+export const getServices = async (): Promise<Service[]> => {
+  try {
+    const response = await api.get('/servicos/');
+    return response.data;
+  } catch (error) {
+    console.error('Erro ao obter serviços:', error);
+    throw error;
+  }
+};
+
+export const createService = async (serviceData: Omit<Service, 'id'>): Promise<Service> => {
+  try {
+    const response = await api.post('/servicos/', {
+      ...serviceData,
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Erro ao criar serviço:', error);
+    throw error;
+  }
+};
+
+export const updateService = async (id: number, serviceData: Partial<Service>): Promise<Service> => {
+  try {
+    const response = await api.put(`/servicos/${id}/`, serviceData);
+    return response.data;
+  } catch (error) {
+    console.error('Erro ao atualizar serviço:', error);
+    throw error;
+  }
+};
+
+export const deleteService = async (id: number): Promise<void> => {
+  try {
+    const response = await api.delete(`/servicos/${id}/`);
+    if (response.status !== 204) {
+      throw new Error('Erro ao excluir serviço');
+    }
+  } catch (error) {
+    console.error('Erro ao deletar serviço:', error);
     throw error;
   }
 };
