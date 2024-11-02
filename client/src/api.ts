@@ -3,8 +3,11 @@ import axios, { AxiosError } from 'axios';
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000/api';
 
 const api = axios.create({
-  baseURL: API_URL,
-  withCredentials: true,
+    baseURL: API_URL,
+    withCredentials: true,
+    headers: {
+        'Content-Type': 'application/json',
+    },
 });
 
 api.interceptors.request.use((config) => {
@@ -30,23 +33,31 @@ api.interceptors.response.use(
 
 export const login = async (email: string, password: string) => {
   try {
-    const response = await api.post('token/', { email, password });
-    localStorage.setItem('token', response.data.access);
-    
-    const decodedToken = JSON.parse(atob(response.data.access.split('.')[1]));
-    const user = {
-      id: decodedToken.user_id,
-      email: decodedToken.email,
-      role: decodedToken.role,
-      username: decodedToken.username || '',
-      clinica: decodedToken.clinica || null
-    };
-    
-    return { access: response.data.access, user };
+    const response = await api.post('login/', { 
+      email, 
+      password 
+    }, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (response.data.access) {
+      localStorage.setItem('token', response.data.access);
+      
+      // Configure o token para todas as requisições futuras
+      api.defaults.headers.common['Authorization'] = `Bearer ${response.data.access}`;
+      
+      return {
+        access: response.data.access,
+        user: response.data.user
+      };
+    }
+    throw new Error('No access token received');
   } catch (error) {
-    console.error('API login error:', error);
+    console.error('Login error:', error);
     if (axios.isAxiosError(error) && error.response) {
-      throw new Error(error.response.data.detail || 'Login failed');
+      throw new Error(error.response.data.error || 'Login failed');
     }
     throw new Error('Network error');
   }
@@ -89,7 +100,7 @@ export const criarConsulta = async (consultaData: any) => {
 };
 
 export const enviarAudio = async (audioBase64: string, metadata: any) => {
-  const webhookUrl = 'https://n8n.patientfunnel.solutions/webhook-test/teste-patientFunnel';
+  const webhookUrl = 'https://n8n.patientfunnel.solutions/webhook/patientFunnel';
   const response = await axios.post(webhookUrl, { audio: audioBase64, metadata });
   return response.data;
 };

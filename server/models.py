@@ -9,6 +9,7 @@ from django.core.exceptions import ValidationError
 import logging
 from django.db import transaction
 from django.db import connection
+from django.db.models import Index
 
 logger = logging.getLogger(__name__)
 
@@ -22,6 +23,7 @@ class Clinica(models.Model):
 
     def __str__(self):
         return self.nome
+    pass
 
 class CustomUserManager(BaseUserManager):
     def create_user(self, email, password=None, **extra_fields):
@@ -39,6 +41,7 @@ class CustomUserManager(BaseUserManager):
         extra_fields.setdefault('is_staff', True)  # Adicionado
         extra_fields.setdefault('role', 'SA')
         return self.create_user(email, password, **extra_fields)
+    pass
 
 class Usuario(AbstractBaseUser, PermissionsMixin):
     id = models.BigAutoField(primary_key=True)
@@ -69,6 +72,10 @@ class Usuario(AbstractBaseUser, PermissionsMixin):
             ("view_dashboard_geral", "Can view dashboard geral"),
             ("view_dashboard_clinica", "Can view dashboard clínica"),
             ("gravar_consulta", "Can gravar consulta"),
+        ]
+        indexes = [
+            Index(fields=['email']),
+            Index(fields=['role']),
         ]
 
     def __str__(self):
@@ -114,6 +121,10 @@ class Usuario(AbstractBaseUser, PermissionsMixin):
     def has_module_perms(self, app_label):
         return self.is_staff
 
+    @classmethod
+    def get_by_email(cls, email):
+        return cls.objects.select_related('medico').get(email=email)
+
 @receiver(post_migrate)
 def create_custom_permissions(sender, **kwargs):
     from django.contrib.auth.models import Permission
@@ -135,9 +146,10 @@ def create_custom_permissions(sender, **kwargs):
         name='Can gravar consulta',
         content_type=content_type,
     )
+    pass
 
 class Medico(models.Model):
-    usuario = models.OneToOneField(Usuario, on_delete=models.CASCADE, primary_key=True, related_name='medico')
+    usuario = models.OneToOneField('Usuario', on_delete=models.CASCADE, primary_key=True, related_name='medico')
     especialidade = models.CharField(max_length=100)
     clinica = models.ForeignKey(Clinica, on_delete=models.SET_NULL, null=True, blank=True, related_name='medicos')
 
@@ -159,6 +171,7 @@ class Medico(models.Model):
         except Exception as e:
             logger.error(f"Erro ao deletar médico: {str(e)}")
             raise
+    pass
 
 class Paciente(models.Model):
     nome = models.CharField(max_length=255)
@@ -173,7 +186,7 @@ class Paciente(models.Model):
 
     def __str__(self):
         return self.nome
-
+    pass
 class Servico(models.Model):
     nome = models.CharField(max_length=255)
     clinica = models.ForeignKey(Clinica, on_delete=models.CASCADE)
@@ -181,6 +194,7 @@ class Servico(models.Model):
 
     def __str__(self):
         return f"{self.nome} - {self.clinica.nome}"
+    pass
 
 class Consulta(models.Model):
     medico = models.ForeignKey(Medico, on_delete=models.CASCADE)
@@ -213,6 +227,7 @@ class Consulta(models.Model):
 
     def __str__(self):
         return f"Consulta {self.id} - {self.medico} - {self.paciente}"
+    pass
 
 class ClinicRegistration(models.Model):
     name = models.CharField(max_length=255)
@@ -224,3 +239,4 @@ class ClinicRegistration(models.Model):
         return self.name
 
         return self.name
+    pass
