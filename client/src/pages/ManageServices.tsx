@@ -121,8 +121,8 @@ const ManageServices: React.FC = () => {
             <TableRow>
               <TableCell>{t('manageServices.name')}</TableCell>
               <TableCell>{t('manageServices.description')}</TableCell>
-              <TableCell>{t('manageServices.status')}</TableCell>
-              <TableCell>{t('common.actions')}</TableCell>
+              <TableCell>{t('manageServices.statusLabel')}</TableCell>
+              <TableCell>{t('manageServices.actions')}</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -146,13 +146,13 @@ const ManageServices: React.FC = () => {
                     setCurrentService(service);
                     setOpenDialog(true);
                   }}>
-                    {t('common.edit')}
+                    {t('manageServices.edit')}
                   </Button>
                   <Button
                     color="error"
                     onClick={() => handleDeleteService(service.id)}
                   >
-                    {t('common.delete')}
+                    {t('manageServices.delete')}
                   </Button>
                 </TableCell>
               </TableRow>

@@ -1,56 +1,71 @@
 {
-  "changeLanguage": "Change Language",
-  "logout": "Logout",
-  "login": {
-    "title": "Sign in to your account",
-    "email": "Email address",
-    "password": "Password",
-    "signIn": "Sign in",
-    "unknownUserType": "Unknown user type",
-    "incompleteUserInfo": "Incomplete user information",
-    "genericError": "Login failed. Please try again."
+  "common": {
+    "actions": {
+      "edit": "Edit",
+      "delete": "Delete",
+      "save": "Save",
+      "cancel": "Cancel",
+      "confirm": "Confirm",
+      "back": "Back",
+      "next": "Next",
+      "search": "Search"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive",
+      "loading": "Loading...",
+      "processing": "Processing...",
+      "error": "Error",
+      "success": "Success"
+    },
+    "labels": {
+      "name": "Name",
+      "email": "Email",
+      "password": "Password",
+      "phone": "Phone",
+      "description": "Description",
+      "createdAt": "Created At",
+      "status": "Status"
+    }
   },
-  "username": "Username",
-  "password": "Password",
-  "loginButton": "Login",
-  "loginError": "Invalid username or password",
-  "selectDoctor": "Select a Doctor",
-  "next": "Next",
-  "pleaseSelectDoctor": "Please select a doctor",
-  "cardiologist": "Cardiologist",
-  "neurologist": "Neurologist",
-  "pediatrician": "Pediatrician",
-  "consultationSetup": "Consultation Setup",
-  "patientName": "Patient Name",
-  "selectService": "Select Service",
-  "participants": "Number of Participants",
-  "startRecording": "Start Recording",
-  "audioRecording": "Audio Recording",
-  "duration": "Duration",
-  "seconds": "seconds",
-  "stopRecording": "Stop Recording",
-  "processingAudio": "Processing and sending audio...",
-  "generalConsultation": "General Consultation",
-  "routineExam": "Routine Exam",
-  "followUp": "Follow-up",
-  "specializedEvaluation": "Specialized Evaluation",
-  "minorProcedure": "Minor Procedure",
-  "errorSendingAudio": "Error Sending Audio",
-  "unexpectedError": "An unexpected error occurred.",
-  "recordingSavedLocally": "The recording was saved locally and the error has been reported to the administrators.",
-  "backToHome": "Back to Home",
-  "audioSentSuccessfully": "Audio Sent Successfully",
-  "audioSentToWebhook": "Your audio has been sent to the webhook.",
-  "startNewConsultation": "Start New Consultation",
+  "auth": {
+    "login": {
+      "title": "Sign in to your account",
+      "email": "Email address",
+      "password": "Password",
+      "signIn": "Sign in",
+      "changeLanguage": "Change Language",
+      "errors": {
+        "unknownUserType": "Unknown user type",
+        "incompleteUserInfo": "Incomplete user information",
+        "invalidCredentials": "Invalid credentials",
+        "generic": "Login failed. Please try again."
+      }
+    },
+    "twoFactor": {
+      "title": "Two-factor verification",
+      "enterCode": "Enter code",
+      "verify": "Verify",
+      "resend": "Resend code"
+    }
+  },
+  "navigation": {
+    "dashboard": "Dashboard",
+    "users": "Users",
+    "clinics": "Clinics",
+    "services": "Services",
+    "reports": "Reports",
+    "settings": "Settings",
+    "logout": "Logout"
+  },
   "dashboard": {
     "title": "Dashboard",
-    "overview": "Overview",
-    "totalClinics": "Total Clinics",
-    "totalDoctors": "Total Doctors",
-    "totalPatients": "Total Patients",
-    "totalConsultations": "Total Consultations",
-    "loading": "Loading data...",
-    "error": "Error loading data",
+    "overview": {
+      "totalClinics": "Total Clinics",
+      "totalDoctors": "Total Doctors",
+      "totalPatients": "Total Patients",
+      "totalConsultations": "Total Consultations"
+    },
     "newClinics": {
       "title": "New Clinics",
       "count": "Count",
@@ -58,141 +73,204 @@
       "tooltip": "New clinics in {{month}}: {{count}}"
     }
   },
-  "months": {
-    "short": {
-      "Jan": "Jan",
-      "Feb": "Feb",
-      "Mar": "Mar",
-      "Apr": "Apr",
-      "May": "May",
-      "Jun": "Jun",
-      "Jul": "Jul",
-      "Aug": "Aug",
-      "Sep": "Sep",
-      "Oct": "Oct",
-      "Nov": "Nov",
-      "Dec": "Dec"
+  "users": {
+    "title": "Manage Users",
+    "roles": {
+      "SA": "Super Admin",
+      "AC": "Clinic Admin",
+      "ME": "Doctor"
     },
-    "long": {
-      "January": "January",
-      "February": "February",
-      "March": "March",
-      "April": "April",
-      "May": "May",
-      "June": "June",
-      "July": "July",
-      "August": "August",
-      "September": "September",
-      "October": "October",
-      "November": "November",
-      "December": "December"
+    "form": {
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "email": "Email",
+      "role": "Role",
+      "clinic": "Clinic",
+      "specialty": "Specialty",
+      "services": "Services"
+    },
+    "messages": {
+      "createSuccess": "User created successfully",
+      "updateSuccess": "User updated successfully",
+      "deleteSuccess": "User deleted successfully",
+      "deleteError": "Error deleting user"
     }
   },
-  "superAdminDashboard": "Super Admin Dashboard",
-  "totalClinics": "Total Clinics",
-  "totalDoctors": "Total Doctors",
-  "totalPatients": "Total Patients",
-  "totalConsultations": "Total Consultations",
-  "errorFetchingDashboardData": "Error fetching dashboard data",
-  "especialidadeNaoDisponivel": "Specialty not available",
-  "newClinics": "New Clinics",
-  "newClinicsOverTime": "New Clinics Over Time",
-  "errorFetchingData": "Error fetching data",
-  "selectPatient": "Select Patient",
-  "language": "Language",
-  "audiosNaoEnviados": "Unsent Audios",
-  "pauseRecording": "Pause Recording",
-  "resumeRecording": "Resume Recording",
+  "clinics": {
+    "title": "Manage Clinics",
+    "form": {
+      "name": "Clinic Name",
+      "status": "Clinic Status",
+      "pipedriveToken": "Pipedrive Token (Optional)"
+    },
+    "messages": {
+      "createSuccess": "Clinic created successfully",
+      "updateSuccess": "Clinic updated successfully",
+      "deleteSuccess": "Clinic deleted successfully",
+      "deleteError": "Error deleting clinic"
+    },
+    "actions": {
+      "activateSelected": "Activate Selected",
+      "deactivateSelected": "Deactivate Selected"
+    }
+  },
+  "services": {
+    "title": "Manage Services",
+    "form": {
+      "name": "Service Name",
+      "description": "Description",
+      "status": "Status"
+    },
+    "messages": {
+      "createSuccess": "Service created successfully",
+      "updateSuccess": "Service updated successfully",
+      "deleteSuccess": "Service deleted successfully",
+      "deleteError": "Error deleting service"
+    }
+  },
+  "consultation": {
+    "setup": {
+      "title": "Consultation Setup",
+      "selectPatient": "Select Patient",
+      "selectService": "Select Service",
+      "participants": "Participants",
+      "language": "Language",
+      "startRecording": "Start Recording",
+      "loading": "Loading...",
+      "error": "Error loading data"
+    },
+    "recording": {
+      "title": "Audio Recording",
+      "start": "Start Recording",
+      "stop": "Stop Recording",
+      "pause": "Pause Recording",
+      "resume": "Resume Recording",
+      "duration": "Duration",
+      "processing": "Processing and sending audio..."
+    },
+    "messages": {
+      "success": "Audio sent successfully",
+      "error": "Error sending audio",
+      "savedLocally": "The recording was saved locally"
+    }
+  },
   "reports": {
     "title": "Reports and Analytics",
-    "totalPatientsAttended": "Total Patients Attended",
-    "patientRetentionRate": "Retention Rate",
-    "averageConsultationTime": "Average Consultation Time",
-    "overallPatientSatisfaction": "Overall Satisfaction",
+    "errorFetchingData": "Error loading data",
+    "metrics": {
+      "totalPatients": "Total Patients Attended",
+      "retention": "Retention Rate",
+      "avgConsultation": "Average Consultation Time",
+      "satisfaction": "Overall Satisfaction"
+    },
+    "distribution": {
+      "age": "Age Distribution",
+      "gender": "Gender Distribution",
+      "occupation": "Occupation Distribution",
+      "location": "Location Distribution"
+    },
+    "performance": {
+      "doctors": "Doctors Performance"
+    },
     "newClinicsOverTime": "New Clinics Over Time",
     "ageDistribution": "Age Distribution",
     "genderDistribution": "Gender Distribution",
     "occupationDistribution": "Occupation Distribution",
-    "locationDistribution": "Location Distribution",
-    "doctorsPerformance": "Doctors Performance"
+    "doctor": "Doctor",
+    "patientsAttended": "Patients Attended",
+    "satisfactionRate": "Satisfaction Rate"
   },
   "manageUsers": {
     "title": "Manage Users",
     "createUser": "Create User",
-    "search": "Search",
+    "editUser": "Edit User",
+    "createNewUser": "Create New User",
+    "search": "Search user",
     "email": "Email",
     "firstName": "First Name",
     "lastName": "Last Name",
     "role": "Role",
     "clinic": "Clinic",
     "specialty": "Specialty",
+    "status": "Status",
     "actions": "Actions",
     "edit": "Edit",
     "delete": "Delete",
     "password": "Password",
     "selectClinic": "Select a Clinic",
-    "save": "Save",
+    "services": "Services",
     "cancel": "Cancel",
-    "confirmDelete": "Confirm Deletion",
-    "confirmUpdate": "Confirm Update",
-    "deleteUserConfirmation": "Are you sure you want to delete this user?",
-    "updateUserConfirmation": "Confirm user changes?",
-    "confirm": "Confirm",
+    "save": "Save",
+    "confirmDeleteTitle": "Confirm Deletion",
+    "confirmDeleteMessage": "Are you sure you want to delete this user?",
+    "enterPassword": "Enter Password",
+    "passwordRequired": "Password required to confirm this action",
+    "invalidPassword": "Invalid password",
+    "statusLabel": "Status",
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
     "roles": {
       "SA": "Super Admin",
       "AC": "Clinic Admin",
       "ME": "Doctor"
-    },
-    "editUser": "Edit User",
-    "createNewUser": "Create New User",
-    "noUsersFound": "No users found",
-    "loading": "Loading...",
-    "error": "Error loading users",
-    "superAdmin": "Super Admin",
-    "clinicAdmin": "Clinic Admin",
-    "doctor": "Doctor",
-    "confirmDeleteTitle": "Confirm Deletion",
-    "confirmDeleteMessage": "Are you sure you want to delete this user? This action cannot be undone.",
-    "enterPassword": "Enter Password",
-    "passwordRequired": "Please enter your password to confirm deletion"
+    }
   },
   "manageClinics": {
     "title": "Manage Clinics",
     "createClinic": "Create Clinic",
-    "search": "Search",
+    "editClinic": "Edit Clinic",
+    "search": "Search clinic",
     "name": "Name",
+    "status": "Status",
     "createdAt": "Created At",
-    "active": "Active",
     "actions": "Actions",
     "edit": "Edit",
     "delete": "Delete",
-    "pipedriveApiToken": "Pipedrive API Token",
-    "yes": "Yes",
-    "no": "No",
-    "save": "Save",
-    "cancel": "Cancel",
-    "editClinic": "Edit Clinic",
-    "createNewClinic": "Create New Clinic",
     "confirmDelete": "Confirm Deletion",
-    "deleteClinicConfirmation": "Are you sure you want to delete this clinic?",
-    "confirm": "Confirm",
-    "loading": "Loading...",
-    "error": "Error loading clinics",
-    "noClinicFound": "No clinic found",
+    "pipedriveToken": "Pipedrive Token",
+    "active": "Active",
+    "inactive": "Inactive",
     "activeStatus": {
       "true": "Active",
       "false": "Inactive"
-    },
-    "form": {
-      "nameRequired": "Name is required",
-      "nameLabel": "Clinic Name",
-      "activateLabel": "Clinic Status",
-      "pipedriveLabel": "Pipedrive Token (Optional)"
-    },
-    "sort": {
-      "name": "Sort by name",
-      "createdAt": "Sort by creation date",
-      "status": "Sort by status"
+    }
+  },
+  "manageServices": {
+    "title": "Manage Services",
+    "createService": "Create Service",
+    "editService": "Edit Service",
+    "search": "Search service",
+    "name": "Name",
+    "description": "Description",
+    "status": "Status",
+    "actions": "Actions",
+    "edit": "Edit",
+    "delete": "Delete",
+    "confirmDelete": "Confirm Deletion",
+    "price": "Price",
+    "duration": "Duration",
+    "statusLabel": "Status",
+    "active": "Active",
+    "inactive": "Inactive"
+  },
+  "manageRegistrations": {
+    "title": "Manage Registrations",
+    "registrationDetails": "Registration Details",
+    "clinicName": "Clinic Name",
+    "ownerName": "Owner Name",
+    "email": "Email",
+    "phone": "Phone",
+    "status": "Status",
+    "createdAt": "Created At",
+    "actions": "Actions",
+    "viewDetails": "View Details",
+    "notes": "Notes",
+    "status": {
+      "pending": "Pending",
+      "approved": "Approved",
+      "rejected": "Rejected"
     }
   }
 }

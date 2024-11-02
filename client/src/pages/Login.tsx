@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { login } from '../api';
 import { useAuth } from '../contexts/AuthContext';
-import { FiGlobe } from 'react-icons/fi';
+import { FiGlobe, FiEye, FiEyeOff } from 'react-icons/fi';
 import { Menu, Transition } from '@headlessui/react';
 import { Fragment } from 'react';
 
@@ -11,6 +11,7 @@ const Login: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
   const { login: authLogin } = useAuth();
   const { t, i18n } = useTranslation();
@@ -31,14 +32,14 @@ const Login: React.FC = () => {
             navigate('/consultation-setup');
             break;
           default:
-            setError(t('login.unknownUserType'));
+            setError(t('auth.login.errors.unknownUserType'));
         }
       } else {
-        throw new Error(t('login.incompleteUserInfo'));
+        throw new Error(t('auth.login.errors.incompleteUserInfo'));
       }
     } catch (error) {
       console.error('Erro no login:', error);
-      setError(error instanceof Error ? error.message : t('login.genericError'));
+      setError(error instanceof Error ? error.message : t('auth.login.errors.generic'));
     }
   };
 
@@ -59,7 +60,7 @@ const Login: React.FC = () => {
           <div>
             <Menu.Button className="inline-flex justify-center w-full rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-100 focus:ring-indigo-500">
               <FiGlobe className="mr-2 h-5 w-5" aria-hidden="true" />
-              {t('changeLanguage')}
+              {t('auth.login.changeLanguage')}
             </Menu.Button>
           </div>
           <Transition
@@ -95,7 +96,7 @@ const Login: React.FC = () => {
       <div className="max-w-md w-full space-y-8">
         <div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            {t('login.title')}
+            {t('auth.login.title')}
           </h2>
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
@@ -103,7 +104,7 @@ const Login: React.FC = () => {
           <div className="rounded-md shadow-sm -space-y-px">
             <div>
               <label htmlFor="email-address" className="sr-only">
-                {t('login.email')}
+                {t('auth.login.email')}
               </label>
               <input
                 id="email-address"
@@ -112,26 +113,37 @@ const Login: React.FC = () => {
                 autoComplete="email"
                 required
                 className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                placeholder={t('login.email')}
+                placeholder={t('auth.login.emailPlaceholder')}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
             </div>
-            <div>
+            <div className="relative">
               <label htmlFor="password" className="sr-only">
-                {t('login.password')}
+                {t('auth.login.password')}
               </label>
               <input
                 id="password"
                 name="password"
-                type="password"
+                type={showPassword ? "text" : "password"}
                 autoComplete="current-password"
                 required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                placeholder={t('login.password')}
+                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm pr-10"
+                placeholder={t('auth.login.passwordPlaceholder')}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
+              <button
+                type="button"
+                className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-500"
+                onClick={() => setShowPassword(!showPassword)}
+              >
+                {showPassword ? (
+                  <FiEyeOff className="h-5 w-5" aria-hidden="true" />
+                ) : (
+                  <FiEye className="h-5 w-5" aria-hidden="true" />
+                )}
+              </button>
             </div>
           </div>
 
@@ -150,7 +162,7 @@ const Login: React.FC = () => {
               type="submit"
               className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
             >
-              {t('login.signIn')}
+              {t('auth.login.signIn')}
             </button>
           </div>
         </form>

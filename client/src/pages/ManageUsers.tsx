@@ -240,7 +240,7 @@ const ManageUsers: React.FC = () => {
                   <TableCell>{t('manageUsers.role')}</TableCell>
                   <TableCell>{t('manageUsers.clinic')}</TableCell>
                   <TableCell>{t('manageUsers.specialty')}</TableCell>
-                  <TableCell>{t('manageUsers.status')}</TableCell>
+                  <TableCell>{t('manageUsers.statusLabel')}</TableCell>
                   <TableCell>{t('manageUsers.actions')}</TableCell>
                 </TableRow>
               </TableHead>

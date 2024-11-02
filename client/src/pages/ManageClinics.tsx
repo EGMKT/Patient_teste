@@ -295,7 +295,7 @@ const ManageClinics: React.FC = () => {
                     </TableSortLabel>
                   </TableCell>
                   <TableCell>{t('manageClinics.createdAt')}</TableCell>
-                  <TableCell>{t('manageClinics.active')}</TableCell>
+                  <TableCell>{t('manageClinics.status')}</TableCell>
                   <TableCell>{t('manageClinics.actions')}</TableCell>
                 </TableRow>
               </TableHead>

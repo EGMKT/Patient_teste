@@ -54,6 +54,7 @@ const Header: React.FC<HeaderProps> = ({
   const languages = [
     { code: 'en', name: 'English' },
     { code: 'pt', name: 'Português' },
+    { code: 'es', name: 'Español' },
   ];
 
   return (

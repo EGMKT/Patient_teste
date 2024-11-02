@@ -28,6 +28,7 @@ const SuperAdminHeader: React.FC<SuperAdminHeaderProps> = ({ onLanguageChange, c
   const languages = [
     { code: 'en', name: 'English' },
     { code: 'pt', name: 'Português' },
+    { code: 'es', name: 'Español' },
   ];
 
   const menuItems = [

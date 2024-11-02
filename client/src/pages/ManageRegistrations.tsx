@@ -109,9 +109,9 @@ const RegistrationDialog: React.FC<RegistrationDialogProps> = ({
         )}
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>{t('common.cancel')}</Button>
+        <Button onClick={onClose}>{t('manageRegistrations.cancel')}</Button>
         <Button onClick={handleSubmit} color="primary">
-          {t('common.save')}
+          {t('manageRegistrations.save')}
         </Button>
       </DialogActions>
     </Dialog>

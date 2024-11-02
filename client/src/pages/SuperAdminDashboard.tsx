@@ -74,19 +74,19 @@ const SuperAdminDashboard: React.FC = () => {
           <>
             <Grid container spacing={3} className="mb-8">
               <DashboardCard 
-                title={t('dashboard.totalClinics')} 
+                title={t('dashboard.overview.totalClinics')} 
                 value={dashboardData.total_clinicas} 
               />
               <DashboardCard 
-                title={t('dashboard.totalDoctors')} 
+                title={t('dashboard.overview.totalDoctors')} 
                 value={dashboardData.total_medicos} 
               />
               <DashboardCard 
-                title={t('dashboard.totalPatients')} 
+                title={t('dashboard.overview.totalPatients')} 
                 value={dashboardData.total_pacientes} 
               />
               <DashboardCard 
-                title={t('dashboard.totalConsultations')} 
+                title={t('dashboard.overview.totalConsultations')} 
                 value={dashboardData.total_consultas} 
               />
             </Grid>

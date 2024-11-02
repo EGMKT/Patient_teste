@@ -70,7 +70,7 @@ const ViewReports: React.FC = () => {
         localStorage.removeItem('token');
         navigate('/login');
       } else {
-        setError(t('errorFetchingData'));
+        setError(t('reports.errorFetchingData'));
       }
     } finally {
       setLoading(false);
@@ -111,19 +111,19 @@ const ViewReports: React.FC = () => {
       {/* Primeira linha de cards - Dashboard Geral */}
       <Grid container spacing={3} className="mb-8">
         <DashboardCard
-          title={t('dashboard.totalClinics')}
+          title={t('dashboard.overview.totalClinics')}
           value={dashboardData.total_clinicas}
         />
         <DashboardCard
-          title={t('dashboard.totalDoctors')}
+          title={t('dashboard.overview.totalDoctors')}
           value={dashboardData.total_medicos}
         />
         <DashboardCard
-          title={t('dashboard.totalPatients')}
+          title={t('dashboard.overview.totalPatients')}
           value={dashboardData.total_pacientes}
         />
         <DashboardCard
-          title={t('dashboard.totalConsultations')}
+          title={t('dashboard.overview.totalConsultations')}
           value={dashboardData.total_consultas}
         />
       </Grid>
@@ -131,19 +131,19 @@ const ViewReports: React.FC = () => {
       {/* Segunda linha de cards - Métricas Detalhadas */}
       <Grid container spacing={3} className="mb-8">
         <MetricCard
-          title={t('reports.totalPatientsAttended')}
+          title={t('reports.metrics.totalPatients')}
           value={reportData.totalPatientsAttended || 0}
         />
         <MetricCard
-          title={t('reports.patientRetentionRate')}
+          title={t('reports.metrics.retention')}
           value={formatValue(reportData.patientRetentionRate, 'percentage')}
         />
         <MetricCard
-          title={t('reports.averageConsultationTime')}
+          title={t('reports.metrics.avgConsultation')}
           value={formatDuration(reportData.averageConsultationTime || 0)}
         />
         <MetricCard
-          title={t('reports.overallPatientSatisfaction')}
+          title={t('reports.metrics.satisfaction')}
           value={`${formatValue(reportData.overallPatientSatisfaction)}/5`}
         />
       </Grid>
@@ -162,7 +162,7 @@ const ViewReports: React.FC = () => {
           <Card>
             <CardContent>
               <Typography variant="h6" className="mb-4">
-                {t('ageDistribution')}
+                {t('reports.distribution.age')}
               </Typography>
               <PieChart width={400} height={300}>
                 <Pie
@@ -192,7 +192,7 @@ const ViewReports: React.FC = () => {
           <Card>
             <CardContent>
               <Typography variant="h6" className="mb-4">
-                {t('genderDistribution')}
+                {t('reports.distribution.gender')}
               </Typography>
               <PieChart width={400} height={300}>
                 <Pie
@@ -223,7 +223,7 @@ const ViewReports: React.FC = () => {
           <Card>
             <CardContent>
               <Typography variant="h6" className="mb-4">
-                {t('occupationDistribution')}
+                {t('reports.distribution.occupation')}
               </Typography>
               <BarChart width={400} height={300} data={Object.entries(reportData.patientDemographics.occupations).map(([key, value]) => ({
                 name: key,
@@ -249,8 +249,8 @@ const ViewReports: React.FC = () => {
           <TableHead>
             <TableRow>
               <TableCell>{t('doctor')}</TableCell>
-              <TableCell align="right">{t('patientsAttended')}</TableCell>
-              <TableCell align="right">{t('satisfactionRate')}</TableCell>
+              <TableCell align="right">{t('reports.patientsAttended')}</TableCell>
+              <TableCell align="right">{t('reports.satisfactionRate')}</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>

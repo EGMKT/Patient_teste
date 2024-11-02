@@ -1,56 +1,74 @@
 {
-  "changeLanguage": "Mudar idioma",
-  "logout": "Sair",
-  "login": {
-    "title": "Entre na sua conta",
-    "email": "Endereço de e-mail",
-    "password": "Senha",
-    "signIn": "Entrar",
-    "unknownUserType": "Tipo de usuário desconhecido",
-    "incompleteUserInfo": "Informações do usuário incompletas",
-    "genericError": "Falha no login. Por favor, tente novamente."
+  "common": {
+    "actions": {
+      "edit": "Editar",
+      "delete": "Excluir",
+      "save": "Salvar",
+      "cancel": "Cancelar",
+      "confirm": "Confirmar",
+      "back": "Voltar",
+      "next": "Próximo",
+      "search": "Pesquisar"
+    },
+    "status": {
+      "active": "Ativo",
+      "inactive": "Inativo",
+      "loading": "Carregando...",
+      "processing": "Processando...",
+      "error": "Erro",
+      "success": "Sucesso"
+    },
+    "labels": {
+      "name": "Nome",
+      "email": "E-mail",
+      "password": "Senha",
+      "phone": "Telefone",
+      "description": "Descrição",
+      "createdAt": "Data de Criação",
+      "status": "Status"
+    }
   },
-  "username": "Nome de usuário",
-  "password": "Senha",
-  "loginButton": "Entrar",
-  "loginError": "Nome de usuário ou senha inválidos",
-  "selectDoctor": "Selecione um Médico",
-  "next": "Próximo",
-  "pleaseSelectDoctor": "Por favor, selecione um médico",
-  "cardiologist": "Cardiologista",
-  "neurologist": "Neurologista",
-  "pediatrician": "Pediatra",
-  "consultationSetup": "Configuração da Consulta",
-  "patientName": "Nome do Paciente",
-  "selectService": "Selecione o Serviço",
-  "participants": "Número de Participantes",
-  "startRecording": "Iniciar Gravação",
-  "audioRecording": "Gravação de Áudio",
-  "duration": "Duração",
-  "seconds": "segundos",
-  "stopRecording": "Parar Gravação",
-  "processingAudio": "Processando e enviando áudio...",
-  "generalConsultation": "Consulta Geral",
-  "routineExam": "Exame de Rotina",
-  "followUp": "Acompanhamento",
-  "specializedEvaluation": "Avaliação Especializada",
-  "minorProcedure": "Procedimento Menor",
-  "errorSendingAudio": "Erro no Envio do Áudio",
-  "unexpectedError": "Ocorreu um erro inesperado.",
-  "recordingSavedLocally": "A gravação foi salva localmente e o erro já foi reportado aos administradores.",
-  "backToHome": "Voltar para o Início",
-  "audioSentSuccessfully": "Áudio Enviado com Sucesso",
-  "audioSentToWebhook": "Seu áudio foi enviado para o webhook.",
-  "startNewConsultation": "Iniciar Nova Consulta",
+  "auth": {
+    "login": {
+      "title": "Entre na sua conta",
+      "email": "Endereço de e-mail",
+      "password": "Senha",
+      "signIn": "Entrar",
+      "changeLanguage": "Idiomas",
+      "errors": {
+        "unknownUserType": "Tipo de usuário desconhecido",
+        "incompleteUserInfo": "Informações do usuário incompletas",
+        "invalidCredentials": "Credenciais inválidas",
+        "generic": "Falha no login. Por favor, tente novamente."
+      },
+      "showPassword": "Mostrar senha",
+      "hidePassword": "Ocultar senha",
+      "passwordPlaceholder": "Digite sua senha"
+    },
+    "twoFactor": {
+      "title": "Verificação em duas etapas",
+      "enterCode": "Digite o código",
+      "verify": "Verificar",
+      "resend": "Reenviar código"
+    }
+  },
+  "navigation": {
+    "dashboard": "Painel",
+    "users": "Usuários",
+    "clinics": "Clínicas",
+    "services": "Serviços",
+    "reports": "Relatórios",
+    "settings": "Configurações",
+    "logout": "Sair"
+  },
   "dashboard": {
     "title": "Painel de Controle",
-    "overview": "Visão Geral",
-    "totalClinics": "Total de Clínicas",
-    "totalDoctors": "Total de Médicos",
-    "totalPatients": "Total de Pacientes",
-    "totalConsultations": "Total de Consultas",
-    "loading": "Carregando dados...",
-    "error": "Erro ao carregar dados",
+    "overview": {
+      "totalClinics": "Total de Clínicas",
+      "totalDoctors": "Total de Médicos",
+      "totalPatients": "Total de Pacientes",
+      "totalConsultations": "Total de Consultas"
+    },
     "newClinics": {
       "title": "Novas Clínicas",
       "count": "Quantidade",
@@ -58,193 +76,211 @@
       "tooltip": "Novas clínicas em {{month}}: {{count}}"
     }
   },
-  "especialidadeNaoDisponivel": "Especialidade não disponível",
-  "superAdminDashboard": "Painel do Super Admin",
-  "databaseOverview": "Visão Geral do Banco de Dados",
+  "users": {
+    "title": "Gerenciar Usuários",
+    "roles": {
+      "SA": "Super Admin",
+      "AC": "Admin Clínica",
+      "ME": "Médico"
+    },
+    "form": {
+      "firstName": "Nome",
+      "lastName": "Sobrenome",
+      "email": "E-mail",
+      "role": "Função",
+      "clinic": "Clínica",
+      "specialty": "Especialidade",
+      "services": "Serviços"
+    },
+    "messages": {
+      "createSuccess": "Usuário criado com sucesso",
+      "updateSuccess": "Usuário atualizado com sucesso",
+      "deleteSuccess": "Usuário excluído com sucesso",
+      "deleteError": "Erro ao excluir usuário"
+    }
+  },
+  "clinics": {
+    "title": "Gerenciar Clínicas",
+    "form": {
+      "name": "Nome da Clínica",
+      "status": "Status da Clínica",
+      "pipedriveToken": "Token Pipedrive (Opcional)"
+    },
+    "messages": {
+      "createSuccess": "Clínica criada com sucesso",
+      "updateSuccess": "Clínica atualizada com sucesso",
+      "deleteSuccess": "Clínica excluída com sucesso",
+      "deleteError": "Erro ao excluir clínica"
+    },
+    "actions": {
+      "activateSelected": "Ativar Selecionadas",
+      "deactivateSelected": "Desativar Selecionadas"
+    }
+  },
+  "services": {
+    "title": "Gerenciar Serviços",
+    "form": {
+      "name": "Nome do Serviço",
+      "description": "Descrição",
+      "status": "Status"
+    },
+    "messages": {
+      "createSuccess": "Serviço criado com sucesso",
+      "updateSuccess": "Serviço atualizado com sucesso",
+      "deleteSuccess": "Serviço excluído com sucesso",
+      "deleteError": "Erro ao excluir serviço"
+    }
+  },
+  "consultation": {
+    "setup": {
+      "title": "Configuração da Consulta",
+      "selectDoctor": "Selecione um Médico",
+      "patientName": "Nome do Paciente",
+      "selectService": "Selecione o Serviço",
+      "participants": "Número de Participantes",
+      "selectPatient": "Selecione o Paciente",
+      "language": "Idioma",
+      "startRecording": "Iniciar Gravação",
+      "loading": "Carregando...",
+      "error": "Erro ao carregar dados"
+    },
+    "recording": {
+      "title": "Gravação de Áudio",
+      "start": "Iniciar Gravação",
+      "stop": "Parar Gravação",
+      "pause": "Pausar Gravação",
+      "resume": "Continuar Gravação",
+      "duration": "Duração",
+      "processing": "Processando e enviando áudio..."
+    },
+    "messages": {
+      "success": "Áudio enviado com sucesso",
+      "error": "Erro ao enviar áudio",
+      "savedLocally": "A gravação foi salva localmente"
+    },
+    "services": {
+      "generalConsultation": "Consulta Geral",
+      "routineExam": "Exame de Rotina",
+      "followUp": "Retorno",
+      "specializedEvaluation": "Avaliação Especializada",
+      "minorProcedure": "Procedimento Menor"
+    }
+  },
+  "reports": {
+    "title": "Relatórios e Análises",
+    "errorFetchingData": "Erro ao carregar dados",
+    "metrics": {
+      "totalPatients": "Total de Pacientes Atendidos",
+      "retention": "Taxa de Retenção",
+      "avgConsultation": "Tempo Médio de Consulta",
+      "satisfaction": "Satisfação Geral"
+    },
+    "distribution": {
+      "age": "Distribuição por Idade",
+      "gender": "Distribuição por Gênero",
+      "occupation": "Distribuição por Ocupação",
+      "location": "Distribuição por Localização"
+    },
+    "performance": {
+      "doctors": "Desempenho dos Médicos"
+    },
+    "newClinicsOverTime": "Novas Clínicas ao Longo do Tempo",
+    "ageDistribution": "Distribuição por Idade",
+    "genderDistribution": "Distribuição por Gênero",
+    "occupationDistribution": "Distribuição por Ocupação",
+    "doctor": "Médico",
+    "patientsAttended": "Pacientes Atendidos",
+    "satisfactionRate": "Taxa de Satisfação"
+  },
   "manageUsers": {
     "title": "Gerenciar Usuários",
     "createUser": "Criar Usuário",
-    "search": "Pesquisar",
+    "editUser": "Editar Usuário",
+    "createNewUser": "Criar Novo Usuário",
+    "search": "Buscar usuário",
     "email": "E-mail",
     "firstName": "Nome",
     "lastName": "Sobrenome",
     "role": "Função",
     "clinic": "Clínica",
     "specialty": "Especialidade",
+    "status": "Status",
     "actions": "Ações",
     "edit": "Editar",
     "delete": "Excluir",
     "password": "Senha",
     "selectClinic": "Selecione uma Clínica",
-    "save": "Salvar",
+    "services": "Serviços",
     "cancel": "Cancelar",
-    "confirmDelete": "Confirmar Exclusão",
-    "confirmUpdate": "Confirmar Atualização",
-    "deleteUserConfirmation": "Tem certeza que deseja excluir este usuário?",
-    "updateUserConfirmation": "Confirmar alterações no usuário?",
+    "save": "Salvar",
     "confirmDeleteTitle": "Confirmar Exclusão",
-    "confirmDeleteMessage": "Tem certeza que deseja excluir este usuário? Esta ação não pode ser desfeita.",
+    "confirmDeleteMessage": "Tem certeza que deseja excluir este usuário?",
     "enterPassword": "Digite sua Senha",
-    "passwordRequired": "Por favor, digite sua senha para confirmar a exclusão",
-    "confirm": "Confirmar",
-    "roles": {
-      "SA": "Super Admin",
-      "AC": "Admin Clínica",
-      "ME": "Médico"
-    },
-    "editUser": "Editar Usuário",
-    "createNewUser": "Criar Novo Usuário",
-    "noUsersFound": "Nenhum usuário encontrado",
-    "loading": "Carregando...",
-    "error": "Erro ao carregar usuários",
-    "superAdmin": "Super Admin",
-    "clinicAdmin": "Admin Clínica",
-    "doctor": "Médico",
-    "deleteError": "Não foi possível excluir o usuário. Verifique se não há dependências.",
-    "invalidPassword": "Senha incorreta",
+    "passwordRequired": "Senha necessária para confirmar esta ação",
+    "invalidPassword": "Senha inválida",
+    "statusLabel": "Status",
     "status": {
       "active": "Ativo",
       "inactive": "Inativo"
     },
-    "services": "Serviços",
-    "selectServices": "Selecione os serviços"
+    "roles": {
+      "SA": "Super Admin",
+      "AC": "Admin Clínica",
+      "ME": "Médico"
+    }
   },
   "manageClinics": {
     "title": "Gerenciar Clínicas",
     "createClinic": "Criar Clínica",
-    "search": "Pesquisar",
+    "editClinic": "Editar Clínica",
+    "search": "Buscar clínica",
     "name": "Nome",
+    "status": "Status",
     "createdAt": "Data de Criação",
-    "active": "Ativa",
     "actions": "Ações",
     "edit": "Editar",
     "delete": "Excluir",
-    "pipedriveApiToken": "Token da API Pipedrive",
-    "yes": "Sim",
-    "no": "Não",
-    "save": "Salvar",
-    "cancel": "Cancelar",
-    "editClinic": "Editar Clínica",
-    "createNewClinic": "Criar Nova Clínica",
     "confirmDelete": "Confirmar Exclusão",
-    "deleteClinicConfirmation": "Tem certeza que deseja excluir esta clínica?",
-    "confirm": "Confirmar",
-    "loading": "Carregando...",
-    "error": "Erro ao carregar clínicas",
-    "noClinicFound": "Nenhuma clínica encontrada",
+    "pipedriveToken": "Token do Pipedrive",
     "activeStatus": {
       "true": "Ativa",
       "false": "Inativa"
-    },
-    "form": {
-      "nameRequired": "Nome é obrigatório",
-      "nameLabel": "Nome da Clínica",
-      "activateLabel": "Status da Clínica",
-      "pipedriveLabel": "Token Pipedrive (Opcional)"
-    },
-    "sort": {
-      "name": "Ordenar por nome",
-      "createdAt": "Ordenar por data de criação",
-      "status": "Ordenar por status"
-    },
-    "confirmDeleteTitle": "Confirmar Exclusão",
-    "confirmDeleteMessage": "Tem certeza que deseja excluir esta clínica? Esta ação não pode ser desfeita.",
-    "enterPassword": "Digite sua Senha",
-    "passwordRequired": "Por favor, digite sua senha para confirmar a exclusão",
-    "activateSelected": "Ativar Selecionadas",
-    "deactivateSelected": "Desativar Selecionadas",
-    "bulkActionError": "Erro ao executar ação em massa",
-    "confirmBulkAction": "Confirmar Ação em Massa",
-    "confirmBulkMessage": "Isso afetará todas as clínicas selecionadas e seus médicos vinculados. Deseja continuar?"
-  },
-  "viewReports": "Ver Relatórios",
-  "id": "ID",
-  "email": "E-mail",
-  "username": "Nome de Usuário",
-  "role": "Função",
-  "actions": "Ações",
-  "edit": "Editar",
-  "delete": "Excluir",
-  "selectPatient": "Selecionar Paciente",
-  "language": "Língua",
-  "audiosNaoEnviados": "Áudios Não Enviados",
-  "month": {
-    "short": {
-      "Jan": "Jan",
-      "Feb": "Fev",
-      "Mar": "Mar",
-      "Apr": "Abr",
-      "May": "Mai",
-      "Jun": "Jun",
-      "Jul": "Jul",
-      "Aug": "Ago",
-      "Sep": "Set",
-      "Oct": "Out",
-      "Nov": "Nov",
-      "Dec": "Dez"
-    },
-    "long": {
-      "January": "Janeiro",
-      "February": "Fevereiro",
-      "March": "Março",
-      "April": "Abril",
-      "May": "Maio",
-      "June": "Junho",
-      "July": "Julho",
-      "August": "Agosto",
-      "September": "Setembro",
-      "October": "Outubro",
-      "November": "Novembro",
-      "December": "Dezembro"
     }
-  },
-  "newClinics": "Novas Clínicas",
-  "newClinicsOverTime": "Novas Clínicas ao Longo do Tempo",
-  "errorFetchingData": "Erro ao buscar dados",
-  "noUsersFound": "Nenhum usuário encontrado",
-  "loading": "Carregando...",
-  "error": "Erro ao carregar dados",
-  "pauseRecording": "Pausar Gravação",
-  "resumeRecording": "Continuar Gravação",
-  "reports": {
-    "title": "Relatórios e Análises",
-    "totalPatientsAttended": "Total de Pacientes Atendidos",
-    "patientRetentionRate": "Taxa de Retenção",
-    "averageConsultationTime": "Tempo Médio de Consulta",
-    "overallPatientSatisfaction": "Satisfação Geral",
-    "newClinicsOverTime": "Novas Clínicas ao Longo do Tempo",
-    "ageDistribution": "Distribuição por Idade",
-    "genderDistribution": "Distribuição por Gênero",
-    "occupationDistribution": "Distribuição por Ocupação",
-    "locationDistribution": "Distribuição por Localização",
-    "doctorsPerformance": "Desempenho dos Médicos"
-  },
-  "common": {
-    "password": "Senha",
-    "passwordRequired": "Senha é obrigatória",
-    "dontAskToday": "Não pedir senha novamente hoje",
-    "confirmAction": "Confirmar Ação",
-    "confirmDeleteMessage": "Digite sua senha para confirmar a exclusão",
-    "cancel": "Cancelar",
-    "confirm": "Confirmar",
-    "deleting": "Excluindo...",
-    "processing": "Processando..."
   },
   "manageServices": {
     "title": "Gerenciar Serviços",
     "createService": "Criar Serviço",
     "editService": "Editar Serviço",
+    "search": "Buscar serviço",
     "name": "Nome",
-    "doctor": "Médico",
-    "currency": "Moeda",
-    "price": "Preço (opcional)",
-    "duration": "Duração",
     "description": "Descrição",
     "status": "Status",
+    "actions": "Ações",
+    "edit": "Editar",
+    "delete": "Excluir",
+    "confirmDelete": "Confirmar Exclusão",
+    "price": "Preço",
+    "duration": "Duração",
+    "statusLabel": "Status",
     "active": "Ativo",
-    "createError": "Erro ao criar serviço",
-    "updateError": "Erro ao atualizar serviço",
-    "deleteError": "Erro ao excluir serviço",
-    "confirmDelete": "Tem certeza que deseja excluir este serviço?"
+    "inactive": "Inativo"
+  },
+  "manageRegistrations": {
+    "title": "Gerenciar Cadastros",
+    "registrationDetails": "Detalhes do Cadastro",
+    "clinicName": "Nome da Clínica",
+    "ownerName": "Nome do Proprietário",
+    "email": "E-mail",
+    "phone": "Telefone",
+    "status": "Status",
+    "createdAt": "Data de Criação",
+    "actions": "Ações",
+    "viewDetails": "Ver Detalhes",
+    "notes": "Observações",
+    "status": {
+      "pending": "Pendente",
+      "approved": "Aprovado",
+      "rejected": "Rejeitado"
+    }
   }
 }

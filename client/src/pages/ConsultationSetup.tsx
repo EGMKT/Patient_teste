@@ -25,11 +25,11 @@ const ConsultationSetup: React.FC = () => {
   const [language, setLanguage] = useState('pt');
 
   const services = [
-    t('generalConsultation'),
-    t('routineExam'),
-    t('followUp'),
-    t('specializedEvaluation'),
-    t('minorProcedure')
+    t('consultation.services.generalConsultation'),
+    t('consultation.services.routineExam'),
+    t('consultation.services.followUp'),
+    t('consultation.services.specializedEvaluation'),
+    t('consultation.services.minorProcedure')
   ];
 
   const validationSchema = Yup.object().shape({
@@ -98,15 +98,15 @@ const ConsultationSetup: React.FC = () => {
   return (
     <div className="flex flex-col h-screen">
       <div className="flex-grow flex flex-col items-center justify-center p-4">
-        <h1 className="text-3xl font-bold mb-8 text-center">{t('consultationSetup')}</h1>
+        <h1 className="text-3xl font-bold mb-8 text-center">{t('consultation.setup.title')}</h1>
         {isLoading ? (
-          <div>Carregando...</div>
+          <div>{t('consultation.setup.loading')}</div>
         ) : error ? (
-          <div className="text-red-500">{error}</div>
+          <div className="text-red-500">{t('consultation.setup.error')}</div>
         ) : (
           <form onSubmit={handleSubmit} className="w-full max-w-md space-y-4">
             <FormControl fullWidth>
-              <InputLabel id="patient-select-label">{t('selectPatient')}</InputLabel>
+              <InputLabel id="patient-select-label">{t('consultation.setup.patientName')}</InputLabel>
               <Select
                 labelId="patient-select-label"
                 value={selectedPatient}
@@ -119,7 +119,7 @@ const ConsultationSetup: React.FC = () => {
               </Select>
             </FormControl>
             <FormControl fullWidth>
-              <InputLabel id="service-select-label">{t('selectService')}</InputLabel>
+              <InputLabel id="service-select-label">{t('consultation.setup.selectService')}</InputLabel>
               <Select
                 labelId="service-select-label"
                 value={service}
@@ -132,7 +132,7 @@ const ConsultationSetup: React.FC = () => {
               </Select>
             </FormControl>
             <div>
-              <p className="mb-2">{t('participants')}:</p>
+              <p className="mb-2">{t('consultation.setup.participants')}:</p>
               <div className="flex justify-between">
                 {[2, 3, 4, 5].map((num) => (
                   <button
@@ -149,7 +149,7 @@ const ConsultationSetup: React.FC = () => {
               </div>
             </div>
             <div>
-              <p className="mb-2">{t('language')}:</p>
+              <p className="mb-2">{t('consultation.setup.language')}:</p>
               <div className="flex justify-center gap-4">
                 {[
                   { code: 'pt', label: 'Português' },
@@ -174,7 +174,7 @@ const ConsultationSetup: React.FC = () => {
               color="primary"
               fullWidth
             >
-              {t('startRecording')}
+              {t('consultation.recording.start')}
             </Button>
           </form>
         )}
