@@ -9,13 +9,13 @@ const NotFound: React.FC = () => {
   return (
     <Container maxWidth="sm" className="text-center mt-16">
       <Typography variant="h1" component="h1" gutterBottom>
-        404
+        {t('notFound.title')}
       </Typography>
       <Typography variant="h4" component="h2" gutterBottom>
-        {t('pageNotFound')}
+        {t('notFound.pageNotFound')}
       </Typography>
       <Typography variant="body1" paragraph>
-        {t('pageNotFoundMessage')}
+        {t('notFound.pageNotFoundMessage')}
       </Typography>
       <Button
         component={Link}
@@ -24,7 +24,7 @@ const NotFound: React.FC = () => {
         color="primary"
         size="large"
       >
-        {t('backToHome')}
+        {t('notFound.backToHome')}
       </Button>
     </Container>
   );

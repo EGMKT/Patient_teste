@@ -6,6 +6,7 @@ from ..models import Servico, MedicoServico
 from ..serializers import ServicoSerializer
 import logging
 from django.db import transaction
+from rest_framework.decorators import action
 
 logger = logging.getLogger(__name__)
 
@@ -69,3 +70,16 @@ class ServicoViewSet(viewsets.ModelViewSet):
                 {"error": str(e)},
                 status=status.HTTP_400_BAD_REQUEST
             )
+
+    @action(detail=False, methods=['GET'])
+    def medico_servicos(self, request):
+        try:
+            if not hasattr(request.user, 'medico'):
+                return Response({"error": "Usuário não é médico"}, status=400)
+                
+            servicos = request.user.medico.servicos.filter(ativo=True)
+            serializer = self.get_serializer(servicos, many=True)
+            return Response(serializer.data)
+        except Exception as e:
+            logger.error(f"Erro ao buscar serviços do médico: {str(e)}")
+            return Response({"error": str(e)}, status=500)

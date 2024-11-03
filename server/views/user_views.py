@@ -95,37 +95,30 @@ class UserViewSet(viewsets.ModelViewSet):
         
         return Response(user_serializer.data, status=status.HTTP_201_CREATED)
 
-    def update(self, instance, validated_data):
-        medico_data = validated_data.pop('medico', None)
-        password = validated_data.pop('password', None)
-        
-        # Atualiza dados do usuário
-        for attr, value in validated_data.items():
-            setattr(instance, attr, value)
-        
-        if password:
-            instance.set_password(password)
-        
-        instance.save()
-
-        # Atualiza ou cria dados do médico
-        if medico_data and instance.role in ['ME', 'AC']:
-            medico, created = Medico.objects.get_or_create(usuario=instance)
-            clinica_id = medico_data.pop('clinica_id', None)
-            servicos = medico_data.pop('servicos', None)
+    def update(self, request, *args, **kwargs):
+        try:
+            instance = self.get_object()
+            logger.info(f"Dados recebidos para atualização: {request.data}")
             
-            if clinica_id:
-                medico.clinica_id = clinica_id
+            serializer = self.get_serializer(instance, data=request.data, partial=True)
+            serializer.is_valid(raise_exception=True)
             
-            for attr, value in medico_data.items():
-                setattr(medico, attr, value)
-            
-            medico.save()
-            
-            if servicos is not None:
-                medico.servicos.set(servicos)
+            with transaction.atomic():
+                updated_instance = serializer.save()
+                logger.info(f"Usuário atualizado com sucesso: {updated_instance.id}")
                 
-        elif instance.role not in ['ME', 'AC'] and hasattr(instance, 'medico'):
-            instance.medico.delete()
-
-        return instance
+                if updated_instance.role == 'ME' and 'medico' in request.data:
+                    medico_data = request.data['medico']
+                    logger.info(f"Dados do médico: {medico_data}")
+                    
+                    if 'servicos' in medico_data:
+                        logger.info(f"Serviços a serem vinculados: {medico_data['servicos']}")
+                        updated_instance.medico.servicos.set(medico_data['servicos'])
+                
+                return Response(serializer.data)
+        except Exception as e:
+            logger.error(f"Erro ao atualizar usuário: {str(e)}")
+            return Response(
+                {"error": f"Erro ao atualizar usuário: {str(e)}"},
+                status=status.HTTP_400_BAD_REQUEST
+            )

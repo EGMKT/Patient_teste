@@ -153,6 +153,7 @@ class Medico(models.Model):
     usuario = models.OneToOneField('Usuario', on_delete=models.CASCADE, primary_key=True, related_name='medico')
     especialidade = models.CharField(max_length=100)
     clinica = models.ForeignKey(Clinica, on_delete=models.SET_NULL, null=True, blank=True, related_name='medicos')
+    servicos = models.ManyToManyField('Servico', through='MedicoServico', related_name='medicos')
 
     def __str__(self):
         return f"{self.usuario.get_full_name()} - {self.especialidade}"

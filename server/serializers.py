@@ -131,11 +131,13 @@ class UsuarioSerializer(serializers.ModelSerializer):
         if medico_data and user.role in ['ME', 'AC']:
             clinica_id = medico_data.pop('clinica_id', None)
             servicos = medico_data.pop('servicos', [])
-            Medico.objects.create(
+            medico = Medico.objects.create(
                 usuario=user,
                 clinica_id=clinica_id,
                 **medico_data
             )
+            if servicos:
+                medico.servicos.set(servicos)
 
         return user
 
@@ -157,6 +159,7 @@ class UsuarioSerializer(serializers.ModelSerializer):
             medico, created = Medico.objects.get_or_create(usuario=instance)
             clinica_id = medico_data.pop('clinica_id', None)
             servicos = medico_data.pop('servicos', None)
+            
             if clinica_id:
                 medico.clinica_id = clinica_id
             
@@ -164,6 +167,11 @@ class UsuarioSerializer(serializers.ModelSerializer):
                 setattr(medico, attr, value)
             
             medico.save()
+
+            # Atualiza os serviços se fornecidos
+            if servicos is not None:
+                medico.servicos.set(servicos)
+                
         elif instance.role not in ['ME', 'AC'] and hasattr(instance, 'medico'):
             # Se não é mais médico, remove o registro de médico
             instance.medico.delete()

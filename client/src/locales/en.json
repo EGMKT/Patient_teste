@@ -157,6 +157,12 @@
   "reports": {
     "title": "Reports and Analytics",
     "errorFetchingData": "Error loading data",
+    "viewLevel": "View Level",
+    "globalView": "Global View",
+    "clinicView": "Clinic View",
+    "doctorView": "Doctor View",
+    "selectClinic": "Select Clinic",
+    "selectDoctor": "Select Doctor",
     "metrics": {
       "totalPatients": "Total Patients Attended",
       "retention": "Retention Rate",
@@ -178,7 +184,15 @@
     "occupationDistribution": "Occupation Distribution",
     "doctor": "Doctor",
     "patientsAttended": "Patients Attended",
-    "satisfactionRate": "Satisfaction Rate"
+    "satisfactionRate": "Satisfaction Rate",
+    "clinic": {
+      "totalPatients": "Total Patients",
+      "monthlyPatients": "Monthly Patients",
+      "retention": "Retention Rate",
+      "satisfaction": "Average Satisfaction",
+      "errorLoading": "Error loading clinic data"
+    },
+    "selectClinicMessage": "Select a clinic to view data"
   },
   "manageUsers": {
     "title": "Manage Users",
@@ -271,6 +285,37 @@
       "pending": "Pending",
       "approved": "Approved",
       "rejected": "Rejected"
+    }
+  },
+  "error": {
+    "title": "Error sending audio",
+    "unexpectedError": "An unexpected error occurred",
+    "recordingSavedLocally": "The recording was saved locally and will be synchronized automatically when connection is available",
+    "backToHome": "Back to home"
+  },
+  "notFound": {
+    "title": "404",
+    "pageNotFound": "Page not found",
+    "pageNotFoundMessage": "The page you are looking for doesn't exist or has been moved",
+    "backToHome": "Back to home"
+  },
+  "success": {
+    "audioSentSuccessfully": "Audio sent successfully!",
+    "audioSentToWebhook": "The audio has been sent and is being processed",
+    "startNewConsultation": "Start new consultation"
+  },
+  "superAdmin": {
+    "menu": "Menu",
+    "changeLanguage": "Change Language",
+    "settings": "Settings",
+    "logout": "Logout",
+    "navigation": {
+      "dashboard": "Dashboard",
+      "manageUsers": "Manage Users",
+      "manageClinics": "Manage Clinics",
+      "manageServices": "Manage Services",
+      "manageRegistrations": "Manage Registrations",
+      "viewReports": "View Reports"
     }
   }
 }

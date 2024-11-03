@@ -32,12 +32,12 @@ const SuperAdminHeader: React.FC<SuperAdminHeaderProps> = ({ onLanguageChange, c
   ];
 
   const menuItems = [
-    { title: 'Dashboard', link: '/SA' },
-    { title: 'Manage Users', link: '/SA/manage-users' },
-    { title: 'Manage Clinics', link: '/SA/manage-clinics' },
-    { title: 'Manage Services', link: '/SA/manage-services' },
-    { title: 'Manage Registrations', link: '/SA/manage-registrations' },
-    { title: 'View Reports', link: '/SA/view-reports' },
+    { title: t('superAdmin.navigation.dashboard'), link: '/SA' },
+    { title: t('superAdmin.navigation.manageUsers'), link: '/SA/manage-users' },
+    { title: t('superAdmin.navigation.manageClinics'), link: '/SA/manage-clinics' },
+    { title: t('superAdmin.navigation.manageServices'), link: '/SA/manage-services' },
+    { title: t('superAdmin.navigation.manageRegistrations'), link: '/SA/manage-registrations' },
+    { title: t('superAdmin.navigation.viewReports'), link: '/SA/view-reports' },
   ];
 
   return (
@@ -47,7 +47,7 @@ const SuperAdminHeader: React.FC<SuperAdminHeaderProps> = ({ onLanguageChange, c
           <button
             onClick={() => setShowMenu(!showMenu)}
             className="p-2 rounded-full bg-gray-200 hover:bg-gray-300 transition-colors mr-4"
-            aria-label={t('menu')}
+            aria-label={t('superAdmin.menu')}
           >
             <FiMenu className="text-gray-600" />
           </button>
@@ -58,7 +58,7 @@ const SuperAdminHeader: React.FC<SuperAdminHeaderProps> = ({ onLanguageChange, c
             <button
               onClick={() => setShowLanguageMenu(!showLanguageMenu)}
               className="p-2 rounded-full bg-gray-200 hover:bg-gray-300 transition-colors"
-              aria-label={t('changeLanguage')}
+              aria-label={t('superAdmin.changeLanguage')}
             >
               <FiGlobe className="text-blue-500" />
             </button>
@@ -84,14 +84,14 @@ const SuperAdminHeader: React.FC<SuperAdminHeaderProps> = ({ onLanguageChange, c
           <button
             onClick={() => setShowTwoFactorSettings(true)}
             className="p-2 rounded-full bg-gray-200 hover:bg-gray-300 transition-colors"
-            aria-label={t('settings')}
+            aria-label={t('superAdmin.settings')}
           >
             <FiSettings className="text-gray-600" />
           </button>
           <button
             onClick={handleLogout}
             className="p-2 rounded-full bg-gray-200 hover:bg-gray-300 transition-colors"
-            aria-label={t('logout')}
+            aria-label={t('superAdmin.logout')}
           >
             <FiLogOut className="text-red-500" />
           </button>
@@ -108,7 +108,7 @@ const SuperAdminHeader: React.FC<SuperAdminHeaderProps> = ({ onLanguageChange, c
                     className="text-gray-600 hover:text-gray-900 transition-colors"
                     onClick={() => setShowMenu(false)}
                   >
-                    {t(item.title)}
+                    {item.title}
                   </Link>
                 </li>
               ))}

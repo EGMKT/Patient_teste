@@ -69,7 +69,7 @@ export const checkTrustedDevice = async (deviceId: string) => {
 };
 
 
-export const getMedicos = async () => {
+export const getMedicos = async (): Promise<{id: number; usuario: User; especialidade: string}[]> => {
   try {
     console.log('Iniciando requisição para buscar médicos');
     const response = await api.get('/medicos/');
@@ -96,7 +96,7 @@ export const criarConsulta = async (consultaData: any) => {
 };
 
 export const enviarAudio = async (audioBase64: string, metadata: any) => {
-  const webhookUrl = 'https://n8n.patientfunnel.solutions/webhook-test/patientFunnel-test';
+  const webhookUrl = 'https://n8n.patientfunnel.solutions/webhook-test/teste-patientFunnel';
   const response = await axios.post(webhookUrl, { audio: audioBase64, metadata });
   return response.data;
 };
@@ -116,9 +116,14 @@ export const getDashboardGeral = async () => {
   return response.data;
 };
 
-export const getDashboardClinica = async () => {
-  const response = await api.get('dashboard/clinica/');
-  return response.data;
+export const getDashboardClinica = async (clinicId: number) => {
+  try {
+    const response = await api.get(`dashboard/clinica/${clinicId}/`);
+    return response.data;
+  } catch (error) {
+    console.error('Erro ao buscar dados da clínica:', error);
+    throw error;
+  }
 };
 
 export const verifyPin = async (email: string, pin: string) => {
@@ -528,6 +533,16 @@ export const deleteService = async (id: number): Promise<void> => {
     }
   } catch (error) {
     console.error('Erro ao deletar serviço:', error);
+    throw error;
+  }
+};
+
+export const getMedicoServicos = async () => {
+  try {
+    const response = await api.get('/servicos/medico_servicos/');
+    return response.data;
+  } catch (error) {
+    console.error('Erro ao buscar serviços do médico:', error);
     throw error;
   }
 };

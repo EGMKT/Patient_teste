@@ -169,6 +169,12 @@
   "reports": {
     "title": "Relatórios e Análises",
     "errorFetchingData": "Erro ao carregar dados",
+    "viewLevel": "Nível de Visualização",
+    "globalView": "Visão Geral",
+    "clinicView": "Visão por Clínica",
+    "doctorView": "Visão por Médico",
+    "selectClinic": "Selecionar Clínica",
+    "selectDoctor": "Selecionar Médico",
     "metrics": {
       "totalPatients": "Total de Pacientes Atendidos",
       "retention": "Taxa de Retenção",
@@ -190,7 +196,15 @@
     "occupationDistribution": "Distribuição por Ocupação",
     "doctor": "Médico",
     "patientsAttended": "Pacientes Atendidos",
-    "satisfactionRate": "Taxa de Satisfação"
+    "satisfactionRate": "Taxa de Satisfação",
+    "clinic": {
+      "totalPatients": "Total de Pacientes",
+      "monthlyPatients": "Pacientes no Mês",
+      "retention": "Taxa de Retenção",
+      "satisfaction": "Satisfação Média",
+      "errorLoading": "Erro ao carregar dados da clínica"
+    },
+    "selectClinicMessage": "Selecione uma clínica para ver os dados"
   },
   "manageUsers": {
     "title": "Gerenciar Usuários",
@@ -281,6 +295,37 @@
       "pending": "Pendente",
       "approved": "Aprovado",
       "rejected": "Rejeitado"
+    }
+  },
+  "error": {
+    "title": "Erro ao enviar áudio",
+    "unexpectedError": "Ocorreu um erro inesperado",
+    "recordingSavedLocally": "A gravação foi salva localmente e será sincronizada automaticamente quando houver conexão",
+    "backToHome": "Voltar ao início"
+  },
+  "notFound": {
+    "title": "404",
+    "pageNotFound": "Página não encontrada",
+    "pageNotFoundMessage": "A página que você está procurando não existe ou foi movida",
+    "backToHome": "Voltar ao início"
+  },
+  "success": {
+    "audioSentSuccessfully": "Áudio enviado com sucesso!",
+    "audioSentToWebhook": "O áudio foi enviado e está sendo processado",
+    "startNewConsultation": "Iniciar nova consulta"
+  },
+  "superAdmin": {
+    "menu": "Menu",
+    "changeLanguage": "Alterar Idioma",
+    "settings": "Configurações",
+    "logout": "Sair",
+    "navigation": {
+      "dashboard": "Painel",
+      "manageUsers": "Gerenciar Usuários",
+      "manageClinics": "Gerenciar Clínicas",
+      "manageServices": "Gerenciar Serviços",
+      "manageRegistrations": "Gerenciar Cadastros",
+      "viewReports": "Ver Relatórios"
     }
   }
 }

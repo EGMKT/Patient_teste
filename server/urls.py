@@ -44,4 +44,7 @@ urlpatterns = [
     path('api/consultation/process-ai-data/', ProcessedConsultationDataView.as_view(), name='process-ai-data'),
     path('api/verify-password/', VerifyPasswordView.as_view(), name='verify-password'),
     path('api/users/<int:pk>/', UserViewSet.as_view({'delete': 'destroy'}), name='user-detail'),
+    path('api/dashboard/clinica/<int:clinica_id>/', 
+         ClinicDashboardView.as_view(), 
+         name='clinic-dashboard'),
 ]

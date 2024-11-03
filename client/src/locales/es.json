@@ -157,10 +157,16 @@
   "reports": {
     "title": "Informes y Análisis",
     "errorFetchingData": "Error al cargar datos",
+    "viewLevel": "Nivel de Visualización",
+    "globalView": "Vista Global",
+    "clinicView": "Vista por Clínica",
+    "doctorView": "Vista por Médico",
+    "selectClinic": "Seleccionar Clínica",
+    "selectDoctor": "Seleccionar Médico",
     "metrics": {
       "totalPatients": "Total de Pacientes Atendidos",
       "retention": "Tasa de Retención",
-      "avgConsultation": "Tiempo Promedio de Consulta",
+      "avgConsultation": "Tiempo Medio de Consulta",
       "satisfaction": "Satisfacción General"
     },
     "distribution": {
@@ -178,7 +184,15 @@
     "occupationDistribution": "Distribución por Ocupación",
     "doctor": "Médico",
     "patientsAttended": "Pacientes Atendidos",
-    "satisfactionRate": "Tasa de Satisfacción"
+    "satisfactionRate": "Tasa de Satisfacción",
+    "clinic": {
+      "totalPatients": "Total de Pacientes",
+      "monthlyPatients": "Pacientes por Mes",
+      "retention": "Tasa de Retención",
+      "satisfaction": "Satisfacción Media",
+      "erroLoading": "Error al cargar los datos de la clínica"
+    },
+    "selectClinicMessage": "Seleccione una clínica para ver los datos"
   },
   "manageUsers": {
     "title": "Gestionar Usuarios",
@@ -271,6 +285,37 @@
       "pending": "Pendiente",
       "approved": "Aprobado",
       "rejected": "Rechazado"
+    }
+  },
+  "error": {
+    "title": "Error al enviar audio",
+    "unexpectedError": "Ocurrió un error inesperado",
+    "recordingSavedLocally": "La grabación se guardó localmente y se sincronizará automáticamente cuando haya conexión",
+    "backToHome": "Volver al inicio"
+  },
+  "notFound": {
+    "title": "404",
+    "pageNotFound": "Página no encontrada",
+    "pageNotFoundMessage": "La página que estás buscando no existe o ha sido movida",
+    "backToHome": "Volver al inicio"
+  },
+  "success": {
+    "audioSentSuccessfully": "¡Audio enviado con éxito!",
+    "audioSentToWebhook": "El audio ha sido enviado y está siendo procesado",
+    "startNewConsultation": "Iniciar nueva consulta"
+  },
+  "superAdmin": {
+    "menu": "Menú",
+    "changeLanguage": "Cambiar Idioma",
+    "settings": "Configuración",
+    "logout": "Cerrar Sesión",
+    "navigation": {
+      "dashboard": "Panel",
+      "manageUsers": "Gestionar Usuarios",
+      "manageClinics": "Gestionar Clínicas",
+      "manageServices": "Gestionar Servicios",
+      "manageRegistrations": "Gestionar Registros",
+      "viewReports": "Ver Informes"
     }
   }
 }

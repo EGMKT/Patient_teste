@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { getPipedrivePatients } from '../api';
+import { getPipedrivePatients, getMedicoServicos } from '../api';
 import { TextField, Button, Select, MenuItem, FormControl, InputLabel } from '@mui/material';
 import * as Yup from 'yup';
 import { useAuth } from '../contexts/AuthContext';
@@ -9,6 +9,12 @@ import { useAuth } from '../contexts/AuthContext';
 interface Patient {
   id: string;
   name: string;
+}
+
+interface Service {
+  id: number;
+  nome: string;
+  descricao?: string;
 }
 
 const ConsultationSetup: React.FC = () => {
@@ -23,14 +29,7 @@ const ConsultationSetup: React.FC = () => {
   const [clinicName, setClinicName] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [language, setLanguage] = useState('pt');
-
-  const services = [
-    t('consultation.services.generalConsultation'),
-    t('consultation.services.routineExam'),
-    t('consultation.services.followUp'),
-    t('consultation.services.specializedEvaluation'),
-    t('consultation.services.minorProcedure')
-  ];
+  const [services, setServices] = useState<Service[]>([]);
 
   const validationSchema = Yup.object().shape({
     patient: Yup.string().required('Nome do paciente é obrigatório'),
@@ -41,21 +40,22 @@ const ConsultationSetup: React.FC = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const patientsData = await getPipedrivePatients();
+        const [patientsData, servicesData] = await Promise.all([
+          getPipedrivePatients(),
+          getMedicoServicos()
+        ]);
+
         if (patientsData && patientsData.data) {
           setPatients(patientsData.data.map((patient: any) => ({
             id: patient.id.toString(),
             name: patient.name
           })));
-        } else {
-          console.error('Formato de dados inesperado:', patientsData);
-          setPatients([]);
-          setError('Não foi possível carregar os pacientes. Por favor, tente novamente mais tarde.');
         }
+
+        setServices(servicesData);
       } catch (error) {
         console.error('Erro ao buscar dados:', error);
-        setPatients([]);
-        setError('Erro ao carregar pacientes. Verifique sua conexão e tente novamente.');
+        setError('Erro ao carregar dados. Verifique sua conexão e tente novamente.');
       } finally {
         setIsLoading(false);
       }
@@ -126,8 +126,8 @@ const ConsultationSetup: React.FC = () => {
                 onChange={(e) => setService(e.target.value as string)}
                 required
               >
-                {services.map((s, index) => (
-                  <MenuItem key={index} value={s}>{s}</MenuItem>
+                {services.map((s) => (
+                  <MenuItem key={s.id} value={s.id}>{s.nome}</MenuItem>
                 ))}
               </Select>
             </FormControl>

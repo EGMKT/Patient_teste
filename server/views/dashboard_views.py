@@ -326,3 +326,65 @@ def get_reports(request):
     except Exception as e:
         return Response({'error': str(e)}, status=500)
 
+class ClinicDashboardView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, clinica_id):
+        try:
+            clinica = Clinica.objects.get(id=clinica_id)
+            hoje = timezone.now().date()
+            mes_passado = hoje - timezone.timedelta(days=30)
+            seis_meses_atras = hoje - timezone.timedelta(days=180)
+            
+            pacientes = Paciente.objects.filter(clinica=clinica)
+            consultas = Consulta.objects.filter(paciente__clinica=clinica)
+            
+            pacientes_fidelizados = pacientes.filter(
+                consulta__data__gte=seis_meses_atras
+            ).distinct().count()
+            
+            indice_fidelizacao = (
+                pacientes_fidelizados / pacientes.count() 
+                if pacientes.count() > 0 else 0
+            )
+
+            top_medicos = (
+                Medico.objects.filter(
+                    clinica=clinica
+                ).annotate(
+                    total_consultas=Count('consulta')
+                ).order_by('-total_consultas')[:5]
+                .values(
+                    'usuario__first_name', 
+                    'usuario__last_name', 
+                    'total_consultas'
+                )
+            )
+
+            return Response({
+                "total_pacientes": pacientes.count(),
+                "pacientes_novos": pacientes.filter(
+                    data_cadastro__gte=mes_passado
+                ).count(),
+                "total_consultas": consultas.count(),
+                "consultas_mes": consultas.filter(
+                    data__gte=mes_passado
+                ).count(),
+                "media_satisfacao": consultas.aggregate(
+                    Avg('satisfacao')
+                )['satisfacao__avg'] or 0,
+                "indice_fidelizacao": indice_fidelizacao,
+                "top_medicos": list(top_medicos)
+            })
+        except Clinica.DoesNotExist:
+            return Response(
+                {"error": "Clínica não encontrada"}, 
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            logger.error(f"Erro ao buscar dados da clínica: {str(e)}")
+            return Response(
+                {"error": "Erro interno do servidor"}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
