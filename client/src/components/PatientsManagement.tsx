@@ -7,10 +7,15 @@ import {
 import { Delete, Edit, Visibility } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
 import { Patient } from '../types';
-import api from '../api';
+import api, { getPacientesByClinica } from '../api';
+import ConfirmActionDialog from '../components/ConfirmActionDialog';
 
 interface PatientsManagementProps {
   clinicId: number;
+}
+
+interface ApiResponse {
+  data: any[];
 }
 
 const PatientsManagement: React.FC<PatientsManagementProps> = ({ clinicId }) => {
@@ -20,17 +25,44 @@ const PatientsManagement: React.FC<PatientsManagementProps> = ({ clinicId }) => 
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [searchTerm, setSearchTerm] = useState('');
+  const [confirmDelete, setConfirmDelete] = useState<{open: boolean; patientId: string | null}>({
+    open: false,
+    patientId: null
+  });
   const { t } = useTranslation();
 
   useEffect(() => {
     fetchPatients();
   }, [clinicId]);
 
+  const formatPatientData = (rawData: any[]): Patient[] => {
+    return rawData.map(patient => ({
+      id: patient.id,
+      nome: patient.nome,
+      email: Array.isArray(patient.email) 
+        ? patient.email.find((e: any) => e.primary)?.value || ''
+        : typeof patient.email === 'object' 
+          ? patient.email.value || ''
+          : patient.email || '',
+      idade: patient.idade,
+      genero: patient.genero,
+      ocupacao: patient.ocupacao,
+      localizacao: patient.localizacao,
+      is_novo: patient.is_novo,
+      data_cadastro: patient.data_cadastro,
+      clinica: {
+        id: clinicId,
+        nome: patient.clinica?.nome || ''
+      }
+    }));
+  };
+
   const fetchPatients = async () => {
     try {
       setLoading(true);
-      const response = await api.get(`/clinicas/${clinicId}/pacientes/`);
-      setPatients(response.data);
+      const response = await getPacientesByClinica(clinicId);
+      const formattedData = formatPatientData(Array.isArray(response) ? response : []);
+      setPatients(formattedData);
     } catch (error) {
       console.error('Erro ao buscar pacientes:', error);
       setError(t('patients.errors.fetchError'));
@@ -43,6 +75,23 @@ const PatientsManagement: React.FC<PatientsManagementProps> = ({ clinicId }) => 
     patient.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
     patient.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const handleDeleteClick = (patientId: string) => {
+    setConfirmDelete({ open: true, patientId });
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!confirmDelete.patientId) return;
+    
+    try {
+      await api.delete(`/pacientes/${confirmDelete.patientId}/`);
+      await fetchPatients(); // Recarrega a lista após excluir
+      setConfirmDelete({ open: false, patientId: null });
+    } catch (error) {
+      console.error('Erro ao excluir paciente:', error);
+      setError(t('common.errors.deleteError'));
+    }
+  };
 
   if (loading) {
     return <CircularProgress />;
@@ -95,18 +144,17 @@ const PatientsManagement: React.FC<PatientsManagementProps> = ({ clinicId }) => 
                     />
                   </TableCell>
                   <TableCell>
-                    <Tooltip title={t('common.actions.view')}>
-                      <IconButton size="small">
-                        <Visibility />
-                      </IconButton>
-                    </Tooltip>
                     <Tooltip title={t('common.actions.edit')}>
                       <IconButton size="small">
                         <Edit />
                       </IconButton>
                     </Tooltip>
                     <Tooltip title={t('common.actions.delete')}>
-                      <IconButton size="small" color="error">
+                      <IconButton 
+                        onClick={() => handleDeleteClick(patient.id)}
+                        size="small"
+                        color="error"
+                      >
                         <Delete />
                       </IconButton>
                     </Tooltip>
@@ -128,6 +176,15 @@ const PatientsManagement: React.FC<PatientsManagementProps> = ({ clinicId }) => 
           labelRowsPerPage={t('common.rowsPerPage')}
         />
       </TableContainer>
+
+      {/* Dialog de confirmação */}
+      <ConfirmActionDialog
+        open={confirmDelete.open}
+        onClose={() => setConfirmDelete({ open: false, patientId: null })}
+        onConfirm={handleConfirmDelete}
+        title={t('patients.confirmDelete.title')}
+        message={t('patients.confirmDelete.message')}
+      />
     </div>
   );
 };

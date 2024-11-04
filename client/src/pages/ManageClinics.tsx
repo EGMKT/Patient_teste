@@ -10,7 +10,7 @@ import {
 } from '@mui/material';
 import { Close as CloseIcon } from '@mui/icons-material';
 import { 
-  getClinics, createClinic, updateClinic, deleteClinic, verifyPassword, bulkUpdateClinics 
+  getClinics, createClinic, updateClinic, deleteClinic, verifyPassword, bulkUpdateClinics, getMedicosByClinica 
 } from '../api';
 import ConfirmActionDialog from '../components/ConfirmActionDialog';
 import axios from 'axios';
@@ -34,9 +34,16 @@ const ManageClinics: React.FC = () => {
     action?: 'activate' | 'deactivate';
     clinicIds?: number[];
   } | null>(null);
-  const [skipPasswordUntil, setSkipPasswordUntil] = useState<number | null>(
-    Number(localStorage.getItem('skipPasswordUntil')) || null
-  );
+  const [skipPasswordUntil, setSkipPasswordUntil] = useState<number | null>(() => {
+    const saved = localStorage.getItem('skipPasswordUntil');
+    if (saved) {
+      const timestamp = parseInt(saved);
+      if (timestamp > Date.now()) {
+        return timestamp;
+      }
+    }
+    return null;
+  });
   const [confirmDeleteDialogOpen, setConfirmDeleteDialogOpen] = useState(false);
   const [selectedClinicId, setSelectedClinicId] = useState<number | null>(null);
   const [selectedClinics, setSelectedClinics] = useState<number[]>([]);
@@ -71,10 +78,11 @@ const ManageClinics: React.FC = () => {
 
   const fetchMedicosByClinica = async (clinicaId: number) => {
     try {
-      const response = await axios.get(`/clinicas/${clinicaId}/medicos/`);
-      setMedicos(response.data);
+      const response = await getMedicosByClinica(clinicaId);
+      setMedicos(response);
     } catch (error) {
       console.error('Erro ao buscar médicos:', error);
+      setError(t('manageClinics.errors.fetchDoctors'));
     }
   };
 
@@ -100,12 +108,16 @@ const ManageClinics: React.FC = () => {
 
   const shouldAskPassword = () => {
     if (!skipPasswordUntil) return true;
-    return new Date().getTime() > skipPasswordUntil;
+    return Date.now() > skipPasswordUntil;
   };
 
   const handleDeleteClick = (id: number) => {
-    setSelectedClinicId(id);
-    setConfirmDeleteDialogOpen(true);
+    if (shouldAskPassword()) {
+      setPendingAction({ type: 'delete', clinicId: id });
+      setConfirmActionDialogOpen(true);
+    } else {
+      deleteClinic(id).then(fetchClinics);
+    }
   };
 
   const handleConfirmDelete = async () => {
@@ -360,80 +372,6 @@ const ManageClinics: React.FC = () => {
             </Table>
           </TableContainer>
 
-          <ClinicDialog
-            open={openDialog}
-            onClose={() => setOpenDialog(false)}
-            clinic={currentClinic}
-            onSave={(clinicData: Omit<Clinic, 'id' | 'created_at'> | Partial<Clinic>) => 
-              currentClinic 
-                ? handleUpdateClinic(currentClinic.id, clinicData as Partial<Clinic>)
-                : handleCreateClinic(clinicData as Omit<Clinic, 'id' | 'created_at'>)
-            }
-          />
-
-          <ConfirmActionDialog
-            open={confirmActionDialogOpen}
-            onClose={() => setConfirmActionDialogOpen(false)}
-            onConfirm={handleConfirmAction}
-            title={t('manageClinics.confirmDelete')}
-            message={t('manageClinics.deleteConfirmMessage')}
-          />
-
-          <Dialog
-            open={confirmDeleteDialogOpen}
-            onClose={() => setConfirmDeleteDialogOpen(false)}
-          >
-            <DialogTitle>{t('manageClinics.confirmDeleteTitle')}</DialogTitle>
-            <DialogContent>
-              <DialogContentText>
-                {t('manageClinics.confirmDeleteMessage')}
-              </DialogContentText>
-            </DialogContent>
-            <DialogActions>
-              <Button onClick={() => setConfirmDeleteDialogOpen(false)}>
-                {t('common.cancel')}
-              </Button>
-              <Button onClick={handleConfirmDelete} color="primary">
-                {t('common.confirm')}
-              </Button>
-            </DialogActions>
-          </Dialog>
-
-          {selectedClinic && (
-            <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
-              <Tabs 
-                value={activeTab} 
-                onChange={(_, newValue) => setActiveTab(newValue)}
-              >
-                <Tab label={t('manageClinics.tabs.info')} value="info" />
-                <Tab label={t('manageClinics.tabs.doctors')} value="doctors" />
-                <Tab label={t('manageClinics.tabs.patients')} value="patients" />
-                <Tab label={t('manageClinics.tabs.consultations')} value="consultations" />
-              </Tabs>
-            </Box>
-          )}
-
-          {selectedClinic && activeTab === 'info' && (
-            <ClinicDialog
-              open={true}
-              onClose={() => setSelectedClinic(null)}
-              clinic={selectedClinic}
-              onSave={(clinicData: Partial<Clinic>) => {
-                if (selectedClinic) {
-                  handleUpdateClinic(selectedClinic.id, clinicData);
-                }
-              }}
-            />
-          )}
-
-          {selectedClinic && activeTab === 'consultations' && (
-            <ConsultationManagement clinicId={selectedClinic.id} />
-          )}
-
-          {selectedClinic && activeTab === 'patients' && (
-            <PatientsManagement clinicId={selectedClinic.id} />
-          )}
-
           <Dialog 
             open={Boolean(selectedClinic)}
             onClose={() => setSelectedClinic(null)}
@@ -527,6 +465,45 @@ const ManageClinics: React.FC = () => {
                 </DialogContent>
               </>
             )}
+          </Dialog>
+
+          <ClinicDialog
+            open={openDialog}
+            onClose={() => setOpenDialog(false)}
+            clinic={currentClinic}
+            onSave={(clinicData) => 
+              currentClinic 
+                ? handleUpdateClinic(currentClinic.id, clinicData as Partial<Clinic>)
+                : handleCreateClinic(clinicData as Omit<Clinic, 'id' | 'created_at'>)
+            }
+          />
+
+          <ConfirmActionDialog
+            open={confirmActionDialogOpen}
+            onClose={() => setConfirmActionDialogOpen(false)}
+            onConfirm={handleConfirmAction}
+            title={t('manageClinics.confirmDelete')}
+            message={t('manageClinics.deleteConfirmMessage')}
+          />
+
+          <Dialog
+            open={confirmDeleteDialogOpen}
+            onClose={() => setConfirmDeleteDialogOpen(false)}
+          >
+            <DialogTitle>{t('manageClinics.confirmDeleteTitle')}</DialogTitle>
+            <DialogContent>
+              <DialogContentText>
+                {t('manageClinics.confirmDeleteMessage')}
+              </DialogContentText>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={() => setConfirmDeleteDialogOpen(false)}>
+                {t('common.cancel')}
+              </Button>
+              <Button onClick={handleConfirmDelete} color="primary">
+                {t('common.confirm')}
+              </Button>
+            </DialogActions>
           </Dialog>
         </div>
       </div>

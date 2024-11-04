@@ -35,9 +35,11 @@
     "notAvailable": "Não disponível",
     "errors": {
       "fetchError": "Erro ao carregar dados",
-      "deleteError": "Erro ao excluir"
+      "deleteError": "Erro ao excluir",
+      "syncError": "Erro ao sincronizar dados"
     },
-    "rowsPerPage": "Linhas por página"
+    "rowsPerPage": "Linhas por página",
+    "sync": "Sincronizar dados"
   },
   "auth": {
     "login": {
@@ -292,7 +294,7 @@
     "confirmDeleteTitle": "Confirmar Exclusão",
     "confirmDeleteMessage": "Tem certeza que deseja excluir este usuário?",
     "enterPassword": "Digite sua Senha",
-    "passwordRequired": "Senha necessária para confirmar esta ação",
+    "passwordRequired": "Senha necessária para confirmar esta aç��o",
     "invalidPassword": "Senha inválida",
     "statusLabel": "Status",
     "status": {

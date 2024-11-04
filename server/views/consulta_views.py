@@ -105,10 +105,10 @@ class GravarConsultaView(views.APIView):
 class ConsultasByClinicaView(views.APIView):
     def get(self, request, clinica_id):
         try:
-            clinica = Clinica.objects.get(id=clinica_id)
             consultas = Consulta.objects.filter(
-                medico__clinica=clinica
+                medico__clinica_id=clinica_id
             ).select_related(
+                'medico',
                 'medico__usuario',
                 'paciente',
                 'servico'
@@ -116,12 +116,8 @@ class ConsultasByClinicaView(views.APIView):
             
             serializer = ConsultaSerializer(consultas, many=True)
             return Response(serializer.data)
-        except Clinica.DoesNotExist:
-            return Response(
-                {"error": "Clínica não encontrada"}, 
-                status=status.HTTP_404_NOT_FOUND
-            )
         except Exception as e:
+            logger.error(f"Erro ao buscar consultas: {str(e)}")
             return Response(
                 {"error": str(e)}, 
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR

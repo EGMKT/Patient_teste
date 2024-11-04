@@ -133,6 +133,8 @@ PatientFunnel-test/
 │ │ │ ├── DocumentViewer.tsx
 │ │ │ ├── ConfirmActionDialog.tsx
 │ │ │ ├── ConsultationDetails.tsx
+│ │ │ ├── PatientsManagement.tsx
+│ │ │ ├── SyncButton.tsx
 │ │ │ └── Sidebar.tsx
 │ │ ├── contexts/
 │ │ │ └── AuthContext.tsx
@@ -198,6 +200,7 @@ PatientFunnel-test/
 │ │ ├── servico_views.py
 │ │ ├── user_views.py
 │ │ ├── webhook_views.py
+│ │ ├── sync_views.py
 │ │ ├── __init__.py
 │ │ ├── __pycache__/
 │ │ │ └── (...)

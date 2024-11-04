@@ -295,7 +295,8 @@
     "tabs": {
       "info": "Información",
       "doctors": "Médicos",
-      "consultations": "Consultas"
+      "consultations": "Consultas",
+      "patients": "Pacientes"
     },
     "confirmDelete": "Confirmar Eliminación",
     "confirmDeleteTitle": "Confirmar Eliminación",
@@ -429,6 +430,20 @@
     "confirmations": {
       "stopRecording": "¿Está seguro que desea detener la grabación?",
       "sendAudio": "¿Está seguro que desea enviar el audio?"
+    }
+  },
+  "patients": {
+    "name": "Nombre",
+    "email": "Correo electrónico",
+    "age": "Edad",
+    "gender": "Género",
+    "occupation": "Ocupación",
+    "location": "Ubicación",
+    "status": "Estado",
+    "new": "Nuevo",
+    "returning": "Recurrente",
+    "errors": {
+      "fetchError": "Error al cargar pacientes"
     }
   }
 }

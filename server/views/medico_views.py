@@ -84,20 +84,15 @@ class MedicosByClinicaView(APIView):
 
     def get(self, request, clinica_id):
         try:
-            # Busca usuários que são médicos primeiro
             medicos = Medico.objects.filter(
+                clinica_id=clinica_id,
                 usuario__role='ME'
             ).select_related(
                 'usuario',
                 'clinica'
+            ).annotate(
+                total_consultas=Count('consulta')
             )
-            
-            # Se tiver filtro de clínica, aplica
-            if clinica_id:
-                medicos = medicos.filter(clinica_id=clinica_id)
-            
-            logger.info(f"Query executada: {medicos.query}")
-            logger.info(f"Total de médicos encontrados: {medicos.count()}")
             
             serializer = MedicoSerializer(medicos, many=True)
             return Response(serializer.data)

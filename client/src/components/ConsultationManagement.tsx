@@ -5,7 +5,7 @@ import {
   TableRow, Paper, Button, Dialog, TextField, IconButton,
   TablePagination, Chip, Tooltip, CircularProgress
 } from '@mui/material';
-import { Delete, Visibility, History } from '@mui/icons-material';
+import { Delete, Visibility, History, Edit } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
 import { getConsultasByClinica, deleteConsulta } from '../api';
 import { Consulta, ConsultationManagementProps } from '../types';
@@ -79,6 +79,12 @@ const ConsultationManagement: React.FC<ConsultationManagementProps> = ({ clinicI
     (consultation.medico?.usuario?.nome || '').toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const formatDuration = (duracao: number) => {
+    const hours = Math.floor(duracao / 3600);
+    const minutes = Math.floor((duracao % 3600) / 60);
+    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center items-center p-4">
@@ -128,9 +134,7 @@ const ConsultationManagement: React.FC<ConsultationManagementProps> = ({ clinicI
                     {new Date(consultation.data).toLocaleDateString()}
                   </TableCell>
                   <TableCell>
-                    {consultation.medico?.usuario?.nome 
-                      ? `${consultation.medico.usuario.nome} - ${consultation.medico.especialidade}`
-                      : t('common.notAvailable')}
+                    {consultation.medico?.usuario?.nome || t('common.notAvailable')}
                   </TableCell>
                   <TableCell>
                     {consultation.paciente?.nome || t('common.notAvailable')}
@@ -139,7 +143,7 @@ const ConsultationManagement: React.FC<ConsultationManagementProps> = ({ clinicI
                     {consultation.servico?.nome || t('common.notAvailable')}
                   </TableCell>
                   <TableCell>
-                    {`${Math.floor(consultation.duracao / 60)}:${String(consultation.duracao % 60).padStart(2, '0')}`}
+                    {formatDuration(consultation.duracao)}
                   </TableCell>
                   <TableCell>
                     <Chip 
@@ -149,12 +153,9 @@ const ConsultationManagement: React.FC<ConsultationManagementProps> = ({ clinicI
                     />
                   </TableCell>
                   <TableCell>
-                    <Tooltip title={t('common.actions.view')}>
-                      <IconButton 
-                        onClick={() => setSelectedConsultation(consultation)}
-                        size="small"
-                      >
-                        <Visibility />
+                    <Tooltip title={t('common.actions.edit')}>
+                      <IconButton size="small">
+                        <Edit />
                       </IconButton>
                     </Tooltip>
                     <Tooltip title={t('common.actions.delete')}>

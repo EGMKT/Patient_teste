@@ -50,4 +50,10 @@ urlpatterns = [
     path('api/clinicas/<int:clinica_id>/consultas/', ConsultasByClinicaView.as_view(), name='consultas-by-clinica'),
     path('api/clinicas/<int:clinica_id>/medicos/', MedicosByClinicaView.as_view(), name='medicos-by-clinica'),
     path('api/dashboard/medico/<int:medico_id>/', DashboardMedicoView.as_view(), name='dashboard-medico'),
+    path('api/clinicas/<int:clinica_id>/pacientes/', PacientesByClinicaView.as_view(), name='pacientes-by-clinica'),
+    path('api/pacientes/<str:paciente_id>/', PacienteDeleteView.as_view(), name='paciente-delete'),
+    path('api/consultas/<int:pk>/', ConsultaViewSet.as_view({'delete': 'destroy'}), name='consulta-detail'),
+    path('api/sync/clinics/', SyncClinicView.as_view(), name='sync-clinics'),
+    path('api/sync/patients/', SyncPatientsView.as_view(), name='sync-patients'),
+    path('api/sync/services/', SyncServicesView.as_view(), name='sync-services'),
 ]

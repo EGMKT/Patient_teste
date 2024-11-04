@@ -12,9 +12,15 @@ class ClinicaSerializer(serializers.ModelSerializer):
 
 
 class PacienteSerializer(serializers.ModelSerializer):
+    clinica = ClinicaSerializer(read_only=True)
+    
     class Meta:
         model = Paciente
-        fields = ['id', 'nome', 'email']
+        fields = [
+            'id', 'nome', 'email', 'is_novo', 'idade', 
+            'genero', 'ocupacao', 'localizacao', 'data_cadastro',
+            'clinica'
+        ]
 
     def validate_email(self, value):
         if not value.endswith('@example.com'):

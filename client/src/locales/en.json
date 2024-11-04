@@ -290,7 +290,8 @@
     "tabs": {
       "info": "Information",
       "doctors": "Doctors",
-      "consultations": "Consultations"
+      "consultations": "Consultations",
+      "patients": "Patients"
     },
     "confirmDelete": "Confirm Deletion",
     "confirmDeleteTitle": "Confirm Deletion",
@@ -426,6 +427,20 @@
     "confirmations": {
       "stopRecording": "Are you sure you want to stop recording?",
       "sendAudio": "Are you sure you want to send the audio?"
+    }
+  },
+  "patients": {
+    "name": "Name",
+    "email": "Email",
+    "age": "Age",
+    "gender": "Gender",
+    "occupation": "Occupation",
+    "location": "Location",
+    "status": "Status",
+    "new": "New",
+    "returning": "Returning",
+    "errors": {
+      "fetchError": "Error loading patients"
     }
   }
 }

@@ -1,66 +1,44 @@
 import requests
 from django.conf import settings
 import logging
+from typing import List, Dict, Any
 
 logger = logging.getLogger(__name__)
 
-class PipedriveConnector:
-    def __init__(self, api_key):
-        self.api_token = api_key
-        self.base_url = "https://api.pipedrive.com/v1/"
-        logger.info(f"PipedriveConnector inicializado com token: {self.api_token[:5]}...")
+class PipedriveClient:
+    BASE_URL = 'https://api.pipedrive.com/v1'
 
-    def get_patients(self):
-        url = f"{self.base_url}persons?api_token={self.api_token}"
-        logger.info(f"Fazendo requisição para Pipedrive: {url[:50]}...")
-        
+    def __init__(self, api_token: str):
+        self.api_token = api_token
+        self.session = requests.Session()
+
+    def _make_request(self, method: str, endpoint: str, **kwargs) -> Dict[str, Any]:
+        url = f"{self.BASE_URL}/{endpoint}"
+        params = kwargs.get('params', {})
+        params['api_token'] = self.api_token
+
         try:
-            response = requests.get(url)
-            logger.info(f"Status code da resposta Pipedrive: {response.status_code}")
-            
-            if response.status_code == 401:
-                logger.error("Token do Pipedrive inválido, expirado ou problema com assinatura")
-                return {
-                    'error': 'auth_error',
-                    'message': 'Acesso ao Pipedrive não autorizado. Verifique se sua assinatura está ativa e o token é válido.'
-                }
-                
-            if response.status_code == 402:
-                logger.error("Problema com pagamento do Pipedrive")
-                return {
-                    'error': 'payment_required',
-                    'message': 'Sua assinatura do Pipedrive precisa ser renovada. Por favor, verifique o status do pagamento.'
-                }
-
+            response = self.session.request(
+                method=method,
+                url=url,
+                params=params,
+                **kwargs
+            )
             response.raise_for_status()
-            data = response.json()
-            
-            if not data.get('success'):
-                error_msg = data.get('error', 'Erro desconhecido')
-                logger.error(f"Erro na resposta do Pipedrive: {error_msg}")
-                return {
-                    'error': 'api_error',
-                    'message': error_msg
-                }
-                
-            patients = data.get('data', [])
-            logger.info(f"Número de pacientes retornados: {len(patients)}")
-            return {
-                'success': True,
-                'data': patients
-            }
-            
+            return response.json()
         except requests.exceptions.RequestException as e:
-            logger.error(f"Erro na requisição para o Pipedrive: {str(e)}")
-            return {
-                'error': 'request_error',
-                'message': 'Erro ao conectar com o Pipedrive. Tente novamente mais tarde.'
-            }
+            logger.error(f"Erro na requisição ao Pipedrive: {str(e)}")
+            raise
+
+    def get_persons(self) -> List[Dict[str, Any]]:
+        """Busca todas as pessoas (pacientes) do Pipedrive"""
+        try:
+            response = self._make_request('GET', 'persons')
+            if response.get('success'):
+                return response.get('data', [])
+            return []
         except Exception as e:
-            logger.error(f"Erro inesperado ao buscar pacientes: {str(e)}")
-            return {
-                'error': 'unknown_error',
-                'message': 'Erro inesperado ao buscar pacientes. Entre em contato com o suporte.'
-            }
+            logger.error(f"Erro ao buscar pessoas do Pipedrive: {str(e)}")
+            return []
 
     

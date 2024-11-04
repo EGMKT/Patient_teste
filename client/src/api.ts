@@ -13,7 +13,8 @@ import {
   Doctor, 
   ConsultaResponse,
   TendenciaPaciente,
-  DoctorDashboardData
+  DoctorDashboardData,
+  Patient
 } from './types';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000/api';
@@ -207,8 +208,10 @@ export const getPipedrivePatients = async () => {
     const response = await api.get('pipedrive/patients/');
     return response.data;
   } catch (error) {
-    console.error('Erro ao buscar pacientes do Pipedrive:', error);
-    throw error;
+    console.error('Erro ao buscar pacientes:', error);
+    // Se houver erro com o Pipedrive, tenta buscar apenas pacientes locais
+    const localResponse = await api.get('pacientes/');
+    return localResponse.data;
   }
 };
 
@@ -608,6 +611,46 @@ export const getConsultasByPaciente = async (pacienteId: string): Promise<Consul
     return response.data;
   } catch (error) {
     console.error('Erro ao buscar consultas do paciente:', error);
+    throw error;
+  }
+};
+
+export const getPacientesByClinica = async (clinicaId: number): Promise<Patient[]> => {
+  try {
+    const response = await api.get(`/clinicas/${clinicaId}/pacientes/`);
+    return response.data;
+  } catch (error) {
+    console.error('Erro ao buscar pacientes da clínica:', error);
+    throw error;
+  }
+};
+
+export const syncAllClinics = async () => {
+  try {
+    const response = await api.post('/sync/clinics/');
+    return response.data;
+  } catch (error) {
+    console.error('Erro ao sincronizar clínicas:', error);
+    throw error;
+  }
+};
+
+export const syncAllPatients = async () => {
+  try {
+    const response = await api.post('/sync/patients/');
+    return response.data;
+  } catch (error) {
+    console.error('Erro ao sincronizar pacientes:', error);
+    throw error;
+  }
+};
+
+export const syncAllServices = async () => {
+  try {
+    const response = await api.post('/sync/services/');
+    return response.data;
+  } catch (error) {
+    console.error('Erro ao sincronizar serviços:', error);
     throw error;
   }
 };

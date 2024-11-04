@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { getAdminDashboard } from '../api';
+import { getAdminDashboard, syncAllClinics, syncAllPatients, syncAllServices } from '../api';
 import { 
   Card, 
   CardContent, 
@@ -12,29 +12,48 @@ import {
 } from '@mui/material';
 import NewClinicsChart from '../components/NewClinicsChart';
 import { DashboardData, SuperAdminDashboardProps } from '../types';
+import SyncButton from '../components/SyncButton';
 
 const SuperAdminDashboard: React.FC = () => {
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [syncing, setSyncing] = useState(false);
   const { t } = useTranslation();
 
-  useEffect(() => {
-    const fetchData = async () => {
+  const fetchDashboardData = async () => {
+    try {
       setIsLoading(true);
-      try {
-        const data = await getAdminDashboard();
-        setDashboardData(data);
-      } catch (err) {
-        console.error('Erro ao buscar dados:', err);
-        setError(t('dashboard.error'));
-      } finally {
-        setIsLoading(false);
-      }
-    };
+      const data = await getAdminDashboard();
+      setDashboardData(data);
+    } catch (error) {
+      console.error('Erro ao buscar dados:', error);
+      setError(t('dashboard.error'));
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-    fetchData();
-  }, [t]);
+  useEffect(() => {
+    fetchDashboardData();
+  }, []);
+
+  const handleSync = async () => {
+    try {
+      setSyncing(true);
+      await Promise.all([
+        syncAllClinics(),
+        syncAllPatients(),
+        syncAllServices()
+      ]);
+      await fetchDashboardData();
+    } catch (error) {
+      console.error('Erro na sincronização:', error);
+      setError(t('common.errors.syncError'));
+    } finally {
+      setSyncing(false);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -56,9 +75,12 @@ const SuperAdminDashboard: React.FC = () => {
   return (
     <div className="flex flex-col min-h-screen">
       <div className="container mx-auto px-4 py-8 flex-grow">
-        <Typography variant="h4" component="h1" className="mb-8">
-          {t('dashboard.title')}
-        </Typography>
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-2xl font-bold">{t('dashboard.title')}</h1>
+          <div className="flex items-center gap-4">
+            <SyncButton onSync={handleSync} loading={syncing} />
+          </div>
+        </div>
         
         {dashboardData && (
           <>

@@ -62,14 +62,17 @@ export interface Service {
 export interface Patient {
   id: string;
   nome: string;
-  clinica: Clinic;
   email: string;
-  is_novo: boolean;
   idade: number;
   genero: string;
   ocupacao: string;
   localizacao: string;
+  is_novo: boolean;
   data_cadastro: string;
+  clinica: {
+    id: number;
+    nome: string;
+  };
 }
 
 // Consultation related interfaces
@@ -272,7 +275,18 @@ export interface AudioRecordingState {
 // Consultation Setup interfaces
 export interface Patient {
   id: string;
-  name: string;
+  nome: string;
+  email: string;
+  idade: number;
+  genero: string;
+  ocupacao: string;
+  localizacao: string;
+  is_novo: boolean;
+  data_cadastro: string;
+  clinica: {
+    id: number;
+    nome: string;
+  };
 }
 
 export interface ConsultationSetupService {

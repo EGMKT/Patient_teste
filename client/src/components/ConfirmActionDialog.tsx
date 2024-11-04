@@ -9,6 +9,7 @@ import {
   FormControlLabel,
   Checkbox,
   Typography,
+  DialogContentText,
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { ConfirmActionDialogProps } from '../types';
@@ -19,37 +20,28 @@ const ConfirmActionDialog: React.FC<ConfirmActionDialogProps> = ({
   onConfirm,
   title,
   message,
-  disabled = false
 }) => {
   const [password, setPassword] = useState('');
   const [dontAskToday, setDontAskToday] = useState(false);
-  const [error, setError] = useState('');
   const { t } = useTranslation();
 
-  const handleConfirmClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    if (!password) {
-      setError(t('common.passwordRequired'));
-      return;
-    }
+  const handleConfirm = () => {
     onConfirm(password, dontAskToday);
     setPassword('');
     setDontAskToday(false);
-    setError('');
   };
 
   const handleClose = () => {
     setPassword('');
     setDontAskToday(false);
-    setError('');
     onClose();
   };
 
   return (
-    <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
+    <Dialog open={open} onClose={handleClose}>
       <DialogTitle>{title}</DialogTitle>
       <DialogContent>
-        <Typography gutterBottom>{message}</Typography>
+        <DialogContentText>{message}</DialogContentText>
         <TextField
           autoFocus
           margin="dense"
@@ -58,9 +50,6 @@ const ConfirmActionDialog: React.FC<ConfirmActionDialogProps> = ({
           fullWidth
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          error={!!error}
-          helperText={error}
-          autoComplete="new-password"
         />
         <FormControlLabel
           control={
@@ -73,15 +62,9 @@ const ConfirmActionDialog: React.FC<ConfirmActionDialogProps> = ({
         />
       </DialogContent>
       <DialogActions>
-        <Button onClick={handleClose} disabled={disabled}>
-          {t('common.cancel')}
-        </Button>
-        <Button 
-          onClick={handleConfirmClick} 
-          color="primary"
-          disabled={disabled}
-        >
-          {disabled ? t('common.processing') : t('common.confirm')}
+        <Button onClick={handleClose}>{t('common.cancel')}</Button>
+        <Button onClick={handleConfirm} color="primary">
+          {t('common.confirm')}
         </Button>
       </DialogActions>
     </Dialog>
