@@ -1,47 +1,15 @@
 from rest_framework import serializers
-from datetime import timedelta
+from datetime import timedelta, timezone
 from .models import Clinica, Usuario, Medico, Paciente, Servico, Consulta, ClinicRegistration, MedicoServico, ClinicRegistration 
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+
+
 
 class ClinicaSerializer(serializers.ModelSerializer):
     class Meta:
         model = Clinica
         fields = ['id', 'nome', 'created_at', 'ativa', 'pipedrive_api_token']
 
-
-class MedicoSerializer(serializers.ModelSerializer):
-    usuario_email = serializers.EmailField(source='usuario.email', read_only=True)
-    clinica_nome = serializers.CharField(source='clinica.nome', read_only=True)
-    total_consultas = serializers.IntegerField(read_only=True)
-    usuario_nome = serializers.SerializerMethodField()
-    
-    class Meta:
-        model = Medico
-        fields = [
-            'usuario', 
-            'usuario_email', 
-            'usuario_nome',
-            'especialidade', 
-            'clinica', 
-            'clinica_nome', 
-            'total_consultas'
-        ]
-
-    def get_usuario_nome(self, obj):
-        return f"{obj.usuario.first_name} {obj.usuario.last_name}"
-
-    def create(self, validated_data):
-        usuario_email = self.context['request'].data.get('usuario_email')
-        if not usuario_email:
-            raise serializers.ValidationError("O email do usuário é obrigatório.")
-        
-        try:
-            usuario = Usuario.objects.get(email=usuario_email, role__in=['ME', 'AC'])
-        except Usuario.DoesNotExist:
-            raise serializers.ValidationError("Usuário não encontrado ou não é um médico/admin clínica.")
-        
-        validated_data['usuario'] = usuario
-        return Medico.objects.create(**validated_data)
 
 class PacienteSerializer(serializers.ModelSerializer):
     class Meta:
@@ -155,6 +123,7 @@ class MedicoNestedSerializer(serializers.ModelSerializer):
         model = Medico
         fields = ['especialidade', 'clinica', 'clinica_id', 'servicos']
 
+
 class UsuarioSerializer(serializers.ModelSerializer):
     medico = MedicoNestedSerializer(required=False)
     password = serializers.CharField(write_only=True, required=False)
@@ -225,3 +194,38 @@ class UsuarioSerializer(serializers.ModelSerializer):
             instance.medico.delete()
 
         return instance
+    
+class MedicoSerializer(serializers.ModelSerializer):
+    usuario = UsuarioSerializer(read_only=True)
+    usuario_email = serializers.EmailField(source='usuario.email', read_only=True)
+    clinica_nome = serializers.CharField(source='clinica.nome', read_only=True)
+    total_consultas = serializers.IntegerField(read_only=True)
+    usuario_nome = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = Medico
+        fields = [
+            'usuario', 
+            'usuario_email', 
+            'usuario_nome',
+            'especialidade', 
+            'clinica', 
+            'clinica_nome', 
+            'total_consultas'
+        ]
+
+    def get_usuario_nome(self, obj):
+        return f"{obj.usuario.first_name} {obj.usuario.last_name}"
+
+    def create(self, validated_data):
+        usuario_email = self.context['request'].data.get('usuario_email')
+        if not usuario_email:
+            raise serializers.ValidationError("O email do usuário é obrigatório.")
+        
+        try:
+            usuario = Usuario.objects.get(email=usuario_email, role__in=['ME', 'AC'])
+        except Usuario.DoesNotExist:
+            raise serializers.ValidationError("Usuário não encontrado ou não é um médico/admin clínica.")
+        
+        validated_data['usuario'] = usuario
+        return Medico.objects.create(**validated_data)

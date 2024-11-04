@@ -37,7 +37,7 @@ urlpatterns = [
     path('admin/medicos/', MedicoListView.as_view(), name='admin_medico_list'),
     path('admin/clinicas/', ClinicaListView.as_view(), name='admin_clinica_list'),
     path('api/users/', UserListView.as_view(), name='user_list'),
-    path('api/medicos/', MedicoListView.as_view(), name='medico_list'),
+    path('api/medicos/', MedicoViewSet.as_view({'get': 'list'}), name='medicos-list'),
     path('api/clinicas/', ClinicaListView.as_view(), name='clinica_list'),
     path('api/dashboard/new-clinics/', NewClinicsDataView.as_view(), name='new-clinics-data'),
     path('api/dashboard/data/', DashboardDataView.as_view(), name='dashboard_data'),
@@ -49,4 +49,5 @@ urlpatterns = [
     path('api/consultation/files/', save_consultation_files, name='save_consultation_files'),
     path('api/clinicas/<int:clinica_id>/consultas/', ConsultasByClinicaView.as_view(), name='consultas-by-clinica'),
     path('api/clinicas/<int:clinica_id>/medicos/', MedicosByClinicaView.as_view(), name='medicos-by-clinica'),
+    path('api/dashboard/medico/<int:medico_id>/', DashboardMedicoView.as_view(), name='dashboard-medico'),
 ]

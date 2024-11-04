@@ -16,6 +16,7 @@ import ConfirmActionDialog from '../components/ConfirmActionDialog';
 import axios from 'axios';
 import ConsultationManagement from '../components/ConsultationManagement';
 import { Clinic, ClinicDialogProps, Doctor } from '../types';
+import PatientsManagement from '../components/PatientsManagement';
 
 const ManageClinics: React.FC = () => {
   const [clinics, setClinics] = useState<Clinic[]>([]);
@@ -40,7 +41,7 @@ const ManageClinics: React.FC = () => {
   const [selectedClinicId, setSelectedClinicId] = useState<number | null>(null);
   const [selectedClinics, setSelectedClinics] = useState<number[]>([]);
   const [selectedClinic, setSelectedClinic] = useState<Clinic | null>(null);
-  const [activeTab, setActiveTab] = useState('info');
+  const [activeTab, setActiveTab] = useState<'info' | 'consultations' | 'doctors' | 'patients'>('info');
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [medicos, setMedicos] = useState<Doctor[]>([]);
   const { t } = useTranslation();
@@ -404,8 +405,10 @@ const ManageClinics: React.FC = () => {
                 value={activeTab} 
                 onChange={(_, newValue) => setActiveTab(newValue)}
               >
-                <Tab label="Informações" value="info" />
-                <Tab label="Consultas" value="consultations" />
+                <Tab label={t('manageClinics.tabs.info')} value="info" />
+                <Tab label={t('manageClinics.tabs.doctors')} value="doctors" />
+                <Tab label={t('manageClinics.tabs.patients')} value="patients" />
+                <Tab label={t('manageClinics.tabs.consultations')} value="consultations" />
               </Tabs>
             </Box>
           )}
@@ -425,6 +428,10 @@ const ManageClinics: React.FC = () => {
 
           {selectedClinic && activeTab === 'consultations' && (
             <ConsultationManagement clinicId={selectedClinic.id} />
+          )}
+
+          {selectedClinic && activeTab === 'patients' && (
+            <PatientsManagement clinicId={selectedClinic.id} />
           )}
 
           <Dialog 
@@ -451,6 +458,7 @@ const ManageClinics: React.FC = () => {
                     >
                       <Tab label={t('manageClinics.tabs.info')} value="info" />
                       <Tab label={t('manageClinics.tabs.doctors')} value="doctors" />
+                      <Tab label={t('manageClinics.tabs.patients')} value="patients" />
                       <Tab label={t('manageClinics.tabs.consultations')} value="consultations" />
                     </Tabs>
                   </Box>
@@ -471,6 +479,16 @@ const ManageClinics: React.FC = () => {
                           {selectedClinic.pipedrive_api_token}
                         </Typography>
                       )}
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={() => {
+                          setCurrentClinic(selectedClinic);
+                          setOpenDialog(true);
+                        }}
+                      >
+                        {t('manageClinics.edit')}
+                      </Button>
                     </div>
                   )}
 
@@ -497,6 +515,10 @@ const ManageClinics: React.FC = () => {
                         </TableBody>
                       </Table>
                     </TableContainer>
+                  )}
+
+                  {activeTab === 'patients' && (
+                    <PatientsManagement clinicId={selectedClinic.id} />
                   )}
 
                   {activeTab === 'consultations' && (

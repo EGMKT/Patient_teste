@@ -26,7 +26,22 @@
       "description": "Descripción",
       "createdAt": "Fecha de creación",
       "status": "Estado"
-    }
+    },
+    "notAvailable": "No disponible",
+    "search": "Buscar",
+    "filter": "Filtrar",
+    "export": "Exportar",
+    "close": "Cerrar",
+    "actions": {
+      "view": "Ver",
+      "delete": "Eliminar"
+    },
+    "errors": {
+      "fetchError": "Error al cargar datos",
+      "deleteError": "Error al eliminar"
+    },
+    "rowsPerPage": "Filas por página",
+    "all": "Todos"
   },
   "auth": {
     "login": {
@@ -152,7 +167,41 @@
       "success": "Audio enviado con éxito",
       "error": "Error al enviar audio",
       "savedLocally": "La grabación se guardó localmente"
-    }
+    },
+    "date": "Fecha",
+    "doctor": "Médico",
+    "patient": "Paciente",
+    "service": "Servicio",
+    "duration": "Duración",
+    "status": {
+      "pendente": "Pendiente",
+      "processando": "Procesando",
+      "concluído": "Completado",
+      "unknown": "Desconocido"
+    },
+    "confirmDelete": {
+      "title": "Confirmar Eliminación",
+      "message": "¿Está seguro que desea eliminar esta consulta?"
+    },
+    "details": {
+      "title": "Detalles de la Consulta",
+      "basicInfo": "Información Básica",
+      "metrics": "Métricas",
+      "keyTopics": "Temas Principales",
+      "marketingOpportunities": "Oportunidades de Marketing"
+    },
+    "history": {
+      "filters": "Filtros del Historial",
+      "startDate": "Fecha Inicial",
+      "endDate": "Fecha Final",
+      "status": "Estado",
+      "service": "Servicio"
+    },
+    "qualityIndex": "Índice de Calidad",
+    "satisfaction": "Satisfacción",
+    "viewHistory": "Ver Historial",
+    "scheduleReturn": "Programar Retorno",
+    "patientHistory": "Historial del Paciente"
   },
   "reports": {
     "title": "Informes y Análisis",
@@ -235,6 +284,7 @@
     "title": "Gestionar Clínicas",
     "createClinic": "Crear Clínica",
     "editClinic": "Editar Clínica",
+    "createNewClinic": "Crear Nueva Clínica",
     "search": "Buscar clínica",
     "name": "Nombre",
     "status": "Estado",
@@ -242,6 +292,11 @@
     "actions": "Acciones",
     "edit": "Editar",
     "delete": "Eliminar",
+    "tabs": {
+      "info": "Información",
+      "doctors": "Médicos",
+      "consultations": "Consultas"
+    },
     "confirmDelete": "Confirmar Eliminación",
     "confirmDeleteTitle": "Confirmar Eliminación",
     "confirmDeleteMessage": "¿Está seguro que desea eliminar esta clínica?",
@@ -261,11 +316,22 @@
       "true": "Activa",
       "false": "Inactiva"
     },
+    "doctorName": "Nombre del Médico",
+    "specialty": "Especialidad",
+    "totalConsultations": "Total de Consultas",
     "form": {
       "nameLabel": "Nombre de la Clínica",
       "nameRequired": "El nombre de la clínica es obligatorio",
       "activateLabel": "Activar Clínica",
       "pipedriveLabel": "Token de Pipedrive"
+    },
+    "activeStatus": {
+      "true": "Activa",
+      "false": "Inactiva"
+    },
+    "confirmDelete": {
+      "title": "Confirmar Eliminación",
+      "message": "¿Está seguro que desea eliminar esta clínica?"
     },
     "activateSelected": "Activar Seleccionadas",
     "deactivateSelected": "Desactivar Seleccionadas"

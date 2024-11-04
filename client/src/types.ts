@@ -101,6 +101,7 @@ export interface Consulta {
   key_topics: string[];
   marketing_opportunities: string[];
   ai_processed: boolean;
+  status: 'pendente' | 'processando' | 'concluído';
 }
 
 export interface ConsultationMetadata {
@@ -123,6 +124,24 @@ export interface ConsultationMetadata {
 
 export interface ConsultationDetails {
   id: string;
+  data: string;
+  medico: {
+    id: number;
+    usuario: {
+      nome: string;
+    };
+    especialidade: string;
+  };
+  paciente: {
+    id: string;
+    nome: string;
+  };
+  servico: {
+    id: number;
+    nome: string;
+  };
+  duracao: number;
+  valor: number;
   summary: string;
   transcription_url?: string;
   summary_url?: string;
@@ -130,6 +149,8 @@ export interface ConsultationDetails {
   satisfaction_score: number;
   key_topics: string[];
   marketing_opportunities: string[];
+  status: 'pendente' | 'processando' | 'concluído';
+  ai_processed: boolean;
 }
 
 // Dashboard related interfaces
@@ -389,12 +410,20 @@ export interface WaveSurferBackend {
 }
 
 export interface Doctor {
-   id: number;
+  id: number;
   usuario: {
+    id: number;
+    email: string;
     first_name: string;
     last_name: string;
+    role: UserRole;
   };
   especialidade: string;
+  clinica?: {
+    id: number;
+    nome: string;
+  } | null;
+  clinica_nome?: string;
   total_consultas?: number;
 }
 
@@ -417,4 +446,26 @@ export interface ConsultaResponse {
     id: number;
     name: string;
   };
+}
+
+export interface AgeGroupData {
+  name: string;
+  value: number;
+}
+
+// Adicione estas interfaces
+export interface TendenciaPaciente {
+  month: string;
+  count: number;
+}
+
+export interface DoctorDashboardData {
+  total_pacientes: number;
+  pacientes_mes: number;
+  media_satisfacao: number;
+  tempo_medio_consulta: number;
+  consultas_por_mes: {
+    month: string;
+    count: number;
+  }[];
 }

@@ -8,7 +8,8 @@
       "confirm": "Confirmar",
       "back": "Voltar",
       "next": "Próximo",
-      "search": "Pesquisar"
+      "search": "Pesquisar",
+      "view": "Visualizar"
     },
     "status": {
       "active": "Ativo",
@@ -26,7 +27,17 @@
       "description": "Descrição",
       "createdAt": "Data de Criação",
       "status": "Status"
-    }
+    },
+    "all": "Todos",
+    "filter": "Filtrar",
+    "export": "Exportar",
+    "close": "Fechar",
+    "notAvailable": "Não disponível",
+    "errors": {
+      "fetchError": "Erro ao carregar dados",
+      "deleteError": "Erro ao excluir"
+    },
+    "rowsPerPage": "Linhas por página"
   },
   "auth": {
     "login": {
@@ -164,22 +175,67 @@
       "followUp": "Retorno",
       "specializedEvaluation": "Avaliação Especializada",
       "minorProcedure": "Procedimento Menor"
-    }
+    },
+    "date": "Data",
+    "doctor": "Médico",
+    "patient": "Paciente",
+    "service": "Serviço",
+    "duration": "Duração",
+    "status": {
+      "pendente": "Pendente",
+      "processando": "Processando",
+      "concluído": "Concluído",
+      "unknown": "Desconhecido"
+    },
+    "confirmDelete": {
+      "title": "Confirmar Exclusão",
+      "message": "Tem certeza que deseja excluir esta consulta?"
+    },
+    "history": {
+      "filters": "Filtros do Histórico",
+      "startDate": "Data Inicial",
+      "endDate": "Data Final",
+      "status": "Status",
+      "service": "Serviço"
+    },
+    "details": {
+      "title": "Detalhes da Consulta",
+      "basicInfo": "Informações Básicas",
+      "metrics": "Métricas",
+      "keyTopics": "Tópicos Principais",
+      "marketingOpportunities": "Oportunidades de Marketing"
+    },
+    "qualityIndex": "Índice de Qualidade",
+    "satisfaction": "Satisfação",
+    "viewHistory": "Ver Histórico",
+    "scheduleReturn": "Agendar Retorno",
+    "patientHistory": "Histórico do Paciente"
   },
   "reports": {
     "title": "Relatórios e Análises",
     "errorFetchingData": "Erro ao carregar dados",
     "viewLevel": "Nível de Visualização",
-    "globalView": "Visão Geral",
+    "globalView": "Visão Global",
     "clinicView": "Visão por Clínica",
     "doctorView": "Visão por Médico",
     "selectClinic": "Selecionar Clínica",
     "selectDoctor": "Selecionar Médico",
+    "selectDoctorMessage": "Selecione um médico para ver os dados",
+    "filterByClinic": "Filtrar por Clínica",
+    "optionalClinicFilter": "Filtro opcional de clínica",
+    "noDoctor": "Nenhum médico encontrado",
     "metrics": {
       "totalPatients": "Total de Pacientes Atendidos",
       "retention": "Taxa de Retenção",
       "avgConsultation": "Tempo Médio de Consulta",
-      "satisfaction": "Satisfação Geral"
+      "satisfaction": "Satisfação Geral",
+      "retentionTooltip": "Porcentagem de pacientes que retornaram nos últimos 6 meses, dentre aqueles que consultaram entre 6 meses e 1 ano atrás"
+    },
+    "retention": {
+      "details": "Detalhes de Retenção",
+      "newPatients": "Novos Pacientes",
+      "returningPatients": "Pacientes Recorrentes",
+      "rate": "Taxa de Retenção"
     },
     "distribution": {
       "age": "Distribuição por Idade",
@@ -194,7 +250,13 @@
     "ageDistribution": "Distribuição por Idade",
     "genderDistribution": "Distribuição por Gênero",
     "occupationDistribution": "Distribuição por Ocupação",
-    "doctor": "Médico",
+    "doctor": {
+      "totalPatients": "Total de Pacientes",
+      "monthlyPatients": "Pacientes nos Últimos 6 Meses",
+      "satisfaction": "Satisfação Média",
+      "avgConsultationTime": "Tempo Médio de Consulta",
+      "consultationsPerMonth": "Consultas por Mês"
+    },
     "patientsAttended": "Pacientes Atendidos",
     "satisfactionRate": "Taxa de Satisfação",
     "clinic": {
@@ -247,6 +309,7 @@
     "title": "Gerenciar Clínicas",
     "createClinic": "Criar Clínica",
     "editClinic": "Editar Clínica",
+    "createNewClinic": "Criar Nova Clínica",
     "search": "Buscar clínica",
     "name": "Nome",
     "status": "Status",
@@ -254,6 +317,12 @@
     "actions": "Ações",
     "edit": "Editar",
     "delete": "Excluir",
+    "tabs": {
+      "info": "Informações",
+      "doctors": "Médicos",
+      "patients": "Pacientes",
+      "consultations": "Consultas"
+    },
     "confirmDelete": "Confirmar Exclusão",
     "confirmDeleteTitle": "Confirmar Exclusão",
     "confirmDeleteMessage": "Tem certeza que deseja excluir esta clínica?",
@@ -271,11 +340,22 @@
       "true": "Ativa",
       "false": "Inativa"
     },
+    "doctorName": "Nome do Médico",
+    "specialty": "Especialidade",
+    "totalConsultations": "Total de Consultas",
     "form": {
       "nameLabel": "Nome da Clínica",
       "nameRequired": "O nome da clínica é obrigatório",
       "activateLabel": "Ativar Clínica",
       "pipedriveLabel": "Token do Pipedrive"
+    },
+    "activeStatus": {
+      "true": "Ativa",
+      "false": "Inativa"
+    },
+    "confirmDelete": {
+      "title": "Confirmar Exclusão",
+      "message": "Tem certeza que deseja excluir esta clínica?"
     },
     "activateSelected": "Ativar Selecionadas",
     "deactivateSelected": "Desativar Selecionadas"
@@ -375,6 +455,20 @@
     "confirmations": {
       "stopRecording": "Tem certeza que deseja parar a gravação?",
       "sendAudio": "Tem certeza que deseja enviar o áudio?"
+    }
+  },
+  "patients": {
+    "name": "Nome",
+    "email": "E-mail",
+    "age": "Idade",
+    "gender": "Gênero",
+    "occupation": "Ocupação",
+    "location": "Localização",
+    "status": "Status",
+    "new": "Novo",
+    "returning": "Retornando",
+    "errors": {
+      "fetchError": "Erro ao carregar pacientes"
     }
   }
 }

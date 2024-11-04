@@ -11,7 +11,9 @@ import {
   UserRole,
   SuperAdmin,
   Doctor, 
-  ConsultaResponse
+  ConsultaResponse,
+  TendenciaPaciente,
+  DoctorDashboardData
 } from './types';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000/api';
@@ -83,17 +85,13 @@ export const checkTrustedDevice = async (deviceId: string) => {
 };
 
 
-export const getMedicos = async (): Promise<{id: number; usuario: User; especialidade: string}[]> => {
+export const getMedicos = async (): Promise<Doctor[]> => {
   try {
-    console.log('Iniciando requisição para buscar médicos');
     const response = await api.get('/medicos/');
-    console.log('Resposta recebida:', response.data);
+    console.log('Resposta getMedicos:', response.data);
     return response.data;
   } catch (error) {
     console.error('Erro ao buscar médicos:', error);
-    if (axios.isAxiosError(error) && error.response) {
-      console.error('Resposta do servidor:', error.response.data);
-    }
     throw error;
   }
 };
@@ -586,9 +584,30 @@ export const deleteConsulta = async (id: number): Promise<void> => {
 export const getMedicosByClinica = async (clinicaId: number): Promise<Doctor[]> => {
   try {
     const response = await api.get(`/clinicas/${clinicaId}/medicos/`);
+    console.log('Resposta getMedicosByClinica:', response.data);
     return response.data;
   } catch (error) {
     console.error('Erro ao buscar médicos da clínica:', error);
+    throw error;
+  }
+};
+
+export const getDashboardMedico = async (doctorId: number): Promise<DoctorDashboardData> => {
+  try {
+    const response = await api.get(`dashboard/medico/${doctorId}/`);
+    return response.data;
+  } catch (error) {
+    console.error('Erro ao buscar dados do médico:', error);
+    throw error;
+  }
+};
+
+export const getConsultasByPaciente = async (pacienteId: string): Promise<Consulta[]> => {
+  try {
+    const response = await api.get(`/pacientes/${pacienteId}/consultas/`);
+    return response.data;
+  } catch (error) {
+    console.error('Erro ao buscar consultas do paciente:', error);
     throw error;
   }
 };

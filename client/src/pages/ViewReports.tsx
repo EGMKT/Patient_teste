@@ -1,18 +1,20 @@
 // ... imports anteriores
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { getReports, getAdminDashboard, getClinics, getMedicos, getDashboardClinica} from '../api';
+import { getReports, getAdminDashboard, getClinics, getMedicos, getDashboardClinica, getDashboardMedico, getMedicosByClinica } from '../api';
 import { 
   Card, CardContent, Typography, Grid, MenuItem,
   Table, TableBody, TableCell, TableHead, TableRow, Select,
-  Paper, CircularProgress, Alert, Box, FormControl, InputLabel
+  Paper, CircularProgress, Alert, Box, FormControl, InputLabel, Autocomplete, TextField, Tooltip as MuiTooltip
 } from '@mui/material';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
   PieChart, Pie, Cell, ResponsiveContainer
 } from 'recharts';
 import { useNavigate } from 'react-router-dom';
-import { ReportData, DashboardData, User, Clinic, Doctor } from '../types';
+import { ReportData, DashboardData, User, Clinic, Doctor, AgeGroupData, DoctorDashboardData } from '../types';
+
+
 
 const formatValue = (value: number | undefined, format: 'percentage' | 'decimal' = 'decimal'): string => {
   if (value === undefined) return '-';
@@ -22,9 +24,15 @@ const formatValue = (value: number | undefined, format: 'percentage' | 'decimal'
 };
 
 const formatDuration = (minutes: number): string => {
+  if (!minutes) return '0min';
+  
   const hours = Math.floor(minutes / 60);
-  const mins = minutes % 60;
-  return `${hours}h ${mins}min`;
+  const mins = Math.floor(minutes % 60);
+
+  if (hours > 0) {
+    return `${hours}h ${mins}min`;
+  }
+  return `${mins}min`;
 };
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
@@ -34,6 +42,7 @@ const ViewReports: React.FC = () => {
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
   const [clinics, setClinics] = useState<Clinic[]>([]);
   const [doctors, setDoctors] = useState<Doctor[]>([]);
+  const [filteredDoctors, setFilteredDoctors] = useState<Doctor[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { t } = useTranslation();
@@ -41,38 +50,52 @@ const ViewReports: React.FC = () => {
   const [viewLevel, setViewLevel] = useState<'global' | 'clinic' | 'doctor'>('global');
   const [selectedClinicId, setSelectedClinicId] = useState<number | null>(null);
   const [selectedDoctorId, setSelectedDoctorId] = useState<number | null>(null);
+  const [clinicFilterForDoctors, setClinicFilterForDoctors] = useState<number | null>(null);
 
   useEffect(() => {
     fetchData();
   }, []);
 
+  useEffect(() => {
+    if (clinicFilterForDoctors) {
+      getMedicosByClinica(clinicFilterForDoctors)
+        .then(response => {
+          console.log('Médicos da clínica:', response);
+          setFilteredDoctors(response);
+        })
+        .catch(error => console.error('Erro ao buscar médicos da clínica:', error));
+    } else {
+      setFilteredDoctors(doctors);
+    }
+  }, [clinicFilterForDoctors, doctors]);
+
   const fetchData = async () => {
     try {
       setLoading(true);
-      setError(null);
+      
       const [
         reportsResponse, 
         dashboardResponse, 
-        clinicsResponse, 
-        doctorsResponse
+        clinicsResponse,
+        medicosResponse
       ] = await Promise.all([
         getReports(),
         getAdminDashboard(),
         getClinics(),
         getMedicos()
       ]);
+
+      console.log('Médicos recebidos:', medicosResponse);
+      
       setReportData(reportsResponse);
       setDashboardData(dashboardResponse);
       setClinics(clinicsResponse);
-      setDoctors(doctorsResponse);
+      setDoctors(medicosResponse);
+      setFilteredDoctors(medicosResponse);
+      
     } catch (error: any) {
       console.error('Erro ao buscar dados:', error);
-      if (error.response?.status === 401) {
-        localStorage.removeItem('token');
-        navigate('/login');
-      } else {
-        setError(t('reports.errorFetchingData'));
-      }
+      setError(t('reports.errorFetchingData'));
     } finally {
       setLoading(false);
     }
@@ -134,37 +157,71 @@ const ViewReports: React.FC = () => {
         {/* Filtros Contextuais */}
         {viewLevel === 'clinic' && clinics.length > 0 && (
           <div className="p-4 border-t">
-            <FormControl fullWidth>
-              <InputLabel>{t('reports.selectClinic')}</InputLabel>
-              <Select
-                value={selectedClinicId || ''}
-                onChange={(e) => setSelectedClinicId(e.target.value as number)}
-              >
-                {clinics.map((clinic) => (
-                  <MenuItem key={clinic.id} value={clinic.id}>
-                    {clinic.nome}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
+            <Autocomplete
+              value={clinics.find(clinic => clinic.id === selectedClinicId) || null}
+              onChange={(_, newValue) => setSelectedClinicId(newValue?.id || null)}
+              options={clinics}
+              getOptionLabel={(option) => option.nome}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label={t('reports.selectClinic')}
+                  variant="outlined"
+                />
+              )}
+            />
           </div>
         )}
 
-        {viewLevel === 'doctor' && doctors.length > 0 && (
+        {viewLevel === 'doctor' && (
           <div className="p-4 border-t">
-            <FormControl fullWidth>
-              <InputLabel>{t('reports.selectDoctor')}</InputLabel>
-              <Select
-                value={selectedDoctorId || ''}
-                onChange={(e) => setSelectedDoctorId(e.target.value as number)}
-              >
-                {doctors.map((doctor) => (
-                  <MenuItem key={doctor.id} value={doctor.id}>
-                    {`${doctor.usuario.first_name} ${doctor.usuario.last_name}`}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
+            {/* Filtro opcional de Clínica */}
+            <Autocomplete
+              value={clinics.find(clinic => clinic.id === clinicFilterForDoctors) || null}
+              onChange={(_, newValue) => {
+                setClinicFilterForDoctors(newValue?.id || null);
+                setSelectedDoctorId(null); // Reseta o médico selecionado
+              }}
+              options={clinics}
+              getOptionLabel={(option) => option.nome}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label={t('reports.filterByClinic')}
+                  variant="outlined"
+                  className="mb-4"
+                  placeholder={t('reports.optionalClinicFilter')}
+                />
+              )}
+            />
+
+            {/* Lista de Médicos */}
+            <Autocomplete
+              value={filteredDoctors.find(d => d.usuario.id === selectedDoctorId) || null}
+              onChange={(_, newValue) => {
+                console.log('Médico selecionado:', newValue);
+                setSelectedDoctorId(newValue?.usuario.id || null);
+              }}
+              options={filteredDoctors}
+              getOptionLabel={(option) => 
+                `${option.usuario.first_name} ${option.usuario.last_name} - ${option.especialidade}`
+              }
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label={t('reports.selectDoctor')}
+                  variant="outlined"
+                />
+              )}
+              renderOption={(props, option) => (
+                <li {...props}>
+                  <div>
+                    <div>{`${option.usuario.first_name} ${option.usuario.last_name}`}</div>
+                    <div className="text-sm text-gray-500">{option.especialidade}</div>
+                  </div>
+                </li>
+              )}
+            />
           </div>
         )}
       </div>
@@ -195,14 +252,20 @@ const DashboardCard: React.FC<{ title: string; value: number }> = ({ title, valu
   </Grid>
 );
 
-const MetricCard: React.FC<{ title: string; value: string | number }> = ({ title, value }) => (
+const MetricCard: React.FC<{ 
+  title: string; 
+  value: string | number;
+  tooltip?: string;
+}> = ({ title, value, tooltip }) => (
   <Grid item xs={12} sm={6} md={3}>
-    <Card>
-      <CardContent>
-        <Typography variant="h6">{title}</Typography>
-        <Typography variant="h4">{value}</Typography>
-      </CardContent>
-    </Card>
+    <MuiTooltip title={tooltip || ''}>
+      <Card>
+        <CardContent>
+          <Typography variant="h6">{title}</Typography>
+          <Typography variant="h4">{value}</Typography>
+        </CardContent>
+      </Card>
+    </MuiTooltip>
   </Grid>
 );
 
@@ -210,15 +273,17 @@ const MetricCard: React.FC<{ title: string; value: string | number }> = ({ title
 const GlobalView: React.FC<{ data: ReportData }> = ({ data }) => {
   const { t } = useTranslation();
 
-  // Dados para o gráfico de distribuição por idade
-  const ageData = Object.entries(data.patientDemographics.ageGroups).map(([range, value]) => ({
+  // Formata a taxa de retenção como porcentagem
+  const formattedRetentionRate = `${(data.patientRetentionRate * 100).toFixed(1)}%`;
+
+  // Prepara dados para o gráfico de idade
+  const ageData: AgeGroupData[] = Object.entries(data.patientDemographics.ageGroups).map(([range, count]) => ({
     name: range,
-    value
+    value: count
   }));
 
   return (
     <div className="space-y-6">
-      {/* Métricas Principais */}
       <Grid container spacing={3}>
         <MetricCard 
           title={t('reports.metrics.totalPatients')} 
@@ -226,7 +291,8 @@ const GlobalView: React.FC<{ data: ReportData }> = ({ data }) => {
         />
         <MetricCard 
           title={t('reports.metrics.retention')} 
-          value={formatValue(data.patientRetentionRate, 'percentage')} 
+          value={formattedRetentionRate}
+          tooltip={t('reports.metrics.retentionTooltip')}
         />
         <MetricCard 
           title={t('reports.metrics.avgConsultation')} 
@@ -237,6 +303,39 @@ const GlobalView: React.FC<{ data: ReportData }> = ({ data }) => {
           value={`${data.overallPatientSatisfaction.toFixed(1)}/5`} 
         />
       </Grid>
+
+      {/* Novo componente para detalhes de retenção */}
+      <Paper className="p-4 mt-4">
+        <Typography variant="h6" className="mb-4">
+          {t('reports.retention.details')}
+        </Typography>
+        <Grid container spacing={2}>
+          <Grid item xs={12} md={4}>
+            <Typography variant="subtitle1">
+              {t('reports.retention.newPatients')}
+            </Typography>
+            <Typography variant="h4">
+              {data.newPatientsAttended}
+            </Typography>
+          </Grid>
+          <Grid item xs={12} md={4}>
+            <Typography variant="subtitle1">
+              {t('reports.retention.returningPatients')}
+            </Typography>
+            <Typography variant="h4">
+              {data.returningPatientsAttended}
+            </Typography>
+          </Grid>
+          <Grid item xs={12} md={4}>
+            <Typography variant="subtitle1">
+              {t('reports.retention.rate')}
+            </Typography>
+            <Typography variant="h4">
+              {formattedRetentionRate}
+            </Typography>
+          </Grid>
+        </Grid>
+      </Paper>
 
       {/* Gráficos */}
       <Grid container spacing={3}>
@@ -258,7 +357,7 @@ const GlobalView: React.FC<{ data: ReportData }> = ({ data }) => {
                   fill="#8884d8"
                   label
                 >
-                  {ageData.map((entry, index) => (
+                  {ageData.map((entry: AgeGroupData, index: number) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>
@@ -355,8 +454,104 @@ const ClinicView: React.FC<{ clinicId: number | null }> = ({ clinicId }) => {
 };
 
 const DoctorView: React.FC<{ doctorId: number | null }> = ({ doctorId }) => {
-  // Implementação do dashboard específico do médico
-  return <div>{/* ... */}</div>;
+  const { t } = useTranslation();
+  const [doctorData, setDoctorData] = useState<DoctorDashboardData | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  // Função para formatar os meses
+  const formatMonth = (month: string) => {
+    const date = new Date(month);
+    return date.toLocaleString('pt-BR', { month: 'short' }).replace('.', '');
+  };
+
+  // Função para encontrar o valor máximo para o eixo Y
+  const getMaxYValue = (data: { count: number }[]) => {
+    const max = Math.max(...data.map(item => item.count));
+    return Math.ceil(max * 1.2); // 20% maior que o valor máximo
+  };
+
+  useEffect(() => {
+    const fetchDoctorData = async () => {
+      if (!doctorId) return;
+      try {
+        const response = await getDashboardMedico(doctorId);
+        
+        // Formata os dados para o gráfico
+        const formattedData = response.consultas_por_mes.map(item => ({
+          ...item,
+          month: formatMonth(item.month),
+        }));
+        
+        setDoctorData({
+          ...response,
+          consultas_por_mes: formattedData
+        });
+      } catch (error) {
+        console.error('Erro ao buscar dados do médico:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDoctorData();
+  }, [doctorId]);
+
+  if (!doctorId) return <div>{t('reports.selectDoctorMessage')}</div>;
+  if (loading) return <CircularProgress />;
+  if (!doctorData) return null;
+
+  return (
+    <div className="space-y-6">
+      <Grid container spacing={3}>
+        <MetricCard 
+          title={t('reports.doctor.totalPatients')} 
+          value={doctorData.total_pacientes} 
+        />
+        <MetricCard 
+          title={t('reports.doctor.monthlyPatients')} 
+          value={doctorData.pacientes_mes} 
+        />
+        <MetricCard 
+          title={t('reports.doctor.satisfaction')} 
+          value={`${doctorData.media_satisfacao.toFixed(1)}/5`} 
+        />
+        <MetricCard 
+          title={t('reports.doctor.avgConsultationTime')} 
+          value={formatDuration(doctorData.tempo_medio_consulta)} 
+        />
+      </Grid>
+
+      {/* Gráfico de consultas por mês */}
+      <Paper className="p-4">
+        <Typography variant="h6" className="mb-4">
+          {t('reports.doctor.consultationsPerMonth')}
+        </Typography>
+        <ResponsiveContainer width="100%" height={300}>
+          <BarChart data={doctorData.consultas_por_mes}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis 
+              dataKey="month"
+              tickFormatter={(value) => value}
+            />
+            <YAxis 
+              domain={[0, getMaxYValue(doctorData.consultas_por_mes)]}
+              tickCount={5}
+              allowDecimals={false}
+            />
+            <Tooltip 
+              formatter={(value: number) => [value, 'Consultas']}
+              labelFormatter={(label) => `${label}`}
+            />
+            <Bar 
+              dataKey="count" 
+              fill="#8884d8"
+              name="Consultas"
+            />
+          </BarChart>
+        </ResponsiveContainer>
+      </Paper>
+    </div>
+  );
 };
 
 export default ViewReports;

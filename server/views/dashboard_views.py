@@ -4,7 +4,7 @@ from rest_framework.permissions import IsAuthenticated
 from ..models import Clinica, Usuario, Paciente, Consulta, Medico
 from django.db.models import Count, Avg, F, ExpressionWrapper, fields
 from django.utils import timezone
-from django.db.models.functions import Now, TruncDay, TruncMonth
+from django.db.models.functions import Now, TruncDay, TruncMonth, Extract
 from django.http import JsonResponse
 from django.views.decorators.http import require_GET
 import logging
@@ -237,16 +237,32 @@ class ReportsView(APIView):
             returning_patients = Paciente.objects.filter(is_novo=False).count()
             
             # Índice de fidelização
-            six_months_ago = timezone.now() - timedelta(days=180)
-            retained_patients = Paciente.objects.filter(
-                consulta__data__gte=six_months_ago
-            ).distinct().count()
-            retention_rate = retained_patients / total_patients if total_patients > 0 else 0
+            hoje = timezone.now()
+            seis_meses_atras = hoje - timedelta(days=180)
+            um_ano_atras = hoje - timedelta(days=365)
+
+            # Pacientes que tiveram consulta entre 6 meses e 1 ano atrás
+            pacientes_antigos = Paciente.objects.filter(
+                consulta__data__range=(um_ano_atras, seis_meses_atras)
+            ).distinct()
+
+            total_pacientes_antigos = pacientes_antigos.count()
+
+            if total_pacientes_antigos == 0:
+                retention_rate = 0
+            else:
+                # Desses pacientes, quantos retornaram nos últimos 6 meses
+                pacientes_retidos = pacientes_antigos.filter(
+                    consulta__data__gte=seis_meses_atras
+                ).distinct().count()
+                retention_rate = pacientes_retidos / total_pacientes_antigos
             
             # Tempo médio de consulta
             avg_consultation_time = Consulta.objects.aggregate(
-                avg_time=Avg('duracao')
-            )['avg_time'] or 0  # Valor padrão se for None
+                avg_time=Avg(
+                    Extract('duracao', 'epoch')/60  # Converte para minutos
+                )
+            )['avg_time'] or 0
             
             # Satisfação média
             avg_satisfaction = Consulta.objects.aggregate(
@@ -383,6 +399,65 @@ class ClinicDashboardView(APIView):
             )
         except Exception as e:
             logger.error(f"Erro ao buscar dados da clínica: {str(e)}")
+            return Response(
+                {"error": "Erro interno do servidor"}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+class DashboardMedicoView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, medico_id):
+        try:
+            medico = Medico.objects.get(usuario_id=medico_id)
+            consultas = Consulta.objects.filter(medico=medico)
+            
+            # Converte a duração para minutos
+            duracao_media = consultas.aggregate(
+                avg_time=Avg(
+                    Extract('duracao', 'epoch')/60  # Converte para minutos
+                )
+            )['avg_time'] or 0
+
+            # Calcula consultas por mês nos últimos 6 meses
+            hoje = timezone.now().date()
+            seis_meses_atras = hoje - timedelta(days=180)
+            
+            consultas_por_mes = (
+                consultas.filter(
+                    data__gte=seis_meses_atras
+                ).annotate(
+                    month=TruncMonth('data')
+                ).values('month')
+                .annotate(count=Count('id'))
+                .order_by('month')
+            )
+
+            return Response({
+                "total_pacientes": consultas.count(),
+                "pacientes_mes": consultas.filter(
+                    data__gte=timezone.now().date() - timezone.timedelta(days=180)
+                ).count(),
+                "media_satisfacao": consultas.aggregate(
+                    Avg('satisfacao')
+                )['satisfacao__avg'] or 0,
+                "tempo_medio_consulta": duracao_media,
+                "consultas_por_mes": [
+                    {
+                        'month': entry['month'].strftime('%Y-%m'),
+                        'count': entry['count']
+                    }
+                    for entry in consultas_por_mes
+                ]
+            })
+        except Medico.DoesNotExist:
+            return Response(
+                {"error": "Médico não encontrado"}, 
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            logger.error(f"Erro ao buscar dados do médico: {str(e)}")
+            logger.error(traceback.format_exc())
             return Response(
                 {"error": "Erro interno do servidor"}, 
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR

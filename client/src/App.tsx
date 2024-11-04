@@ -18,6 +18,8 @@ import ManageRegistrations from './pages/ManageRegistrations';
 import NotFound from './pages/NotFound';
 import { getClinicaInfo } from './api';
 import i18n from './i18n';
+import { LocalizationProvider } from '@mui/x-date-pickers';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 
 const AppRoutes: React.FC = () => {
   const { user, isAuthenticated } = useAuth();
@@ -31,50 +33,52 @@ const AppRoutes: React.FC = () => {
   const showHeader = isAuthenticated && location.pathname !== '/login';
 
   return (
-    <>
-      {showHeader && (
-        user?.role === 'SA' ? (
-          <SuperAdminHeader onLanguageChange={changeLanguage} currentLanguage={i18n.language} />
-        ) : (
-          <Header onLanguageChange={changeLanguage} currentLanguage={i18n.language} />
-        )
-      )}
-      <Routes>
-        <Route path="/login" element={<Login />} />
-        <Route path="/error" element={<ErrorPage />} />
-        <Route path="/success" element={<SuccessPage />} />
-
-        {isAuthenticated ? (
+    <LocalizationProvider dateAdapter={AdapterDayjs}>
+      <>
+        {showHeader && (
           user?.role === 'SA' ? (
-            <>
-              <Route path="/SA/*" element={
-                <Routes>
-                  <Route path="/" element={<SuperAdminDashboard />} />
-                  <Route path="/manage-users" element={<ManageUsers />} />
-                  <Route path="/manage-clinics" element={<ManageClinics />} />
-                  <Route path="/manage-services" element={<ManageServices />} />
-                  <Route path="/manage-registrations" element={<ManageRegistrations />} />
-                  <Route path="/view-reports" element={<ViewReports />} />
-                </Routes>
-              } />
-              <Route path="*" element={<Navigate to="/SA" replace />} />
-            </>
+            <SuperAdminHeader onLanguageChange={changeLanguage} currentLanguage={i18n.language} />
           ) : (
-            <>
-              <Route path="/*" element={
-                <Routes>
-                  <Route path="/consultation-setup" element={<ConsultationSetup />} />
-                  <Route path="/audio-recording" element={<AudioRecording />} />
-                  <Route path="*" element={<Navigate to="/consultation-setup" replace />} />
-                </Routes>
-              } />
-            </>
+            <Header onLanguageChange={changeLanguage} currentLanguage={i18n.language} />
           )
-        ) : (
-          <Route path="*" element={<Navigate to="/login" replace />} />
         )}
-      </Routes>
-    </>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="/error" element={<ErrorPage />} />
+          <Route path="/success" element={<SuccessPage />} />
+
+          {isAuthenticated ? (
+            user?.role === 'SA' ? (
+              <>
+                <Route path="/SA/*" element={
+                  <Routes>
+                    <Route path="/" element={<SuperAdminDashboard />} />
+                    <Route path="/manage-users" element={<ManageUsers />} />
+                    <Route path="/manage-clinics" element={<ManageClinics />} />
+                    <Route path="/manage-services" element={<ManageServices />} />
+                    <Route path="/manage-registrations" element={<ManageRegistrations />} />
+                    <Route path="/view-reports" element={<ViewReports />} />
+                  </Routes>
+                } />
+                <Route path="*" element={<Navigate to="/SA" replace />} />
+              </>
+            ) : (
+              <>
+                <Route path="/*" element={
+                  <Routes>
+                    <Route path="/consultation-setup" element={<ConsultationSetup />} />
+                    <Route path="/audio-recording" element={<AudioRecording />} />
+                    <Route path="*" element={<Navigate to="/consultation-setup" replace />} />
+                  </Routes>
+                } />
+              </>
+            )
+          ) : (
+            <Route path="*" element={<Navigate to="/login" replace />} />
+          )}
+        </Routes>
+      </>
+    </LocalizationProvider>
   );
 };
 
