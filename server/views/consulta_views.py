@@ -2,8 +2,14 @@ from rest_framework import viewsets, views
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from django.http import HttpResponse
-from ..models import Consulta
+from django.utils import timezone
+from ..models import Consulta, Medico, Paciente, Servico, Clinica
 from ..serializers import ConsultaSerializer
+import logging
+from datetime import timedelta
+from rest_framework import status
+
+logger = logging.getLogger(__name__)
 
 class ConsultaViewSet(viewsets.ModelViewSet):
     queryset = Consulta.objects.all()
@@ -39,5 +45,84 @@ class ConsultaViewSet(viewsets.ModelViewSet):
 
 class GravarConsultaView(views.APIView):
     def post(self, request):
-        # Implemente a lógica para gravar a consulta aqui
-        return Response({"message": "Consulta gravada com sucesso"})
+        try:
+            data = request.data
+            logger.info(f"Dados recebidos para criar consulta: {data}")
+            
+            # Validações
+            if not data.get('medico_id'):
+                return Response(
+                    {"error": "medico_id é obrigatório"}, 
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            try:
+                # Usar usuario_id para buscar o médico
+                medico = Medico.objects.select_related('usuario', 'clinica').get(usuario_id=data['medico_id'])
+                paciente = Paciente.objects.get(id=data['paciente_id'])
+                servico = Servico.objects.get(id=data['servico_id'])
+            except (Medico.DoesNotExist, Paciente.DoesNotExist, Servico.DoesNotExist) as e:
+                logger.error(f"Erro ao buscar entidades: {str(e)}")
+                return Response(
+                    {"error": f"Entidade não encontrada: {str(e)}"}, 
+                    status=status.HTTP_404_NOT_FOUND
+                )
+            
+            # Criar consulta
+            consulta = Consulta.objects.create(
+                medico=medico,
+                paciente=paciente,
+                servico=servico,
+                data=timezone.now(),
+                duracao=data.get('duracao', timedelta(hours=1)),
+                valor=data.get('valor', 0),
+                satisfacao=data.get('satisfacao', 0),
+                enviado=True
+            )
+            
+            logger.info(f"Consulta criada com sucesso: {consulta.id}")
+            return Response({
+                "message": "Consulta gravada com sucesso",
+                "consultation_id": consulta.id,
+                "doctor": {
+                    "id": medico.usuario_id,  # Usando usuario_id aqui
+                    "name": f"{medico.usuario.first_name} {medico.usuario.last_name}",
+                    "specialty": medico.especialidade
+                },
+                "clinic": {
+                    "id": medico.clinica.id if medico.clinica else None,
+                    "name": medico.clinica.nome if medico.clinica else None
+                }
+            })
+            
+        except Exception as e:
+            logger.error(f"Erro ao criar consulta: {str(e)}")
+            return Response(
+                {"error": str(e)}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+class ConsultasByClinicaView(views.APIView):
+    def get(self, request, clinica_id):
+        try:
+            clinica = Clinica.objects.get(id=clinica_id)
+            consultas = Consulta.objects.filter(
+                medico__clinica=clinica
+            ).select_related(
+                'medico__usuario',
+                'paciente',
+                'servico'
+            ).order_by('-data')
+            
+            serializer = ConsultaSerializer(consultas, many=True)
+            return Response(serializer.data)
+        except Clinica.DoesNotExist:
+            return Response(
+                {"error": "Clínica não encontrada"}, 
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            return Response(
+                {"error": str(e)}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )

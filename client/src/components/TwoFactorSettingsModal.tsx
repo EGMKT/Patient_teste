@@ -2,13 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Switch, TextField } from '@mui/material';
 import { enableTwoFactor, disableTwoFactor, verifyTwoFactor, getTwoFactorStatus } from '../api';
+import { TwoFactorSettingsModalProps } from '../types';
 
-interface TwoFactorSettingsModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-}
-
-const TwoFactorSettingsModal: React.FC<TwoFactorSettingsModalProps> = ({ isOpen, onClose }) => {
+const TwoFactorSettingsModal: React.FC<TwoFactorSettingsModalProps> = ({
+  isOpen,
+  onClose
+}) => {
   const { t } = useTranslation();
   const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
   const [qrCodeUrl, setQrCodeUrl] = useState('');
@@ -52,7 +51,6 @@ const TwoFactorSettingsModal: React.FC<TwoFactorSettingsModalProps> = ({ isOpen,
       setSuccess('');
     }
   };
-
   const handleVerify = async () => {
     try {
       await verifyTwoFactor(verificationCode);
@@ -111,3 +109,4 @@ const TwoFactorSettingsModal: React.FC<TwoFactorSettingsModalProps> = ({ isOpen,
 };
 
 export default TwoFactorSettingsModal;
+

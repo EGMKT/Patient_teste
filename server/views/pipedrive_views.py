@@ -2,30 +2,46 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from server.crm_connectors.pipedrive import PipedriveConnector
-from server.models import Medico
+from server.models import Medico, Paciente
 import logging
 
 logger = logging.getLogger(__name__)
 
 class PipedrivePatientView(APIView):
     def get(self, request):
-        logger.info("PipedrivePatientView chamada")
-        user = request.user
         try:
-            medico = Medico.objects.get(usuario=user)
+            medico = Medico.objects.get(usuario=request.user)
             clinica = medico.clinica
-            if not clinica or not clinica.pipedrive_api_token:
-                return Response({"error": "Chave API do Pipedrive não configurada para esta clínica"}, status=status.HTTP_400_BAD_REQUEST)
             
+            if not clinica or not clinica.pipedrive_api_token:
+                return Response({"error": "Configuração do Pipedrive ausente"}, status=400)
+
             connector = PipedriveConnector(clinica.pipedrive_api_token)
-            patients = connector.get_patients()
-            if not patients:
-                logger.warning("Nenhum paciente retornado do Pipedrive")
-                return Response({"error": "Não foi possível obter pacientes do Pipedrive"}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
-            logger.info(f"Número de pacientes retornados: {len(patients)}")
-            return Response({"data": patients}, status=status.HTTP_200_OK)
-        except Medico.DoesNotExist:
-            return Response({"error": "Médico não encontrado"}, status=status.HTTP_404_NOT_FOUND)
+            result = connector.get_patients()
+            
+            if 'error' in result:
+                return Response({"error": result['message']}, status=400)
+
+            # Sincronizar pacientes com o banco local
+            for patient_data in result['data']:
+                Paciente.objects.update_or_create(
+                    id=patient_data['id'],
+                    defaults={
+                        'nome': patient_data['name'],
+                        'clinica': clinica,
+                        'email': patient_data.get('email', ''),
+                        'is_novo': True,
+                        'idade': patient_data.get('age', 0),
+                        'genero': patient_data.get('gender', ''),
+                        'ocupacao': patient_data.get('occupation', ''),
+                        'localizacao': patient_data.get('location', '')
+                    }
+                )
+
+            return Response({"data": result['data']})
+        except Exception as e:
+            logger.error(f"Erro ao processar pacientes: {str(e)}")
+            return Response({"error": str(e)}, status=500)
 
 # Se você não tem uma view para appointments, remova ou comente a linha abaixo
 # class PipedriveAppointmentView(APIView):

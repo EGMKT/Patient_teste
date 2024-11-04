@@ -1,6 +1,7 @@
 import { openDB } from 'idb';
 import { enviarAudio } from './api';
 import axios from 'axios';
+import { ConsultationMetadata } from './types';
 
 const dbPromise = openDB('AudioDB', 1, {
   upgrade(db) {
@@ -46,7 +47,7 @@ export const verificarConexaoEEnviar = () => {
 };
 
 window.addEventListener('online', verificarConexaoEEnviar);
-export const saveAudioLocally = async (audioBlob: Blob, metadata: any) => {
+export const saveAudioLocally = async (audioBlob: Blob, metadata: ConsultationMetadata) => {
   const storedAudios: StoredAudio[] = JSON.parse(localStorage.getItem(AUDIO_STORAGE_KEY) || '[]');
   const newAudio: StoredAudio = {
     id: Date.now().toString(),

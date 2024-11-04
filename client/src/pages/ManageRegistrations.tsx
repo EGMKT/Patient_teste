@@ -21,102 +21,7 @@ import {
   MenuItem
 } from '@mui/material';
 import api from '../api';
-
-interface Registration {
-  id: number;
-  name: string;
-  email: string;
-  phone: string;
-  owner_name: string;
-  status: 'pending' | 'approved' | 'rejected';
-  created_at: string;
-  notes: string;
-}
-
-interface RegistrationDialogProps {
-  open: boolean;
-  registration: Registration | null;
-  onClose: () => void;
-  onStatusChange: (id: number, status: string, notes: string) => void;
-}
-
-const RegistrationDialog: React.FC<RegistrationDialogProps> = ({
-  open,
-  registration,
-  onClose,
-  onStatusChange,
-}) => {
-  const [status, setStatus] = useState<string>('');
-  const [notes, setNotes] = useState('');
-  const { t } = useTranslation();
-
-  useEffect(() => {
-    if (registration) {
-      setStatus(registration.status);
-      setNotes(registration.notes || '');
-    }
-  }, [registration]);
-
-  const handleSubmit = () => {
-    if (registration) {
-      onStatusChange(registration.id, status, notes);
-    }
-  };
-
-  return (
-    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
-      <DialogTitle>{t('manageRegistrations.registrationDetails')}</DialogTitle>
-      <DialogContent>
-        {registration && (
-          <div className="space-y-4">
-            <div>
-              <Typography variant="subtitle2">{t('manageRegistrations.clinicName')}</Typography>
-              <Typography>{registration.name}</Typography>
-            </div>
-            <div>
-              <Typography variant="subtitle2">{t('manageRegistrations.ownerName')}</Typography>
-              <Typography>{registration.owner_name}</Typography>
-            </div>
-            <div>
-              <Typography variant="subtitle2">{t('manageRegistrations.email')}</Typography>
-              <Typography>{registration.email}</Typography>
-            </div>
-            <div>
-              <Typography variant="subtitle2">{t('manageRegistrations.phone')}</Typography>
-              <Typography>{registration.phone}</Typography>
-            </div>
-            <FormControl fullWidth margin="normal">
-              <Typography variant="subtitle2">{t('manageRegistrations.status')}</Typography>
-              <Select
-                value={status}
-                onChange={(e) => setStatus(e.target.value)}
-              >
-                <MenuItem value="pending">{t('manageRegistrations.status.pending')}</MenuItem>
-                <MenuItem value="approved">{t('manageRegistrations.status.approved')}</MenuItem>
-                <MenuItem value="rejected">{t('manageRegistrations.status.rejected')}</MenuItem>
-              </Select>
-            </FormControl>
-            <TextField
-              fullWidth
-              multiline
-              rows={4}
-              label={t('manageRegistrations.notes')}
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              margin="normal"
-            />
-          </div>
-        )}
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={onClose}>{t('manageRegistrations.cancel')}</Button>
-        <Button onClick={handleSubmit} color="primary">
-          {t('manageRegistrations.save')}
-        </Button>
-      </DialogActions>
-    </Dialog>
-  );
-};
+import { Registration, RegistrationDialogProps } from '../types';
 
 const ManageRegistrations: React.FC = () => {
   const [registrations, setRegistrations] = useState<Registration[]>([]);
@@ -160,7 +65,7 @@ const ManageRegistrations: React.FC = () => {
               <TableCell>{t('manageRegistrations.clinicName')}</TableCell>
               <TableCell>{t('manageRegistrations.ownerName')}</TableCell>
               <TableCell>{t('manageRegistrations.email')}</TableCell>
-              <TableCell>{t('manageRegistrations.status')}</TableCell>
+              <TableCell>{t('manageRegistrations.statusLabel')}</TableCell>
               <TableCell>{t('manageRegistrations.createdAt')}</TableCell>
               <TableCell>{t('manageRegistrations.actions')}</TableCell>
             </TableRow>
@@ -209,6 +114,84 @@ const ManageRegistrations: React.FC = () => {
         onStatusChange={handleStatusChange}
       />
     </div>
+  );
+};
+
+const RegistrationDialog: React.FC<RegistrationDialogProps> = ({
+  open,
+  registration,
+  onClose,
+  onStatusChange,
+}) => {
+  const [status, setStatus] = useState<string>('');
+  const [notes, setNotes] = useState('');
+  const { t } = useTranslation();
+
+  useEffect(() => {
+    if (registration) {
+      setStatus(registration.status);
+      setNotes(registration.notes || '');
+    }
+  }, [registration]);
+
+  const handleSubmit = () => {
+    if (registration) {
+      onStatusChange(registration.id, status, notes);
+    }
+  };
+
+  return (
+    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
+      <DialogTitle>{t('manageRegistrations.registrationDetails')}</DialogTitle>
+      <DialogContent>
+        {registration && (
+          <div className="space-y-4">
+            <div>
+              <Typography variant="subtitle2">{t('manageRegistrations.clinicName')}</Typography>
+              <Typography>{registration.name}</Typography>
+            </div>
+            <div>
+              <Typography variant="subtitle2">{t('manageRegistrations.ownerName')}</Typography>
+              <Typography>{registration.owner_name}</Typography>
+            </div>
+            <div>
+              <Typography variant="subtitle2">{t('manageRegistrations.email')}</Typography>
+              <Typography>{registration.email}</Typography>
+            </div>
+            <div>
+              <Typography variant="subtitle2">{t('manageRegistrations.phone')}</Typography>
+              <Typography>{registration.phone}</Typography>
+            </div>
+            <FormControl fullWidth margin="normal">
+              <Typography variant="subtitle2">{t('manageRegistrations.statusLabel')}</Typography>
+              <Select
+                value={status}
+                onChange={(e) => setStatus(e.target.value)}
+              >
+                <MenuItem value="pending">{t('manageRegistrations.status.pending')}</MenuItem>
+                <MenuItem value="approved">{t('manageRegistrations.status.approved')}</MenuItem>
+                <MenuItem value="rejected">{t('manageRegistrations.status.rejected')}</MenuItem>
+              </Select>
+            </FormControl>
+            <TextField
+              fullWidth
+              multiline
+              rows={4}
+              label={t('manageRegistrations.notes')}
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              margin="normal"
+            />
+          </div>
+        )}
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={onClose}>{t('manageRegistrations.cancel')}</Button>
+        <Button onClick={handleSubmit} color="primary">
+          {t('manageRegistrations.save')}
+        </Button>
+      </DialogActions>
+    </Dialog>
   );
 };
 

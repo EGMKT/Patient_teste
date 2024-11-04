@@ -1,16 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-
-interface ConsultationDetails {
-  id: string;
-  summary: string;
-  transcription_url?: string;
-  summary_url?: string;
-  quality_index: number;
-  satisfaction_score: number;
-  key_topics: string[];
-  marketing_opportunities: string[];
-}
+import { ConsultationDetails } from '../types';
 
 const ConsultationDetails: React.FC<{ consultationId: string }> = ({ consultationId }) => {
   const [details, setDetails] = useState<ConsultationDetails | null>(null);

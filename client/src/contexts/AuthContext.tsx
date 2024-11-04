@@ -1,20 +1,5 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
-
-interface User {
-  id: number;
-  email: string;
-  role: string;
-  // Adicione outros campos necessários, mas torne-os opcionais
-  username?: string;
-  clinica?: number | null;
-}
-
-interface AuthContextType {
-  user: User | null;
-  isAuthenticated: boolean;
-  login: (token: string, user: User) => void;
-  logout: () => void;
-}
+import { User, AuthContextType } from '../types';
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
@@ -29,6 +14,7 @@ export const AuthProvider: React.FC<React.PropsWithChildren<{}>> = ({ children }
     if (storedUser && token) {
       try {
         const parsedUser = JSON.parse(storedUser);
+        console.log('Dados do usuário carregados:', parsedUser);
         setUser(parsedUser);
         setIsAuthenticated(true);
       } catch (error) {

@@ -5,31 +5,21 @@ import { getPipedrivePatients, getMedicoServicos } from '../api';
 import { TextField, Button, Select, MenuItem, FormControl, InputLabel } from '@mui/material';
 import * as Yup from 'yup';
 import { useAuth } from '../contexts/AuthContext';
-
-interface Patient {
-  id: string;
-  name: string;
-}
-
-interface Service {
-  id: number;
-  nome: string;
-  descricao?: string;
-}
+import { Patient, ConsultationSetupService } from '../types';
 
 const ConsultationSetup: React.FC = () => {
   const { t, i18n } = useTranslation();
   const { user } = useAuth();
   const [patients, setPatients] = useState<Patient[]>([]);
   const [selectedPatient, setSelectedPatient] = useState('');
-  const [service, setService] = useState('');
+  const [service, setService] = useState<number>(0);
   const [participants, setParticipants] = useState(2);
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
   const [clinicName, setClinicName] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [language, setLanguage] = useState('pt');
-  const [services, setServices] = useState<Service[]>([]);
+  const [services, setServices] = useState<ConsultationSetupService[]>([]);
 
   const validationSchema = Yup.object().shape({
     patient: Yup.string().required('Nome do paciente é obrigatório'),
@@ -52,10 +42,12 @@ const ConsultationSetup: React.FC = () => {
           })));
         }
 
+        console.log('Serviços recebidos:', servicesData);
         setServices(servicesData);
-      } catch (error) {
+      } catch (error: any) {
         console.error('Erro ao buscar dados:', error);
-        setError('Erro ao carregar dados. Verifique sua conexão e tente novamente.');
+        const errorMessage = error.response?.data?.error || 'Erro ao carregar dados. Verifique sua conexão e tente novamente.';
+        setError(errorMessage);
       } finally {
         setIsLoading(false);
       }
@@ -66,28 +58,32 @@ const ConsultationSetup: React.FC = () => {
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const values = {
-      patient: selectedPatient,
-      service: service,
-      participants: participants,
-    };
-
+    
     try {
-      await validationSchema.validate(values);
+      if (!selectedPatient || !service) {
+        throw new Error('Selecione um paciente e um serviço');
+      }
+
       const currentDate = new Date().toISOString();
+      const selectedService = services.find(s => s.id === service);
       
-      // Navegar para a página de gravação de áudio com os dados da consulta
+      if (!selectedService) {
+        throw new Error('Serviço não selecionado');
+      }
+      
       navigate('/audio-recording', { 
         state: { 
           patientId: selectedPatient,
-          service: service,
+          serviceId: service,
+          serviceName: selectedService.nome,
           participants: participants,
           language: language,
-          startTime: currentDate
+          startTime: currentDate,
+          patientName: patients.find(p => p.id === selectedPatient)?.nome
         } 
       });
     } catch (error) {
-      console.error('Erro na validação:', error);
+      setError(error instanceof Error ? error.message : 'Erro desconhecido');
     }
   };
 
@@ -123,7 +119,7 @@ const ConsultationSetup: React.FC = () => {
               <Select
                 labelId="service-select-label"
                 value={service}
-                onChange={(e) => setService(e.target.value as string)}
+                onChange={(e) => setService(e.target.value as number)}
                 required
               >
                 {services.map((s) => (

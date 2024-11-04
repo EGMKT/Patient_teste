@@ -235,6 +235,7 @@
     "title": "Manage Clinics",
     "createClinic": "Create Clinic",
     "editClinic": "Edit Clinic",
+    "createNewClinic": "Create New Clinic",
     "search": "Search clinic",
     "name": "Name",
     "status": "Status",
@@ -243,13 +244,32 @@
     "edit": "Edit",
     "delete": "Delete",
     "confirmDelete": "Confirm Deletion",
+    "confirmDeleteTitle": "Confirm Deletion",
+    "confirmDeleteMessage": "Are you sure you want to delete this clinic?",
+    "deleteConfirmMessage": "Are you sure you want to delete this clinic?",
     "pipedriveToken": "Pipedrive Token",
     "active": "Active",
     "inactive": "Inactive",
+    "loading": "Loading...",
+    "error": "Error loading clinics",
+    "bulkActionError": "Error executing bulk action",
+    "invalidPassword": "Invalid password",
+    "yes": "Yes",
+    "no": "No",
+    "cancel": "Cancel",
+    "save": "Save",
     "activeStatus": {
       "true": "Active",
       "false": "Inactive"
-    }
+    },
+    "form": {
+      "nameLabel": "Clinic Name",
+      "nameRequired": "Clinic name is required",
+      "activateLabel": "Activate Clinic",
+      "pipedriveLabel": "Pipedrive Token"
+    },
+    "activateSelected": "Activate Selected",
+    "deactivateSelected": "Deactivate Selected"
   },
   "manageServices": {
     "title": "Manage Services",
@@ -276,11 +296,13 @@
     "ownerName": "Owner Name",
     "email": "Email",
     "phone": "Phone",
-    "status": "Status",
+    "statusLabel": "Status",
     "createdAt": "Created At",
     "actions": "Actions",
     "viewDetails": "View Details",
     "notes": "Notes",
+    "cancel": "Cancel",
+    "save": "Save",
     "status": {
       "pending": "Pending",
       "approved": "Approved",
@@ -316,6 +338,34 @@
       "manageServices": "Manage Services",
       "manageRegistrations": "Manage Registrations",
       "viewReports": "View Reports"
+    }
+  },
+  "audioRecording": {
+    "title": "Audio Recording",
+    "recording": {
+      "start": "Start Recording",
+      "stop": "Stop Recording",
+      "pause": "Pause Recording",
+      "resume": "Resume Recording",
+      "send": "Send Audio"
+    },
+    "status": {
+      "processing": "Processing and sending audio...",
+      "loading": "Loading..."
+    },
+    "messages": {
+      "error": {
+        "startRecording": "Error starting recording",
+        "sendAudio": "Error sending audio",
+        "processAudio": "Error processing audio"
+      },
+      "success": {
+        "audioSent": "Audio sent successfully"
+      }
+    },
+    "confirmations": {
+      "stopRecording": "Are you sure you want to stop recording?",
+      "sendAudio": "Are you sure you want to send the audio?"
     }
   }
 }

@@ -6,11 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { FiGlobe, FiLogOut, FiSettings, FiMenu } from 'react-icons/fi';
 import { useAuth } from '../contexts/AuthContext';
 import TwoFactorSettingsModal from './TwoFactorSettingsModal';
-
-interface SuperAdminHeaderProps {
-  onLanguageChange: (lang: string) => void;
-  currentLanguage: string;
-}
+import { SuperAdminHeaderProps, MenuItem } from '../types';
 
 const SuperAdminHeader: React.FC<SuperAdminHeaderProps> = ({ onLanguageChange, currentLanguage }) => {
   const { t } = useTranslation();

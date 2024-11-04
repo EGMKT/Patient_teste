@@ -11,15 +11,7 @@ import {
   Typography,
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-
-interface ConfirmActionDialogProps {
-  open: boolean;
-  onClose: () => void;
-  onConfirm: (password: string, dontAskToday: boolean) => void;
-  title: string;
-  message: string;
-  disabled?: boolean;
-}
+import { ConfirmActionDialogProps } from '../types';
 
 const ConfirmActionDialog: React.FC<ConfirmActionDialogProps> = ({
   open,

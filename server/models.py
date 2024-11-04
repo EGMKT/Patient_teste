@@ -176,14 +176,15 @@ class Medico(models.Model):
     pass
 
 class Paciente(models.Model):
+    id = models.CharField(max_length=255, primary_key=True)  # ID do Pipedrive
     nome = models.CharField(max_length=255)
     clinica = models.ForeignKey(Clinica, on_delete=models.CASCADE)
-    email = models.EmailField()
+    email = models.EmailField(blank=True)
     is_novo = models.BooleanField(default=True)
-    idade = models.IntegerField()
-    genero = models.CharField(max_length=50)
-    ocupacao = models.CharField(max_length=100)
-    localizacao = models.CharField(max_length=255)
+    idade = models.IntegerField(default=0)
+    genero = models.CharField(max_length=50, blank=True)
+    ocupacao = models.CharField(max_length=100, blank=True)
+    localizacao = models.CharField(max_length=255, blank=True)
     data_cadastro = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -241,6 +242,15 @@ class Consulta(models.Model):
         null=True, 
         blank=True
     )
+    procedimentos_desejados = models.JSONField(default=list, null=True)
+    expectativas_paciente = models.JSONField(default=list, null=True)
+    problemas_relatados = models.JSONField(default=list, null=True)
+    experiencias_anteriores = models.JSONField(default=list, null=True)
+    interesse_tratamentos = models.JSONField(default=list, null=True)
+    motivacoes = models.JSONField(default=list, null=True)
+    aspectos_emocionais = models.JSONField(default=list, null=True)
+    preocupacoes_saude = models.JSONField(default=list, null=True)
+    produtos_interesse = models.JSONField(default=list, null=True)
 
     def __str__(self):
         return f"Consulta {self.id} - {self.medico} - {self.paciente}"

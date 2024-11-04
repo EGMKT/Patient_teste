@@ -10,10 +10,7 @@ import {
   ResponsiveContainer 
 } from 'recharts';
 import { useTranslation } from 'react-i18next';
-
-interface NewClinicsChartProps {
-  data: { month: string; count: number }[];
-}
+import { NewClinicsChartProps } from '../types';
 
 const NewClinicsChart: React.FC<NewClinicsChartProps> = ({ data }) => {
   const { t, i18n } = useTranslation();
@@ -28,7 +25,6 @@ const NewClinicsChart: React.FC<NewClinicsChartProps> = ({ data }) => {
       return month;
     }
   };
-
   const formattedData = data
     .map(item => ({
       ...item,
@@ -99,3 +95,4 @@ const NewClinicsChart: React.FC<NewClinicsChartProps> = ({ data }) => {
 };
 
 export default NewClinicsChart;
+

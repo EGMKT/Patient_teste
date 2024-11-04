@@ -22,7 +22,8 @@ import {
   Switch,
   Alert,
 } from '@mui/material';
-import api, { getServices, createService, updateService, deleteService, Service } from '../api';
+import api, { getServices, createService, updateService, deleteService} from '../api';
+import { Service, ServiceDialogProps } from '../types';
 
 
 const ManageServices: React.FC = () => {
@@ -175,12 +176,7 @@ const ManageServices: React.FC = () => {
   );
 };
 
-interface ServiceDialogProps {
-  open: boolean;
-  onClose: () => void;
-  service: Service | null;
-  onSave: (serviceData: any) => void;
-}
+
 
 const ServiceDialog: React.FC<ServiceDialogProps> = ({
   open,
@@ -250,9 +246,9 @@ const ServiceDialog: React.FC<ServiceDialogProps> = ({
         </FormControl>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>{t('common.cancel')}</Button>
+        <Button onClick={onClose}>{t('common.actions.cancel')}</Button>
         <Button onClick={handleSubmit} color="primary" disabled={!nome}>
-          {t('common.save')}
+          {t('common.actions.save')}
         </Button>
       </DialogActions>
     </Dialog>

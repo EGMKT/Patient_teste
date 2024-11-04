@@ -1,4 +1,18 @@
 import axios, { AxiosError } from 'axios';
+import { 
+  User, 
+  Clinic, 
+  Service, 
+  ConsultationMetadata, 
+  Consulta,
+  CreateUserData,
+  UpdateUserData,
+  MedicoData,
+  UserRole,
+  SuperAdmin,
+  Doctor, 
+  ConsultaResponse
+} from './types';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000/api';
 
@@ -90,14 +104,68 @@ export const getPacientes = async () => {
 };
 
 
-export const criarConsulta = async (consultaData: any) => {
-  const response = await api.post('consultas/', consultaData);
-  return response.data;
+
+export const criarConsulta = async (consultaData: {
+  medico_id: number;
+  paciente_id: string;
+  servico_id: number;
+  duracao: string;
+  data: string;
+  satisfacao: number;
+  valor: number;
+}): Promise<ConsultaResponse> => {
+  try {
+    console.log('Dados sendo enviados para criar consulta:', consultaData);
+    const response = await api.post('/consulta/gravar/', consultaData);
+    console.log('Resposta da criação da consulta:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Erro ao criar consulta:', error);
+    if (axios.isAxiosError(error)) {
+      console.error('Detalhes do erro:', error.response?.data);
+    }
+    throw error;
+  }
 };
 
-export const enviarAudio = async (audioBase64: string, metadata: any) => {
+export const enviarAudio = async (audioBase64: string, metadata: ConsultationMetadata) => {
+  const payload = {
+    consultation: {
+      audio: audioBase64,
+      recorded_at: metadata.startTime,
+      duration: metadata.duration,
+      format: "audio/webm;codecs=opus",
+      size: metadata.size,
+    },
+    patient: {
+      id: metadata.patientId,
+      source: "pipedrive",
+    },
+    doctor: {
+      id: metadata.doctorId,
+      specialty: metadata.doctorSpecialty,
+    },
+    service: {
+      id: metadata.serviceId,
+      name: metadata.serviceName,
+    },
+    clinic: {
+      id: metadata.clinicId,
+      name: metadata.clinicName,
+    },
+    session: {
+      participants: metadata.participants,
+      language: metadata.language,
+      environment: {
+        app_version: process.env.REACT_APP_VERSION,
+        platform: "web",
+        browser: navigator.userAgent,
+      }
+    }
+  };
+
   const webhookUrl = 'https://n8n.patientfunnel.solutions/webhook-test/teste-patientFunnel';
-  const response = await axios.post(webhookUrl, { audio: audioBase64, metadata });
+  const response = await axios.post(webhookUrl, payload);
   return response.data;
 };
 
@@ -207,15 +275,6 @@ export const deleteUser = async (userId: number): Promise<void> => {
     throw error;
   }
 };
-
-export interface Clinic {
-  id: number;
-  nome: string;
-  created_at: string;
-  ativa: boolean;
-  logo: string | null;
-  pipedrive_api_token: string | null;
-}
 
 export const getClinics = async (): Promise<Clinic[]> => {
   try {
@@ -375,11 +434,7 @@ export const deleteSuperAdmin = async (id: number) => {
   }
 };
 
-export interface SuperAdmin {
-  id: number;
-  username: string;
-  email: string;
-}
+
 
 export default api;
 
@@ -410,41 +465,6 @@ export const updateUser = async (id: number, userData: UpdateUserData) => {
     throw error;
   }
 };
-
-export type UserRole = 'SA' | 'AC' | 'ME';
-
-export interface MedicoData {
-  especialidade: string;
-  clinica_id?: number;
-  clinica?: Clinic;
-  servicos?: number[];
-}
-
-export interface User {
-  id: number;
-  email: string;
-  first_name: string;
-  last_name: string;
-  role: UserRole;
-  is_active: boolean;
-  password?: string;
-  medico?: MedicoData;
-}
-
-// Removendo a extensão de Omit<User, 'id'> para evitar conflitos
-export interface CreateUserData {
-  email: string;
-  first_name: string;
-  last_name: string;
-  role: UserRole;
-  is_active: boolean;
-  password?: string;
-  medico?: MedicoData;
-}
-
-export interface UpdateUserData extends Partial<CreateUserData> {
-  medico?: MedicoData;
-}
 
 export const verifyPassword = async (password: string) => {
   try {
@@ -485,13 +505,6 @@ export const bulkUpdateClinics = async (clinicIds: number[], action: 'activate' 
     throw error;
   }
 };
-
-export interface Service {
-  id: number;
-  nome: string;
-  descricao?: string;
-  ativo: boolean;
-}
 
 export const getServices = async (): Promise<Service[]> => {
   try {
@@ -540,9 +553,42 @@ export const deleteService = async (id: number): Promise<void> => {
 export const getMedicoServicos = async () => {
   try {
     const response = await api.get('/servicos/medico_servicos/');
+    console.log('Resposta dos serviços do médico:', response.data);
     return response.data;
   } catch (error) {
     console.error('Erro ao buscar serviços do médico:', error);
+    throw error;
+  }
+};
+
+export const getConsultasByClinica = async (clinicId: number): Promise<Consulta[]> => {
+  try {
+    const response = await api.get(`/clinicas/${clinicId}/consultas/`);
+    return response.data;
+  } catch (error) {
+    console.error('Erro ao buscar consultas:', error);
+    throw error;
+  }
+};
+
+export const deleteConsulta = async (id: number): Promise<void> => {
+  try {
+    const response = await api.delete(`/consultas/${id}/`);
+    if (response.status !== 204) {
+      throw new Error('Erro ao excluir consulta');
+    }
+  } catch (error) {
+    console.error('Erro ao deletar consulta:', error);
+    throw error;
+  }
+};
+
+export const getMedicosByClinica = async (clinicaId: number): Promise<Doctor[]> => {
+  try {
+    const response = await api.get(`/clinicas/${clinicaId}/medicos/`);
+    return response.data;
+  } catch (error) {
+    console.error('Erro ao buscar médicos da clínica:', error);
     throw error;
   }
 };

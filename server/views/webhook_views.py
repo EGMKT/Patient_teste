@@ -34,12 +34,25 @@ def process_ai_results(request):
     
     try:
         consulta = Consulta.objects.get(id=consultation_id)
+        
+        # Atualização dos campos existentes
         consulta.summary = data['summary']
         consulta.quality_index = data['metrics']['qualityIndex']
         consulta.satisfaction_score = data['metrics']['satisfactionScore']
         consulta.key_topics = data['metrics']['keyTopics']
-        consulta.follow_up_needed = data['metrics']['followUpNeeded']
-        consulta.marketing_opportunities = data['marketingOpportunities']
+        
+        # Novos campos
+        insights = data.get('insights', {})
+        consulta.procedimentos_desejados = insights.get('procedimentos', [])
+        consulta.expectativas_paciente = insights.get('expectativas', [])
+        consulta.problemas_relatados = insights.get('problemas', [])
+        consulta.experiencias_anteriores = insights.get('experiencias', [])
+        consulta.interesse_tratamentos = insights.get('interesse', [])
+        consulta.motivacoes = insights.get('motivacoes', [])
+        consulta.aspectos_emocionais = insights.get('aspectos_emocionais', [])
+        consulta.preocupacoes_saude = insights.get('preocupacoes', [])
+        consulta.produtos_interesse = insights.get('produtos', [])
+        
         consulta.ai_processed = True
         consulta.save()
         
@@ -79,15 +92,28 @@ def save_consultation_files(request):
 class ProcessedConsultationDataView(APIView):
     def post(self, request):
         try:
-            consultation_id = request.data.get('consultation_id')
+            data = json.loads(request.body)
+            consultation_id = data.get('consultationId')
             consultation = Consulta.objects.get(id=consultation_id)
             
-            # Atualizar dados da consulta com os insights da IA
-            consultation.summary = request.data.get('summary')
-            consultation.satisfaction_score = request.data.get('satisfaction_score')
-            consultation.quality_index = request.data.get('quality_index')
-            consultation.key_topics = request.data.get('key_topics', [])
-            consultation.marketing_opportunities = request.data.get('marketing_opportunities', [])
+            # Dados básicos da análise
+            consultation.summary = data['summary']
+            consultation.quality_index = data['metrics']['qualityIndex']
+            consultation.satisfaction_score = data['metrics']['satisfactionScore']
+            consultation.key_topics = data['metrics']['keyTopics']
+            
+            # Insights específicos
+            insights = data.get('insights', {})
+            consultation.procedimentos_desejados = insights.get('procedimentos', [])
+            consultation.expectativas_paciente = insights.get('expectativas', [])
+            consultation.problemas_relatados = insights.get('problemas', [])
+            consultation.experiencias_anteriores = insights.get('experiencias', [])
+            consultation.interesse_tratamentos = insights.get('interesse', [])
+            consultation.motivacoes = insights.get('motivacoes', [])
+            consultation.aspectos_emocionais = insights.get('aspectos_emocionais', [])
+            consultation.preocupacoes_saude = insights.get('preocupacoes', [])
+            consultation.produtos_interesse = insights.get('produtos', [])
+            
             consultation.ai_processed = True
             consultation.save()
             

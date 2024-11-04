@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import { DocumentViewerProps } from '../types'; 
 
-interface DocumentViewerProps {
-  consultationId: string;
-  fileType: 'transcription' | 'summary';
-}
-
-const DocumentViewer: React.FC<DocumentViewerProps> = ({ consultationId, fileType }) => {
+const DocumentViewer: React.FC<DocumentViewerProps> = ({
+  consultationId,
+  fileType
+}) => {
   const [content, setContent] = useState<string>('');
   const [isExpanded, setIsExpanded] = useState(false);
 

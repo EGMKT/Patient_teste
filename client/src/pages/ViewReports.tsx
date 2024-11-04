@@ -1,7 +1,7 @@
 // ... imports anteriores
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { getReports, getAdminDashboard, getClinics, getMedicos, getDashboardClinica, Clinic, MedicoData, User } from '../api';
+import { getReports, getAdminDashboard, getClinics, getMedicos, getDashboardClinica} from '../api';
 import { 
   Card, CardContent, Typography, Grid, MenuItem,
   Table, TableBody, TableCell, TableHead, TableRow, Select,
@@ -12,41 +12,7 @@ import {
   PieChart, Pie, Cell, ResponsiveContainer
 } from 'recharts';
 import { useNavigate } from 'react-router-dom';
-import NewClinicsChart from '../components/NewClinicsChart';
-
-interface ReportData {
-  totalPatientsAttended: number;
-  patientsPerDoctor: { [key: string]: number };
-  newPatientsAttended: number;
-  returningPatientsAttended: number;
-  patientRetentionRate: number;
-  averageConsultationTime: number;
-  overallPatientSatisfaction: number;
-  doctorQualityIndex: { [key: string]: number };
-  patientDemographics: {
-    ageGroups: { [key: string]: number };
-    genderDistribution: { [key: string]: number };
-    occupations: { [key: string]: number };
-    locations: { [key: string]: number };
-  };
-}
-
-interface DashboardData {
-  total_clinicas: number;
-  total_medicos: number;
-  total_pacientes: number;
-  total_consultas: number;
-  new_clinics_data: {
-    month: string;
-    count: number;
-  }[];
-}
-
-interface Doctor {
-  id: number;
-  usuario: User;
-  especialidade: string;
-}
+import { ReportData, DashboardData, User, Clinic, Doctor } from '../types';
 
 const formatValue = (value: number | undefined, format: 'percentage' | 'decimal' = 'decimal'): string => {
   if (value === undefined) return '-';

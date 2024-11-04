@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import WaveSurfer from 'wavesurfer.js';
-import { enviarAudio } from '../api';
-import { saveAudioLocally } from '../audioStorage';
+import { enviarAudio, criarConsulta } from '../api';
 import useTranslation from '../hooks/useTranslation';
 import { useAuth } from '../contexts/AuthContext';
+import { ConsultationMetadata, AudioRecordingState, WaveSurferBackend} from '../types';
 
 // Adicione esta declaração no topo do arquivo
 declare global {
@@ -14,12 +14,10 @@ declare global {
 }
 
 // Adicionando uma declaração de tipo para o backend do WaveSurfer
-interface WaveSurferBackend {
-  setBuffer?: (buffer: Float32Array) => void;
-}
+
 
 const AudioRecording: React.FC = () => {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const { user } = useAuth();
   const [translations, setTranslations] = useState({
     audioRecording: '',
@@ -27,8 +25,8 @@ const AudioRecording: React.FC = () => {
     stopRecording: '',
     processingAudio: '',
     sendAudio: '',
-    pauseRecording: '', // Adicionando nova tradução
-    resumeRecording: '', // Adicionando nova tradução
+    pauseRecording: '',
+    resumeRecording: '',
   });
   const [isRecording, setIsRecording] = useState(false);
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
@@ -51,22 +49,14 @@ const AudioRecording: React.FC = () => {
 
   useEffect(() => {
     const loadTranslations = async () => {
-      const audioRecording = await t('audioRecording', 'Audio Recording');
-      const startRecording = await t('startRecording', 'Start Recording');
-      const stopRecording = await t('stopRecording', 'Stop Recording');
-      const processingAudio = await t('processingAudio', 'Processing Audio');
-      const sendAudio = await t('sendAudio', 'Send Audio');
-      const pauseRecording = await t('pauseRecording', 'Pause Recording');
-      const resumeRecording = await t('resumeRecording', 'Resume Recording');
-
       setTranslations({
-        audioRecording,
-        startRecording,
-        stopRecording,
-        processingAudio,
-        sendAudio,
-        pauseRecording,
-        resumeRecording,
+        audioRecording: t('audioRecording.title'),
+        startRecording: t('audioRecording.recording.start'),
+        stopRecording: t('audioRecording.recording.stop'),
+        processingAudio: t('audioRecording.status.processing'),
+        sendAudio: t('audioRecording.recording.send'),
+        pauseRecording: t('audioRecording.recording.pause'),
+        resumeRecording: t('audioRecording.recording.resume'),
       });
     };
 
@@ -96,6 +86,7 @@ const AudioRecording: React.FC = () => {
     }
 
     return () => {
+      cleanupAudioResources();
       if (wavesurferRef.current) {
         wavesurferRef.current.destroy();
       }
@@ -106,7 +97,13 @@ const AudioRecording: React.FC = () => {
         audioContextRef.current.close();
       }
     };
-  }, [t, user]);
+  }, [t]);
+
+  useEffect(() => {
+    return () => {
+      cleanupAudioResources();
+    };
+  }, []);
 
   const toggleRecording = async () => {
     if (!isRecording) {
@@ -128,7 +125,11 @@ const AudioRecording: React.FC = () => {
         } 
       });
 
-      audioContextRef.current = new (window.AudioContext || window.webkitAudioContext)();
+      // Criar novo AudioContext apenas se não existir ou estiver fechado
+      if (!audioContextRef.current || audioContextRef.current.state === 'closed') {
+        audioContextRef.current = new (window.AudioContext || window.webkitAudioContext)();
+      }
+
       analyserRef.current = audioContextRef.current.createAnalyser();
       sourceRef.current = audioContextRef.current.createMediaStreamSource(stream);
       
@@ -225,70 +226,146 @@ const AudioRecording: React.FC = () => {
     if (mediaRecorderRef.current && isRecording) {
       mediaRecorderRef.current.stop();
       setIsRecording(false);
-      if (timerIntervalRef.current) {
-        clearInterval(timerIntervalRef.current);
-      }
-      if (sourceRef.current) {
-        sourceRef.current.disconnect();
-      }
-      mediaRecorderRef.current.ondataavailable = (e) => {
-        if (e.data.size > 0) {
-          setAudioBlob(e.data);
-        }
-      };
+      cleanupAudioResources();
     }
   };
 
-  const handleSubmit = async () => {
-    if (audioBlob) {
-      setIsProcessing(true); // Ativar loading
-      
-      // Parar a gravação e desativar o microfone
+  const cleanupAudioResources = () => {
+    try {
+      // Parar o timer
+      if (timerIntervalRef.current) {
+        clearInterval(timerIntervalRef.current);
+      }
+
+      // Parar todas as tracks do stream primeiro
       if (streamRef.current) {
         streamRef.current.getTracks().forEach(track => {
           track.stop();
         });
         streamRef.current = null;
       }
-      
-      if (timerIntervalRef.current) {
-        clearInterval(timerIntervalRef.current);
+
+      // Desconectar o source do analyser
+      if (sourceRef.current) {
+        sourceRef.current.disconnect();
+        sourceRef.current = null;
       }
 
-      try {
-        const reader = new FileReader();
-        reader.readAsDataURL(audioBlob);
-        
-        reader.onloadend = async () => {
-          try {
-            const base64Audio = reader.result as string;
-            const metadata = {
-              ...location.state,
-              startTime: startTimeRef.current
-            };
-            await enviarAudio(base64Audio.split(',')[1], metadata);
-            navigate('/success');
-          } catch (error) {
-            console.error('Erro ao enviar áudio:', error);
-            await saveAudioLocally(audioBlob, {
-              ...location.state,
-              startTime: startTimeRef.current
-            });
-            navigate('/error', { 
-              state: { 
-                errorMessage: error instanceof Error ? error.message : 'Erro ao enviar áudio'
-              } 
-            });
-          }
-        };
-      } catch (error) {
-        console.error('Erro ao processar áudio:', error);
-        navigate('/error', { 
-          state: { 
-            errorMessage: 'Erro ao processar o áudio'
-          } 
-        });
+      // Parar e desconectar o MediaRecorder
+      if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+        mediaRecorderRef.current.stop();
+        mediaRecorderRef.current = null;
       }
+
+      // Fechar o contexto de áudio apenas se estiver ativo
+      if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
+        audioContextRef.current.close().catch(console.error);
+        audioContextRef.current = null;
+      }
+
+    } catch (error) {
+      console.error('Erro ao limpar recursos de áudio:', error);
+    }
+  };
+
+  const handleSubmit = async () => {
+    if (!audioBlob || !user || user.role !== 'ME') {
+      console.error('Usuário inválido ou não é médico:', { user });
+      navigate('/error', { 
+        state: { 
+          error: 'Acesso não autorizado',
+          details: 'Apenas médicos podem gravar consultas'
+        } 
+      });
+      return;
+    }
+
+    setIsProcessing(true);
+
+    try {
+      console.log('Enviando consulta com dados:', {
+        medico_id: user.id,  // ID do usuário que é médico
+        paciente_id: location.state?.patientId,
+        servico_id: location.state?.serviceId,
+        duracao: `${Math.floor(recordingTime / 60)}:${recordingTime % 60}`,
+        data: startTimeRef.current
+      });
+
+      // Adicionar delay para visualização do processamento
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      // Parar a gravação se ainda estiver ativa
+      if (isRecording) {
+        stopRecording();
+      }
+
+      // Criar consulta
+      const consultaData = {
+        medico_id: user.id,
+        paciente_id: location.state?.patientId,
+        servico_id: location.state?.serviceId,
+        duracao: `${Math.floor(recordingTime / 60)}:${recordingTime % 60}`,
+        data: startTimeRef.current,
+        satisfacao: 0,
+        valor: 0
+      };
+
+      console.log('Enviando dados da consulta:', consultaData);
+      const consultaResponse = await criarConsulta(consultaData);
+
+      if (!consultaResponse?.consultation_id) {
+        throw new Error('ID da consulta não retornado');
+      }
+
+      // Criar um Promise para o FileReader
+      const readFileAsDataURL = (blob: Blob): Promise<string> => {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onloadend = () => resolve(reader.result as string);
+          reader.onerror = reject;
+          reader.readAsDataURL(blob);
+        });
+      };
+
+      // Ler o arquivo de forma assíncrona
+      const base64Audio = await readFileAsDataURL(audioBlob);
+      
+      const audioMetadata: ConsultationMetadata = {
+        startTime: startTimeRef.current,
+        duration: recordingTime,
+        size: audioBlob.size,
+        consultation_id: consultaResponse.consultation_id,
+        doctorId: consultaResponse.doctor.id,
+        doctorName: consultaResponse.doctor.name,
+        doctorSpecialty: consultaResponse.doctor.specialty,
+        clinicId: consultaResponse.clinic.id || 0,
+        clinicName: consultaResponse.clinic.name || '',
+        patientId: location.state.patientId,
+        patientName: location.state.patientName || '',
+        serviceId: location.state.serviceId,
+        serviceName: location.state.serviceName || '',
+        participants: location.state.participants || 2,
+        language: location.state.language || 'pt'
+      };
+
+      console.log('Enviando áudio com metadados:', { audioMetadata });
+      await enviarAudio(base64Audio.split(',')[1], audioMetadata);
+      navigate('/success');
+
+    } catch (error) {
+      console.error('Erro ao processar consulta:', error);
+      navigate('/error', { 
+        state: { 
+          error: 'Erro ao processar consulta',
+          details: error instanceof Error ? error.message : 'Erro desconhecido'
+        } 
+      });
+    } finally {
+      // Adicionar delay antes de remover o loading
+      setTimeout(() => {
+        setIsProcessing(false);
+        cleanupAudioResources();
+      }, 500);
     }
   };
 
@@ -298,18 +375,14 @@ const AudioRecording: React.FC = () => {
     return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
   };
 
-  const handleLanguageChange = (lang: string) => {
-    i18n.changeLanguage(lang);
-  };
-
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-4">
       <div className="absolute top-4 left-0 right-0 flex justify-center items-center">
         <span className="text-xl font-semibold">{clinicName}</span>
       </div>
-      <h1 className="text-3xl font-bold mb-8">{translations.audioRecording}</h1>
+      <h1 className="text-3xl font-bold mb-8">{t('audioRecording.title')}</h1>
       
-      {/* Container do waveform com fundo mais escuro para contraste */}
+      {/* Container do waveform */}
       <div 
         ref={waveformRef} 
         className="w-full max-w-2xl mb-8 bg-gray-100 rounded-lg p-4 shadow-md"
@@ -319,14 +392,14 @@ const AudioRecording: React.FC = () => {
       {/* Timer */}
       <div className="mb-6 text-xl font-semibold">{formatTime(recordingTime)}</div>
       
-      {/* Container dos botões */}
+      {/* Botões de controle */}
       <div className="flex gap-4 items-center justify-center">
         {!isRecording && !audioBlob && (
           <button
             onClick={toggleRecording}
             className="px-8 py-3 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition-colors text-lg"
           >
-            {translations.startRecording}
+            {t('audioRecording.recording.start')}
           </button>
         )}
         
@@ -340,7 +413,7 @@ const AudioRecording: React.FC = () => {
                   : 'bg-yellow-500 hover:bg-yellow-600'
               } text-white rounded-full transition-colors text-lg`}
             >
-              {isPaused ? translations.resumeRecording : translations.pauseRecording}
+              {isPaused ? t('audioRecording.recording.resume') : t('audioRecording.recording.pause')}
             </button>
             
             <button
@@ -348,7 +421,7 @@ const AudioRecording: React.FC = () => {
               className="px-8 py-3 bg-green-500 text-white rounded-full hover:bg-green-600 transition-colors text-lg"
               disabled={isPaused}
             >
-              {translations.sendAudio}
+              {t('audioRecording.recording.send')}
             </button>
           </div>
         )}
@@ -359,7 +432,7 @@ const AudioRecording: React.FC = () => {
             <div className="bg-white p-6 rounded-lg shadow-lg flex items-center gap-3">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
               <p className="text-lg font-semibold text-gray-700">
-                {translations.processingAudio}
+                {t('audioRecording.status.processing')}
               </p>
             </div>
           </div>

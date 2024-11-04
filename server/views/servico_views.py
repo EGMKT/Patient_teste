@@ -77,8 +77,10 @@ class ServicoViewSet(viewsets.ModelViewSet):
             if not hasattr(request.user, 'medico'):
                 return Response({"error": "Usuário não é médico"}, status=400)
                 
+            # Busca apenas os serviços ativos vinculados ao médico
             servicos = request.user.medico.servicos.filter(ativo=True)
             serializer = self.get_serializer(servicos, many=True)
+            logger.info(f"Serviços encontrados para o médico {request.user.id}: {len(servicos)}")
             return Response(serializer.data)
         except Exception as e:
             logger.error(f"Erro ao buscar serviços do médico: {str(e)}")

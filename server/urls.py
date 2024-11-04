@@ -3,6 +3,7 @@ from rest_framework.routers import DefaultRouter
 from django.contrib import admin
 from rest_framework_simplejwt.views import TokenRefreshView
 from .views import *  # Importa todas as views do __init__.py
+from .views.webhook_views import save_consultation_files
 
 router = DefaultRouter()
 router.register(r'clinicas', ClinicaViewSet)
@@ -44,7 +45,8 @@ urlpatterns = [
     path('api/consultation/process-ai-data/', ProcessedConsultationDataView.as_view(), name='process-ai-data'),
     path('api/verify-password/', VerifyPasswordView.as_view(), name='verify-password'),
     path('api/users/<int:pk>/', UserViewSet.as_view({'delete': 'destroy'}), name='user-detail'),
-    path('api/dashboard/clinica/<int:clinica_id>/', 
-         ClinicDashboardView.as_view(), 
-         name='clinic-dashboard'),
+    path('api/dashboard/clinica/<int:clinica_id>/', ClinicDashboardView.as_view(), name='clinic-dashboard'),
+    path('api/consultation/files/', save_consultation_files, name='save_consultation_files'),
+    path('api/clinicas/<int:clinica_id>/consultas/', ConsultasByClinicaView.as_view(), name='consultas-by-clinica'),
+    path('api/clinicas/<int:clinica_id>/medicos/', MedicosByClinicaView.as_view(), name='medicos-by-clinica'),
 ]

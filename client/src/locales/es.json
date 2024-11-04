@@ -243,13 +243,32 @@
     "edit": "Editar",
     "delete": "Eliminar",
     "confirmDelete": "Confirmar Eliminación",
+    "confirmDeleteTitle": "Confirmar Eliminación",
+    "confirmDeleteMessage": "¿Está seguro que desea eliminar esta clínica?",
+    "deleteConfirmMessage": "¿Está seguro que desea eliminar esta clínica?",
     "pipedriveToken": "Token de Pipedrive",
     "active": "Activa",
     "inactive": "Inactiva",
+    "loading": "Cargando...",
+    "error": "Error al cargar clínicas",
+    "bulkActionError": "Error al ejecutar acción masiva",
+    "invalidPassword": "Contraseña inválida",
+    "yes": "Sí",
+    "no": "No",
+    "cancel": "Cancelar",
+    "save": "Guardar",
     "activeStatus": {
       "true": "Activa",
       "false": "Inactiva"
-    }
+    },
+    "form": {
+      "nameLabel": "Nombre de la Clínica",
+      "nameRequired": "El nombre de la clínica es obligatorio",
+      "activateLabel": "Activar Clínica",
+      "pipedriveLabel": "Token de Pipedrive"
+    },
+    "activateSelected": "Activar Seleccionadas",
+    "deactivateSelected": "Desactivar Seleccionadas"
   },
   "manageServices": {
     "title": "Gestionar Servicios",
@@ -276,7 +295,7 @@
     "ownerName": "Nombre del Propietario",
     "email": "Correo Electrónico",
     "phone": "Teléfono",
-    "status": "Estado",
+    "statusLabel": "Estado",
     "createdAt": "Fecha de Creación",
     "actions": "Acciones",
     "viewDetails": "Ver Detalles",
@@ -316,6 +335,34 @@
       "manageServices": "Gestionar Servicios",
       "manageRegistrations": "Gestionar Registros",
       "viewReports": "Ver Informes"
+    }
+  },
+  "audioRecording": {
+    "title": "Grabación de Audio",
+    "recording": {
+      "start": "Iniciar Grabación",
+      "stop": "Detener Grabación",
+      "pause": "Pausar Grabación",
+      "resume": "Continuar Grabación",
+      "send": "Enviar Audio"
+    },
+    "status": {
+      "processing": "Procesando y enviando audio...",
+      "loading": "Cargando..."
+    },
+    "messages": {
+      "error": {
+        "startRecording": "Error al iniciar la grabación",
+        "sendAudio": "Error al enviar el audio",
+        "processAudio": "Error al procesar el audio"
+      },
+      "success": {
+        "audioSent": "Audio enviado con éxito"
+      }
+    },
+    "confirmations": {
+      "stopRecording": "¿Está seguro que desea detener la grabación?",
+      "sendAudio": "¿Está seguro que desea enviar el audio?"
     }
   }
 }

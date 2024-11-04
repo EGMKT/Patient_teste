@@ -10,6 +10,7 @@ from django.views.decorators.cache import cache_page
 from rest_framework.views import APIView
 from django.core.paginator import Paginator
 from rest_framework import serializers
+from django.db.models import Count
 
 class MedicoViewSet(viewsets.ModelViewSet):
     queryset = Medico.objects.all()
@@ -17,7 +18,9 @@ class MedicoViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        return Medico.objects.filter(usuario__role='ME')
+        return Medico.objects.annotate(
+            total_consultas=Count('consulta')
+        ).filter(usuario__role='ME')
 
     def list(self, request):
         logging.info("Requisição recebida para listar médicos")
@@ -41,7 +44,10 @@ class MedicoListView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        medicos = Medico.objects.all().order_by('usuario__first_name')
+        medicos = Medico.objects.annotate(
+            total_consultas=Count('consulta')
+        ).order_by('usuario__first_name')
+        
         paginator = Paginator(medicos, 20)  # 20 médicos por página
         page_number = request.GET.get('page')
         page_obj = paginator.get_page(page_number)
@@ -56,7 +62,9 @@ class MedicoListView(APIView):
 def get_medicos(request):
     logging.info("Função get_medicos chamada")
     try:
-        medicos = Medico.objects.all()
+        medicos = Medico.objects.annotate(
+            total_consultas=Count('consulta')
+        ).all()
         logging.info(f"Médicos obtidos: {medicos}")
         serializer = MedicoSerializer(medicos, many=True)
         logging.info("Serializer criado")
@@ -64,3 +72,26 @@ def get_medicos(request):
     except Exception as e:
         logging.error(f"Erro em get_medicos: {str(e)}")
         return Response({"error": str(e)}, status=500)
+
+class MedicosByClinicaView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, clinica_id):
+        try:
+            medicos = Medico.objects.filter(
+                clinica_id=clinica_id
+            ).annotate(
+                total_consultas=Count('consulta')
+            ).select_related(
+                'usuario',
+                'clinica'
+            ).order_by('usuario__first_name')
+            
+            serializer = MedicoSerializer(medicos, many=True)
+            return Response(serializer.data)
+        except Exception as e:
+            logger.error(f"Erro ao buscar médicos da clínica: {str(e)}")
+            return Response(
+                {"error": str(e)}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )

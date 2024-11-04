@@ -5,21 +5,17 @@ import {
   Paper, TableContainer, Button, TextField, Dialog, 
   DialogTitle, DialogContent, DialogActions, TableSortLabel,
   CircularProgress, Alert, FormControl, InputLabel, Select,
-  MenuItem, Typography, DialogContentText, Checkbox
+  MenuItem, Typography, DialogContentText, Checkbox, Tabs, Tab, Box,
+  IconButton
 } from '@mui/material';
+import { Close as CloseIcon } from '@mui/icons-material';
 import { 
-  getClinics, createClinic, updateClinic, deleteClinic, 
-  Clinic, verifyPassword, bulkUpdateClinics 
+  getClinics, createClinic, updateClinic, deleteClinic, verifyPassword, bulkUpdateClinics 
 } from '../api';
 import ConfirmActionDialog from '../components/ConfirmActionDialog';
 import axios from 'axios';
-
-interface ClinicDialogProps {
-  open: boolean;
-  onClose: () => void;
-  clinic: Clinic | null;
-  onSave: (clinicData: Omit<Clinic, 'id' | 'created_at'>) => void;
-}
+import ConsultationManagement from '../components/ConsultationManagement';
+import { Clinic, ClinicDialogProps, Doctor } from '../types';
 
 const ManageClinics: React.FC = () => {
   const [clinics, setClinics] = useState<Clinic[]>([]);
@@ -43,11 +39,21 @@ const ManageClinics: React.FC = () => {
   const [confirmDeleteDialogOpen, setConfirmDeleteDialogOpen] = useState(false);
   const [selectedClinicId, setSelectedClinicId] = useState<number | null>(null);
   const [selectedClinics, setSelectedClinics] = useState<number[]>([]);
+  const [selectedClinic, setSelectedClinic] = useState<Clinic | null>(null);
+  const [activeTab, setActiveTab] = useState('info');
+  const [detailsOpen, setDetailsOpen] = useState(false);
+  const [medicos, setMedicos] = useState<Doctor[]>([]);
   const { t } = useTranslation();
 
   useEffect(() => {
     fetchClinics();
   }, []);
+
+  useEffect(() => {
+    if (selectedClinic) {
+      fetchMedicosByClinica(selectedClinic.id);
+    }
+  }, [selectedClinic]);
 
   const fetchClinics = async () => {
     try {
@@ -59,6 +65,15 @@ const ManageClinics: React.FC = () => {
       setError(t('manageClinics.error'));
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchMedicosByClinica = async (clinicaId: number) => {
+    try {
+      const response = await axios.get(`/clinicas/${clinicaId}/medicos/`);
+      setMedicos(response.data);
+    } catch (error) {
+      console.error('Erro ao buscar médicos:', error);
     }
   };
 
@@ -315,7 +330,15 @@ const ManageClinics: React.FC = () => {
                         onChange={() => handleSelectClinic(clinic.id)}
                       />
                     </TableCell>
-                    <TableCell>{clinic.nome}</TableCell>
+                    <TableCell>
+                      <Button
+                        onClick={() => setSelectedClinic(clinic)}
+                        className="text-left hover:underline"
+                        sx={{ textTransform: 'none' }}
+                      >
+                        {clinic.nome}
+                      </Button>
+                    </TableCell>
                     <TableCell>
                       {new Date(clinic.created_at).toLocaleDateString()}
                     </TableCell>
@@ -340,10 +363,10 @@ const ManageClinics: React.FC = () => {
             open={openDialog}
             onClose={() => setOpenDialog(false)}
             clinic={currentClinic}
-            onSave={(clinicData: Omit<Clinic, 'id' | 'created_at'>) => 
+            onSave={(clinicData: Omit<Clinic, 'id' | 'created_at'> | Partial<Clinic>) => 
               currentClinic 
-                ? handleUpdateClinic(currentClinic.id, clinicData)
-                : handleCreateClinic(clinicData)
+                ? handleUpdateClinic(currentClinic.id, clinicData as Partial<Clinic>)
+                : handleCreateClinic(clinicData as Omit<Clinic, 'id' | 'created_at'>)
             }
           />
 
@@ -373,6 +396,115 @@ const ManageClinics: React.FC = () => {
                 {t('common.confirm')}
               </Button>
             </DialogActions>
+          </Dialog>
+
+          {selectedClinic && (
+            <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
+              <Tabs 
+                value={activeTab} 
+                onChange={(_, newValue) => setActiveTab(newValue)}
+              >
+                <Tab label="Informações" value="info" />
+                <Tab label="Consultas" value="consultations" />
+              </Tabs>
+            </Box>
+          )}
+
+          {selectedClinic && activeTab === 'info' && (
+            <ClinicDialog
+              open={true}
+              onClose={() => setSelectedClinic(null)}
+              clinic={selectedClinic}
+              onSave={(clinicData: Partial<Clinic>) => {
+                if (selectedClinic) {
+                  handleUpdateClinic(selectedClinic.id, clinicData);
+                }
+              }}
+            />
+          )}
+
+          {selectedClinic && activeTab === 'consultations' && (
+            <ConsultationManagement clinicId={selectedClinic.id} />
+          )}
+
+          <Dialog 
+            open={Boolean(selectedClinic)}
+            onClose={() => setSelectedClinic(null)}
+            maxWidth="lg"
+            fullWidth
+          >
+            {selectedClinic && (
+              <>
+                <DialogTitle>
+                  <div className="flex justify-between items-center">
+                    <Typography variant="h6">{selectedClinic.nome}</Typography>
+                    <IconButton onClick={() => setSelectedClinic(null)}>
+                      <CloseIcon />
+                    </IconButton>
+                  </div>
+                </DialogTitle>
+                <DialogContent>
+                  <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
+                    <Tabs 
+                      value={activeTab} 
+                      onChange={(_, newValue) => setActiveTab(newValue)}
+                    >
+                      <Tab label={t('manageClinics.tabs.info')} value="info" />
+                      <Tab label={t('manageClinics.tabs.doctors')} value="doctors" />
+                      <Tab label={t('manageClinics.tabs.consultations')} value="consultations" />
+                    </Tabs>
+                  </Box>
+
+                  {activeTab === 'info' && (
+                    <div className="space-y-4">
+                      <Typography variant="subtitle1">
+                        <strong>{t('manageClinics.createdAt')}:</strong>{' '}
+                        {new Date(selectedClinic.created_at).toLocaleDateString()}
+                      </Typography>
+                      <Typography variant="subtitle1">
+                        <strong>{t('manageClinics.status')}:</strong>{' '}
+                        {t(`manageClinics.activeStatus.${selectedClinic.ativa}`)}
+                      </Typography>
+                      {selectedClinic.pipedrive_api_token && (
+                        <Typography variant="subtitle1">
+                          <strong>{t('manageClinics.pipedriveToken')}:</strong>{' '}
+                          {selectedClinic.pipedrive_api_token}
+                        </Typography>
+                      )}
+                    </div>
+                  )}
+
+                  {activeTab === 'doctors' && (
+                    <TableContainer component={Paper}>
+                      <Table>
+                        <TableHead>
+                          <TableRow>
+                            <TableCell>{t('manageClinics.doctorName')}</TableCell>
+                            <TableCell>{t('manageClinics.specialty')}</TableCell>
+                            <TableCell>{t('manageClinics.totalConsultations')}</TableCell>
+                          </TableRow>
+                        </TableHead>
+                        <TableBody>
+                          {medicos.map((medico) => (
+                            <TableRow key={medico.id}>
+                              <TableCell>
+                                {`${medico.usuario.first_name} ${medico.usuario.last_name}`}
+                              </TableCell>
+                              <TableCell>{medico.especialidade}</TableCell>
+                              <TableCell>{medico.total_consultas}</TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </TableContainer>
+                  )}
+
+                  {activeTab === 'consultations' && (
+                    <ConsultationManagement clinicId={selectedClinic.id} />
+                  )}
+                </DialogContent>
+              </>
+            )}
           </Dialog>
         </div>
       </div>
@@ -458,3 +590,4 @@ const ClinicDialog: React.FC<ClinicDialogProps> = ({ open, onClose, clinic, onSa
 };
 
 export default ManageClinics;
+

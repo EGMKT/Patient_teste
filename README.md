@@ -132,6 +132,7 @@ PatientFunnel-test/
 │ │ │ ├── TwoFactorSettingsModal.tsx
 │ │ │ ├── DocumentViewer.tsx
 │ │ │ ├── ConfirmActionDialog.tsx
+│ │ │ ├── ConsultationDetails.tsx
 │ │ │ └── Sidebar.tsx
 │ │ ├── contexts/
 │ │ │ └── AuthContext.tsx
@@ -213,42 +214,7 @@ PatientFunnel-test/
 │ └── .env
 └── README.md
 
-
-## Para Entregar até o Final de Hoje
-- [x] **Interface para o Super Admin (SA)**:
-  - [ ] Criar interface administrativa para configuração do back-end.
-  - [ ] Implementar gerenciamento de acessos e aprovação de cadastros.
-  - [ ] Desenvolver visualização de relatórios e dados.
-  - [x] Ativar tradução automática e atualizar arquivos de tradução.
-
-- [x] **Interface do Doctor Selection**:
-  - [x] Melhorar a interface do PIN. Quero que seja aceitavel somente números. E que fique mais bonito.
-
-- [ ] **Implementação de Formulários de Cadastro**:
-  - [ ] Página de aprovação de cadastro para clínicas.
-  - [ ] Página de aprovação de cadastro para médicos.
-
-- [x] **Autenticação por PIN para Médicos**:
-  - [x] Implementar sistema de login por PIN para médicos e médicos admin.
-
-- [x] **Desativação da Aba de Sincronização de Áudios**:
-  - [x] Remover ou ocultar a aba até que a funcionalidade esteja operacional.
-
-- [ ] **Verificação e Ajuste da Estrutura do Back-end**:
-  - [ ] Revisar modelos e relacionamentos.
-  - [ ] Ajustar conforme necessidades atuais.
-
-- [ ] **Melhoria no JSON Enviado pelo Webhook**:
-  - [ ] Definir novo esquema de JSON.
-  - [ ] Implementar melhorias no código de geração do JSON.
-
-- [ ] **Otimização do Back-end**:
-  - [ ] Identificar e corrigir gargalos de performance.
-  - [ ] Implementar melhorias necessárias.
-  - [ ] Aceitar somente números nos PINs dos médicos
-
 ## Estrutura de Dados e Usuários
-
 - **Login com email da clínica**:
   - Acesso permitido apenas para emails cadastrados das clínicas ou SA.
 
@@ -269,7 +235,6 @@ PatientFunnel-test/
   ~~- [ ] Quantidade de procedimentos realizados.~~
   ~~- [ ] Quantidade de incidentes ocorridos.~~
   - [ ] Índice de satisfação geral dos pacientes (análise semântica/IA).
-  - [ ] Índice de satisfação geral dos pacientes e qualidade do atendimento de cada profissional(extraído por código - na aba de SuccessPage). Da até para fazer uma comparação entre real e teórico.
   - [ ] Índice de qualidade do atendimento de cada profissional (análise semântica/IA).
   - [ ] Dados gerais (Faixa de Idade, gênero, ocupação e localização dos pacientes). (extraído por código - com integração do pipedrive)
 

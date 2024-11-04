@@ -7,11 +7,10 @@ import {
   InputLabel, CircularProgress, DialogContentText,
   Alert, Checkbox, Chip
 } from '@mui/material';
-import api, { getUsers, createUser, updateUser, deleteUser, User, getClinics, Clinic, verifyPassword, MedicoData, UpdateUserData, CreateUserData } from '../api';
+import api, { getUsers, createUser, updateUser, deleteUser, getClinics, verifyPassword } from '../api';
 import ConfirmActionDialog from '../components/ConfirmActionDialog';
+import { User, MedicoData, UpdateUserData, CreateUserData, Clinic, UserRole, UserDialogProps, Service } from '../types';
 
-// Adicione esta definição de tipo no início do arquivo
-type UserRole = 'SA' | 'AC' | 'ME';
 
 const ManageUsers: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
@@ -83,7 +82,8 @@ const ManageUsers: React.FC = () => {
       if (userData.role === 'ME' && userData.medico) {
         const updatedMedico: MedicoData = {
           especialidade: userData.medico.especialidade,
-          clinica_id: userData.medico.clinica?.id
+          clinica_id: userData.medico.clinica?.id,
+          servicos: userData.medico.servicos || []
         };
         userData.medico = updatedMedico;
       }
@@ -94,7 +94,8 @@ const ManageUsers: React.FC = () => {
       setOpenDialog(false);
     } catch (error) {
       console.error('Erro ao atualizar usuário:', error);
-      setError(error instanceof Error ? error.message : 'Erro ao atualizar usuário');
+      const errorMessage = error instanceof Error ? error.message : 'Erro ao atualizar usuário';
+      setError(errorMessage);
     }
   };
 
@@ -339,19 +340,6 @@ const ManageUsers: React.FC = () => {
     </div>
   );
 };
-
-interface UserDialogProps {
-  open: boolean;
-  onClose: () => void;
-  user: User | null;
-  clinics: Clinic[];
-  onSave: (userData: CreateUserData) => void;
-}
-
-interface Service {
-  id: number;
-  nome: string;
-}
 
 const UserDialog: React.FC<UserDialogProps> = ({ open, onClose, user, clinics, onSave }) => {
   const [email, setEmail] = useState(user?.email || '');

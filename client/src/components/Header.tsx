@@ -5,20 +5,15 @@ import { FiGlobe, FiLogOut, FiSettings, FiMenu } from 'react-icons/fi';
 import { useAuth } from '../contexts/AuthContext';
 import { getClinicaInfo } from '../api';
 import TwoFactorSettingsModal from './TwoFactorSettingsModal';
+import { HeaderProps } from '../types';
 
-interface HeaderProps {
-  onLanguageChange: (lang: string) => void;
-  currentLanguage: string;
-  clinicName?: string;
-  showMenu?: boolean;
-  menuItems?: Array<{ title: string; link: string }>;
-}
 
-const Header: React.FC<HeaderProps> = ({ 
-  onLanguageChange, 
-  currentLanguage, 
+
+const Header: React.FC<HeaderProps> = ({
+  onLanguageChange,
+  currentLanguage,
   clinicName,
-  showMenu = false,
+  showMenu,
   menuItems = []
 }) => {
   const { t } = useTranslation();
@@ -164,5 +159,5 @@ const Header: React.FC<HeaderProps> = ({
     );
   }
 };
-
 export default Header;
+

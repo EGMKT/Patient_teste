@@ -11,17 +11,7 @@ import {
   Alert
 } from '@mui/material';
 import NewClinicsChart from '../components/NewClinicsChart';
-
-interface DashboardData {
-  total_clinicas: number;
-  total_medicos: number;
-  total_pacientes: number;
-  total_consultas: number;
-  new_clinics_data: {
-    month: string;
-    count: number;
-  }[];
-}
+import { DashboardData, SuperAdminDashboardProps } from '../types';
 
 const SuperAdminDashboard: React.FC = () => {
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
@@ -104,12 +94,7 @@ const SuperAdminDashboard: React.FC = () => {
   );
 };
 
-interface DashboardCardProps {
-  title: string;
-  value: number;
-}
-
-const DashboardCard: React.FC<DashboardCardProps> = ({ title, value }) => (
+const DashboardCard: React.FC<SuperAdminDashboardProps> = ({ title, value }) => (
   <Grid item xs={12} sm={6} md={3}>
     <Card className="h-full">
       <CardContent>

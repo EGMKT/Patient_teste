@@ -12,10 +12,23 @@ class ClinicaSerializer(serializers.ModelSerializer):
 class MedicoSerializer(serializers.ModelSerializer):
     usuario_email = serializers.EmailField(source='usuario.email', read_only=True)
     clinica_nome = serializers.CharField(source='clinica.nome', read_only=True)
+    total_consultas = serializers.IntegerField(read_only=True)
+    usuario_nome = serializers.SerializerMethodField()
     
     class Meta:
         model = Medico
-        fields = ['usuario', 'usuario_email', 'especialidade', 'clinica', 'clinica_nome']
+        fields = [
+            'usuario', 
+            'usuario_email', 
+            'usuario_nome',
+            'especialidade', 
+            'clinica', 
+            'clinica_nome', 
+            'total_consultas'
+        ]
+
+    def get_usuario_nome(self, obj):
+        return f"{obj.usuario.first_name} {obj.usuario.last_name}"
 
     def create(self, validated_data):
         usuario_email = self.context['request'].data.get('usuario_email')
@@ -41,14 +54,49 @@ class PacienteSerializer(serializers.ModelSerializer):
         return value
 
 class ConsultaSerializer(serializers.ModelSerializer):
+    medico = serializers.SerializerMethodField()
+    paciente = serializers.SerializerMethodField()
+    servico = serializers.SerializerMethodField()
+    status = serializers.SerializerMethodField()
+
     class Meta:
         model = Consulta
-        fields = ['id', 'medico', 'paciente', 'data', 'descricao']
+        fields = [
+            'id', 'data', 'duracao', 'medico', 'paciente', 
+            'servico', 'ai_processed', 'satisfaction_score',
+            'quality_index', 'summary', 'status'
+        ]
+
+    def get_medico(self, obj):
+        return {
+            'id': obj.medico.usuario.id,
+            'nome': f"{obj.medico.usuario.first_name} {obj.medico.usuario.last_name}",
+            'especialidade': obj.medico.especialidade
+        }
+
+    def get_paciente(self, obj):
+        return {
+            'id': obj.paciente.id,
+            'nome': obj.paciente.nome
+        }
+
+    def get_servico(self, obj):
+        return {
+            'id': obj.servico.id,
+            'nome': obj.servico.nome
+        }
 
     def validate_data(self, value):
         if value < timezone.now():
             raise serializers.ValidationError("A data da consulta não pode ser no passado.")
         return value
+    
+    def get_status(self, obj):
+        if not obj.enviado:
+            return "pendente"
+        elif not obj.ai_processed:
+            return "processando"
+        return "concluído"
 
 # Adicione serializers similares para Servico
 
