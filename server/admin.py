@@ -82,9 +82,10 @@ class MedicoAdmin(admin.ModelAdmin):
 
 @admin.register(Paciente)
 class PacienteAdmin(admin.ModelAdmin):
-    list_display = ('nome', 'email', 'clinica', 'is_novo', 'data_cadastro')
+    list_display = ('nome', 'email', 'telefone', 'clinica', 'created_at')
     list_filter = ('clinica', 'is_novo')
-    search_fields = ('nome', 'email')
+    search_fields = ('nome', 'email', 'telefone')
+    readonly_fields = ('created_at', 'updated_at')
 
 @admin.register(Servico)
 class ServicoAdmin(admin.ModelAdmin):

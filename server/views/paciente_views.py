@@ -30,14 +30,15 @@ class PacientesByClinicaView(APIView):
 
     def get(self, request, clinica_id):
         try:
-            pacientes = Paciente.objects.filter(clinica_id=clinica_id)
-            for paciente in pacientes:
-                logger.info(f"Email do paciente {paciente.id}: {paciente.email}")
+            pacientes = Paciente.objects.filter(
+                clinica_id=clinica_id
+            ).select_related('clinica')
             
             serializer = PacienteSerializer(pacientes, many=True)
             return Response(serializer.data)
+            
         except Exception as e:
-            logger.error(f"Erro ao buscar pacientes: {str(e)}")
+            logger.error(f"Erro ao buscar pacientes da clínica: {str(e)}")
             return Response(
                 {"error": str(e)}, 
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR

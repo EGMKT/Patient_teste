@@ -176,16 +176,31 @@ class Medico(models.Model):
     pass
 
 class Paciente(models.Model):
-    id = models.CharField(max_length=255, primary_key=True)  # ID do Pipedrive
+    id = models.CharField(max_length=255, primary_key=True)
     nome = models.CharField(max_length=255)
-    clinica = models.ForeignKey(Clinica, on_delete=models.CASCADE)
-    email = models.EmailField(blank=True)
+    email = models.EmailField(blank=True, null=True)
+    telefone = models.CharField(max_length=20, blank=True, null=True)
+    idade = models.IntegerField(null=True, blank=True)
+    genero = models.CharField(max_length=20, blank=True, null=True)
+    ocupacao = models.CharField(max_length=100, blank=True, null=True)
+    localizacao = models.CharField(max_length=255, blank=True, null=True)
     is_novo = models.BooleanField(default=True)
-    idade = models.IntegerField(default=0)
-    genero = models.CharField(max_length=50, blank=True)
-    ocupacao = models.CharField(max_length=100, blank=True)
-    localizacao = models.CharField(max_length=255, blank=True)
-    data_cadastro = models.DateTimeField(auto_now_add=True)
+    clinica = models.ForeignKey(Clinica, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    ultima_consulta = models.DateTimeField(null=True, blank=True)
+    
+    def save(self, *args, **kwargs):
+        # Atualiza is_novo baseado na existência de consultas anteriores
+        if not self.pk:  # Novo paciente
+            self.is_novo = True
+        else:
+            consultas_anteriores = self.consulta_set.exclude(
+                id=kwargs.get('current_consulta_id')
+            ).exists()
+            self.is_novo = not consultas_anteriores
+            
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.nome

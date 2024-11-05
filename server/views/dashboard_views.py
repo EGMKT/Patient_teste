@@ -236,28 +236,25 @@ class ReportsView(APIView):
             new_patients = Paciente.objects.filter(is_novo=True).count()
             returning_patients = Paciente.objects.filter(is_novo=False).count()
             
-            # Índice de fidelização
+            # Calcula taxa de retenção
             hoje = timezone.now()
             seis_meses_atras = hoje - timedelta(days=180)
             um_ano_atras = hoje - timedelta(days=365)
-
-            # Pacientes que tiveram consulta entre 6 meses e 1 ano atrás
+            
             pacientes_antigos = Paciente.objects.filter(
                 consulta__data__range=(um_ano_atras, seis_meses_atras)
             ).distinct()
-
+            
             total_pacientes_antigos = pacientes_antigos.count()
-
-            if total_pacientes_antigos == 0:
-                retention_rate = 0
-            else:
-                # Desses pacientes, quantos retornaram nos últimos 6 meses
+            
+            retention_rate = 0
+            if total_pacientes_antigos > 0:
                 pacientes_retidos = pacientes_antigos.filter(
                     consulta__data__gte=seis_meses_atras
                 ).distinct().count()
                 retention_rate = pacientes_retidos / total_pacientes_antigos
             
-            # Tempo médio de consulta
+            # Tempo médio de consulta (corrigido)
             avg_consultation_time = Consulta.objects.aggregate(
                 avg_time=Avg(
                     Extract('duracao', 'epoch')/60  # Converte para minutos
@@ -267,7 +264,7 @@ class ReportsView(APIView):
             # Satisfação média
             avg_satisfaction = Consulta.objects.aggregate(
                 avg=Avg('satisfacao')
-            )['avg'] or 0  # Valor padrão se for None
+            )['avg'] or 0
             
             # Índice de qualidade por médico
             doctor_quality = dict(
@@ -276,10 +273,10 @@ class ReportsView(APIView):
                 .values_list('medico__usuario__first_name', 'avg_quality')
             )
             
-            # Dados demográficos
+            # Dados demográficos (corrigido)
             demographics = {
                 'ageGroups': dict(
-                    Paciente.objects.annotate(
+                    Paciente.objects.filter(idade__gt=0).annotate(
                         age_group=Case(
                             When(idade__lt=18, then=Value('0-17')),
                             When(idade__lt=30, then=Value('18-29')),
@@ -290,21 +287,6 @@ class ReportsView(APIView):
                     ).values('age_group')
                     .annotate(count=Count('id'))
                     .values_list('age_group', 'count')
-                ),
-                'genderDistribution': dict(
-                    Paciente.objects.values('genero')
-                    .annotate(count=Count('id'))
-                    .values_list('genero', 'count')
-                ),
-                'occupations': dict(
-                    Paciente.objects.values('ocupacao')
-                    .annotate(count=Count('id'))
-                    .values_list('ocupacao', 'count')
-                ),
-                'locations': dict(
-                    Paciente.objects.values('localizacao')
-                    .annotate(count=Count('id'))
-                    .values_list('localizacao', 'count')
                 )
             }
 
@@ -380,7 +362,7 @@ class ClinicDashboardView(APIView):
             return Response({
                 "total_pacientes": pacientes.count(),
                 "pacientes_novos": pacientes.filter(
-                    data_cadastro__gte=mes_passado
+                    created_at__gte=mes_passado
                 ).count(),
                 "total_consultas": consultas.count(),
                 "consultas_mes": consultas.filter(
@@ -462,4 +444,25 @@ class DashboardMedicoView(APIView):
                 {"error": "Erro interno do servidor"}, 
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+
+def calcular_taxa_retencao(pacientes, hoje):
+    seis_meses_atras = hoje - timedelta(days=180)
+    um_ano_atras = hoje - timedelta(days=365)
+    
+    # Pacientes que consultaram entre 6 meses e 1 ano atrás
+    pacientes_antigos = pacientes.filter(
+        consulta__data__range=(um_ano_atras, seis_meses_atras)
+    ).distinct()
+    
+    total_pacientes_antigos = pacientes_antigos.count()
+    
+    if total_pacientes_antigos == 0:
+        return 0
+        
+    # Desses pacientes, quantos retornaram nos últimos 6 meses
+    pacientes_retidos = pacientes_antigos.filter(
+        consulta__data__gte=seis_meses_atras
+    ).distinct().count()
+    
+    return pacientes_retidos / total_pacientes_antigos
 

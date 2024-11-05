@@ -30,8 +30,17 @@ class PipedriveClient:
             logger.error(f"Erro na requisição ao Pipedrive: {str(e)}")
             raise
 
-    def get_persons(self) -> List[Dict[str, Any]]:
+    def get_persons(self):
         """Busca todas as pessoas (pacientes) do Pipedrive"""
+        required_fields = {
+            'name': 'nome',
+            'email': [{'value': 'email', 'primary': True}],
+            'phone': [{'value': 'telefone', 'primary': True}],
+            'age': 'idade',
+            'gender': 'genero',
+            'occupation': 'ocupacao',
+            'location': 'localizacao'
+        }
         try:
             response = self._make_request('GET', 'persons')
             if response.get('success'):

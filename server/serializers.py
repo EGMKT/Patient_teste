@@ -18,12 +18,12 @@ class PacienteSerializer(serializers.ModelSerializer):
         model = Paciente
         fields = [
             'id', 'nome', 'email', 'is_novo', 'idade', 
-            'genero', 'ocupacao', 'localizacao', 'data_cadastro',
+            'genero', 'ocupacao', 'localizacao',
             'clinica'
         ]
 
     def validate_email(self, value):
-        if not value.endswith('@example.com'):
+        if value and not value.endswith('@example.com'):
             raise serializers.ValidationError("Email inválido.")
         return value
 
@@ -235,3 +235,14 @@ class MedicoSerializer(serializers.ModelSerializer):
         
         validated_data['usuario'] = usuario
         return Medico.objects.create(**validated_data)
+
+class ReportSerializer(serializers.Serializer):
+    totalPatientsAttended = serializers.IntegerField()
+    patientsPerDoctor = serializers.DictField(child=serializers.IntegerField())
+    newPatientsAttended = serializers.IntegerField()
+    returningPatientsAttended = serializers.IntegerField()
+    patientRetentionRate = serializers.FloatField()
+    averageConsultationTime = serializers.FloatField()
+    overallPatientSatisfaction = serializers.FloatField()
+    doctorQualityIndex = serializers.DictField(child=serializers.FloatField())
+    patientDemographics = serializers.DictField()

@@ -74,7 +74,7 @@ class GravarConsultaView(views.APIView):
                 paciente=paciente,
                 servico=servico,
                 data=timezone.now(),
-                duracao=data.get('duracao', timedelta(hours=1)),
+                duracao=parse_duration(data.get('duracao', '30')),
                 valor=data.get('valor', 0),
                 satisfacao=data.get('satisfacao', 0),
                 enviado=True
@@ -122,3 +122,10 @@ class ConsultasByClinicaView(views.APIView):
                 {"error": str(e)}, 
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+
+def parse_duration(duration_str):
+    try:
+        minutes = int(duration_str)  # Assumindo que recebemos em minutos
+        return timedelta(minutes=minutes)
+    except:
+        return timedelta(minutes=30)  # Duração padrão

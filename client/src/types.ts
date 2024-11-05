@@ -483,3 +483,8 @@ export interface DoctorDashboardData {
     count: number;
   }[];
 }
+
+export interface MedicoMetrics {
+  satisfacao_media: number;
+  total_pacientes: number;
+}

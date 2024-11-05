@@ -5,14 +5,15 @@ import { getReports, getAdminDashboard, getClinics, getMedicos, getDashboardClin
 import { 
   Card, CardContent, Typography, Grid, MenuItem,
   Table, TableBody, TableCell, TableHead, TableRow, Select,
-  Paper, CircularProgress, Alert, Box, FormControl, InputLabel, Autocomplete, TextField, Tooltip as MuiTooltip
+  Paper, CircularProgress, Alert, Box, FormControl, InputLabel, Autocomplete, TextField, Tooltip as MuiTooltip,
+  List, ListItem, ListItemText, LinearProgress
 } from '@mui/material';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
   PieChart, Pie, Cell, ResponsiveContainer
 } from 'recharts';
 import { useNavigate } from 'react-router-dom';
-import { ReportData, DashboardData, User, Clinic, Doctor, AgeGroupData, DoctorDashboardData } from '../types';
+import { ReportData, DashboardData, User, Clinic, Doctor, AgeGroupData, DoctorDashboardData, MedicoMetrics } from '../types';
 
 
 
@@ -269,7 +270,78 @@ const MetricCard: React.FC<{
   </Grid>
 );
 
-// Componentes de visualização específicos
+// Novo componente para visualização de insights
+const InsightsSection: React.FC<{ data: any }> = ({ data }) => {
+  const { t } = useTranslation();
+  
+  return (
+    <Paper className="p-4 mt-4">
+      <Typography variant="h6" className="mb-4">
+        {t('reports.insights.title')}
+      </Typography>
+      
+      <Grid container spacing={3}>
+        {/* Tendências de Procedimentos */}
+        <Grid item xs={12} md={6}>
+          <Card>
+            <CardContent>
+              <Typography variant="h6">
+                {t('reports.insights.procedures')}
+              </Typography>
+              <List>
+                {data.distribuicao_servicos && 
+                  Object.entries(data.distribuicao_servicos)
+                    .sort(([,a], [,b]) => (b as number) - (a as number))
+                    .slice(0, 5)
+                    .map(([servico, count]) => (
+                      <ListItem key={servico}>
+                        <ListItemText 
+                          primary={servico}
+                          secondary={`${count} ${t('reports.consultations')}`}
+                        />
+                      </ListItem>
+                    ))
+                }
+              </List>
+            </CardContent>
+          </Card>
+        </Grid>
+        
+        {/* Análise de Satisfação */}
+        <Grid item xs={12} md={6}>
+          <Card>
+            <CardContent>
+              <Typography variant="h6">
+                {t('reports.insights.satisfaction')}
+              </Typography>
+              <Box className="mt-4">
+                {data.metricas_medicos && 
+                  (Object.entries(data.metricas_medicos) as [string, MedicoMetrics][])
+                    .sort((a, b) => b[1].satisfacao_media - a[1].satisfacao_media)
+                    .map(([medico, metrics]) => (
+                      <Box key={medico} className="mb-2">
+                        <Typography variant="subtitle2">{medico}</Typography>
+                        <LinearProgress 
+                          variant="determinate"
+                          value={(metrics.satisfacao_media / 5) * 100}
+                          className="mt-1"
+                        />
+                        <Typography variant="caption">
+                          {metrics.satisfacao_media.toFixed(1)}/5
+                        </Typography>
+                      </Box>
+                    ))
+                }
+              </Box>
+            </CardContent>
+          </Card>
+        </Grid>
+      </Grid>
+    </Paper>
+  );
+};
+
+// Atualizar o componente GlobalView para incluir os insights
 const GlobalView: React.FC<{ data: ReportData }> = ({ data }) => {
   const { t } = useTranslation();
 
@@ -397,6 +469,9 @@ const GlobalView: React.FC<{ data: ReportData }> = ({ data }) => {
           </Paper>
         </Grid>
       </Grid>
+
+      {/* Adicionar seção de insights */}
+      <InsightsSection data={data} />
     </div>
   );
 };
